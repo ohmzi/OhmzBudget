@@ -165,6 +165,26 @@ The app integrates with **Plaid** for automatic bank transaction import. Plaid c
 
 ---
 
+## Commit Message Conventions
+
+Use conventional commit prefixes:
+
+| Type | Description |
+|------|-------------|
+| `feat` | Adds a new feature |
+| `fix` | Fixes a bug |
+| `docs` | Documentation-only changes |
+| `style` | Formatting or styling changes |
+| `refactor` | Restructures code without changing behavior |
+| `perf` | Improves performance |
+| `test` | Adds or updates tests |
+| `build` | Changes the build system or dependencies |
+| `ci` | Changes CI/CD configuration |
+| `chore` | General maintenance work |
+| `revert` | Reverts a previous commit |
+
+---
+
 ## Future Considerations
 
 - **Asset Tracking**: Car value tracking and house/real estate tracking for more accurate net worth calculations. Would need new account types or asset tables beyond the current financial account model.
