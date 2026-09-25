@@ -11,7 +11,7 @@
 .heroContainer {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 2.5rem 1.25rem;
+  padding: 2rem 2.5rem 0.25rem;
 }
 
 .heroGrid {
@@ -32,7 +32,7 @@
 .heroHeadline {
   display: flex;
   flex-direction: column;
-  font-size: clamp(2.5rem, 4.5vw, 3.75rem);
+  font-size: clamp(2.5rem, 5vw, 4.15rem);
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.025em;
@@ -45,7 +45,7 @@
 }
 
 .headlineBlue {
-  color: #2E90FA;
+  color: #1E90FF;
 }
 
 .heroDescription {
@@ -150,63 +150,21 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  margin-top: -2rem;
-  margin-right: -3rem;
+  margin-top: -1.5rem;
+  margin-right: -2rem;
   margin-bottom: -2rem;
-}
-
-.heroImageWrapper::before {
-  content: '';
-  position: absolute;
-  width: 70%;
-  height: 70%;
-  background: radial-gradient(
-    circle,
-    rgba(37, 99, 235, 0.08) 0%,
-    transparent 70%
-  );
-  border-radius: 50%;
-  z-index: 0;
 }
 
 .heroImage {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 580px;
+  max-width: 500px;
   height: auto;
   object-fit: contain;
   filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
 }
 
-/* ---- Subtle cloud decorations ---- */
-
-.hero::before,
-.hero::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.hero::before {
-  width: 500px;
-  height: 120px;
-  background: rgba(15, 25, 50, 0.6);
-  bottom: 12%;
-  right: 5%;
-  filter: blur(40px);
-}
-
-.hero::after {
-  width: 350px;
-  height: 80px;
-  background: rgba(15, 25, 50, 0.4);
-  top: 25%;
-  right: 15%;
-  filter: blur(30px);
-}
 
 /* ============================================================
    Intro Section
@@ -214,7 +172,7 @@
 
 .intro {
   background: var(--ifm-background-color);
-  padding: 2.5rem 1.5rem 4rem;
+  padding: 2rem 1.5rem 4rem;
   text-align: center;
 }
 
@@ -249,12 +207,12 @@
 
 @media screen and (max-width: 996px) {
   .heroContainer {
-    padding: 3.5rem 1.25rem 3.5rem;
+    padding: 2.5rem 1.25rem 2rem;
   }
 
   .heroGrid {
     grid-template-columns: 1fr;
-    gap: 2.5rem;
+    gap: 2rem;
     text-align: center;
   }
 
@@ -274,13 +232,12 @@
     justify-content: center;
   }
 
-  .heroImage {
-    max-width: 300px;
+  .heroImageWrapper {
+    margin: 0;
   }
 
-  .hero::before,
-  .hero::after {
-    display: none;
+  .heroImage {
+    max-width: 300px;
   }
 }
 
