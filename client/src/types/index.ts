@@ -23,6 +23,7 @@ export interface Transaction {
   parentTransactionId: string | null;
   importedId: string | null;
   recurringTransactionId: string | null;
+  scheduleId: string | null;
   createdAt: string;
   children?: Transaction[];
 }
@@ -255,6 +256,110 @@ export interface RecurringOccurrence {
 export interface RecurringSummary {
   income: number;
   expenses: number;
+}
+
+// --- Schedule System (replaces recurring transactions) ---
+export type RecurrenceType = 'once' | 'weekly' | 'biweekly' | 'semimonthly' | 'monthly' | 'quarterly' | 'semiannually' | 'yearly';
+export type AmountType = 'exact' | 'approximate' | 'variable';
+export type ScheduleStatus = 'active' | 'paused' | 'canceled';
+export type ScheduleSource = 'manual' | 'detected';
+export type WeekendAdjust = 'none' | 'before' | 'after' | 'closest';
+export type OccurrenceDisplayStatus = 'upcoming' | 'due' | 'waiting' | 'paid' | 'skipped' | 'cancelled';
+export type MatchType = 'automatic' | 'manual';
+
+export type RecurrenceRule =
+  | { type: 'once' }
+  | { type: 'weekly'; interval: number; anchorDay: number }
+  | { type: 'biweekly'; anchorDay: number }
+  | { type: 'semimonthly'; day1: number; day2: number }
+  | { type: 'monthly'; interval: number; anchorDay: number }
+  | { type: 'quarterly'; anchorDay: number }
+  | { type: 'semiannually'; anchorDay: number }
+  | { type: 'yearly'; anchorMonth: number; anchorDay: number };
+
+export const RECURRENCE_TYPE_LABELS: { value: RecurrenceType; label: string }[] = [
+  { value: 'once', label: 'One Time' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'biweekly', label: 'Every 2 Weeks' },
+  { value: 'semimonthly', label: 'Twice a Month' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'quarterly', label: 'Quarterly' },
+  { value: 'semiannually', label: 'Every 6 Months' },
+  { value: 'yearly', label: 'Yearly' },
+];
+
+export interface Schedule {
+  id: string;
+  name: string;
+  amount: number;
+  amountType: AmountType;
+  recurrenceType: RecurrenceType;
+  recurrenceRule: string;
+  startDate: string;
+  endDate: string | null;
+  weekendAdjust: WeekendAdjust;
+  dateFlexibility: number;
+  accountId: string | null;
+  transferAccountId: string | null;
+  categoryId: string | null;
+  payeeId: string | null;
+  notes: string | null;
+  status: ScheduleStatus;
+  autoCreate: number;
+  autoCreateFrom: string | null;
+  source: ScheduleSource;
+  occurrenceHorizon: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ScheduleWithOccurrences extends Schedule {
+  occurrences: ScheduleOccurrence[];
+}
+
+export interface ScheduleOccurrence {
+  id: string;
+  scheduleId: string;
+  scheduledDate: string;
+  expectedDate: string;
+  expectedAmount: number;
+  status: string;
+  displayStatus: OccurrenceDisplayStatus;
+  matchedTransactionId: string | null;
+  matchType: MatchType | null;
+  matchConfidence: number | null;
+  skippedAt: string | null;
+  paidAt: string | null;
+  createdAt: string;
+  scheduleName: string;
+  recurrenceType: RecurrenceType;
+  amountType: AmountType;
+  scheduleAccountId: string | null;
+  scheduleCategoryId: string | null;
+  schedulePayeeId: string | null;
+  matchedAmount: number | null;
+  matchedDate: string | null;
+}
+
+export interface ScheduleSummary {
+  income: number;
+  expenses: number;
+}
+
+export interface MatchSuggestion {
+  occurrenceId: string;
+  scheduleId: string;
+  scheduleName: string;
+  scheduledDate: string;
+  expectedDate: string;
+  expectedAmount: number;
+  candidates: {
+    transactionId: string;
+    date: string;
+    amount: number;
+    payeeName: string | null;
+    score: number;
+  }[];
 }
 
 export interface RunRulesPreviewItem {

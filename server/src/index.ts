@@ -10,12 +10,15 @@ import { reportsRouter } from './routes/reports.js';
 import { exportRouter } from './routes/export.js';
 import { customReportsRouter } from './routes/customReports.js';
 import { recurringTransactionsRouter, autoCreateDueRecurring } from './routes/recurringTransactions.js';
+import { schedulesRouter } from './routes/schedules.js';
 import { goalsRouter } from './routes/goals.js';
 import { plaidRouter } from './routes/plaid.js';
 import { simplefinRouter } from './routes/simplefin.js';
 import { syncAllItems } from './services/plaidSyncService.js';
 import { isPlaidConfigured } from './services/plaidService.js';
 import { syncAllSimplefinConnections } from './services/simplefinSyncService.js';
+import { migrateRecurrenceRules, migrateOccurrencesFromLegacy, ensureOccurrencesForAll, autoCreateDueScheduled } from './services/scheduleService.js';
+import { format, addDays } from 'date-fns';
 
 const app = express();
 
@@ -34,6 +37,7 @@ app.use('/api/reports', reportsRouter);
 app.use('/api/export', exportRouter);
 app.use('/api/custom-reports', customReportsRouter);
 app.use('/api/recurring-transactions', recurringTransactionsRouter);
+app.use('/api/schedules', schedulesRouter);
 app.use('/api/goals', goalsRouter);
 app.use('/api/plaid', plaidRouter);
 app.use('/api/simplefin', simplefinRouter);
@@ -47,20 +51,40 @@ export async function startServer(port: number | string): Promise<void> {
   return new Promise((resolve) => {
     app.listen(Number(port), '127.0.0.1', () => {
       console.log(`Server running on http://localhost:${port}`);
+
+      // --- Schedule system startup ---
+      const rulesMigrated = migrateRecurrenceRules();
+      if (rulesMigrated > 0) console.log(`Migrated ${rulesMigrated} recurrence rule(s)`);
+
+      const legacyOccs = migrateOccurrencesFromLegacy();
+      if (legacyOccs > 0) console.log(`Created ${legacyOccs} legacy occurrence(s)`);
+
+      const horizon = format(addDays(new Date(), 90), 'yyyy-MM-dd');
+      const ensured = ensureOccurrencesForAll(horizon);
+      if (ensured > 0) console.log(`Ensured ${ensured} new occurrence(s)`);
+
+      // Legacy auto-create (kept during transition)
       const created = autoCreateDueRecurring();
       if (created > 0) console.log(`Auto-created ${created} recurring transaction(s)`);
 
-      if (isPlaidConfigured()) {
-        syncAllItems().then(results => {
+      // Bank sync BEFORE schedule auto-create (so real txns get matched first)
+      const bankSyncDone = Promise.all([
+        isPlaidConfigured()
+          ? syncAllItems().then(results => {
+              const total = results.reduce((s, r) => s + r.added, 0);
+              if (total > 0) console.log(`Plaid sync: imported ${total} new transaction(s)`);
+            }).catch(err => console.error('Plaid sync error:', err.message))
+          : Promise.resolve(),
+        syncAllSimplefinConnections().then(results => {
           const total = results.reduce((s, r) => s + r.added, 0);
-          if (total > 0) console.log(`Plaid sync: imported ${total} new transaction(s)`);
-        }).catch(err => console.error('Plaid sync error:', err.message));
-      }
+          if (total > 0) console.log(`SimpleFIN sync: imported ${total} new transaction(s)`);
+        }).catch(err => console.error('SimpleFIN sync error:', err.message)),
+      ]);
 
-      syncAllSimplefinConnections().then(results => {
-        const total = results.reduce((s, r) => s + r.added, 0);
-        if (total > 0) console.log(`SimpleFIN sync: imported ${total} new transaction(s)`);
-      }).catch(err => console.error('SimpleFIN sync error:', err.message));
+      bankSyncDone.then(() => {
+        const scheduled = autoCreateDueScheduled();
+        if (scheduled > 0) console.log(`Auto-created ${scheduled} scheduled transaction(s)`);
+      });
 
       resolve();
     });
