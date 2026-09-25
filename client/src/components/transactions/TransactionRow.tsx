@@ -61,7 +61,7 @@ export function TransactionRow({ tx, categoryEntry, categoryMap, groups, payees,
         onClick={() => onOpenDetail(tx.id)}
       >
         {/* Payee */}
-        <div className="group/payee flex items-center gap-1 flex-[1.8] min-w-0 relative mr-3">
+        <div className="group/payee flex items-center gap-1 flex-[3] min-w-0 relative mr-3">
           <div
             className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[11px] font-semibold shrink-0"
             style={{ backgroundColor: bgColor }}
@@ -101,7 +101,7 @@ export function TransactionRow({ tx, categoryEntry, categoryMap, groups, payees,
         </div>
 
         {/* Category */}
-        <div className="group/cat flex items-center gap-1 flex-[1.5] min-w-0 relative mr-3">
+        <div className="group/cat flex items-center gap-1 flex-[2] min-w-0 relative mr-3">
           {isSplitParent ? (
             <button
               onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
@@ -155,7 +155,7 @@ export function TransactionRow({ tx, categoryEntry, categoryMap, groups, payees,
 
         {/* Account */}
         {showAccountCol && (
-          <div className="group/acct flex items-center gap-1 flex-[1.5] min-w-0">
+          <div className="group/acct flex items-center gap-1 flex-[2] min-w-0">
             <div className="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-transparent group-hover/acct:border-border group-hover/acct:bg-surface transition-all min-w-0">
               <div
                 className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"

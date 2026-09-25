@@ -15,7 +15,7 @@ export default function SpendingBreakdown({ currentMonth }: Props) {
   const topCategories = useMemo(() => {
     return data
       .sort((a, b) => b.totalSpent - a.totalSpent)
-      .slice(0, 12)
+      .slice(0, 7)
       .map(c => ({ ...c, amount: c.totalSpent }));
   }, [data]);
 
@@ -26,7 +26,7 @@ export default function SpendingBreakdown({ currentMonth }: Props) {
       <Card>
         <div className="h-5 w-40 bg-surface-alt rounded animate-pulse mb-4" />
         <div className="space-y-3">
-          {Array.from({ length: 12 }).map((_, i) => (
+          {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="h-6 bg-surface-alt rounded animate-pulse" style={{ width: `${90 - i * 8}%` }} />
           ))}
         </div>

@@ -62,7 +62,6 @@ export default function RecentTransactions() {
               payees={payees}
               accountName={accountInfoMap.get(tx.accountId)?.name}
               accountType={accountInfoMap.get(tx.accountId)?.type}
-              showAccountCol
               isSelected={false}
               onOpenDetail={() => navigate('/transactions')}
             />
