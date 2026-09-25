@@ -1,6 +1,11 @@
 import { BarChart3, LineChart, AreaChart, PieChart, Table2, Layers } from 'lucide-react';
 import type { ChartType, ReportMode } from '../../types';
 
+const MODE_LABELS: Record<ReportMode, string> = {
+  total: 'Total',
+  time: 'Over Time',
+};
+
 const CHART_TYPES: { id: ChartType; icon: typeof BarChart3; label: string; modes: ReportMode[] }[] = [
   { id: 'bar', icon: BarChart3, label: 'Bar', modes: ['total', 'time'] },
   { id: 'stacked-bar', icon: Layers, label: 'Stacked', modes: ['time'] },
@@ -27,7 +32,10 @@ export default function ChartTypeSelector({ value, mode, onChange }: Props) {
             key={t.id}
             disabled={disabled}
             onClick={() => onChange(t.id)}
-            title={t.label}
+            title={disabled
+              ? `${t.label} is only available in '${t.modes.map(m => MODE_LABELS[m]).join("' and '")}' mode`
+              : t.label
+            }
             className={`flex items-center gap-1 px-2 py-1.5 text-xs font-medium rounded-md transition-colors ${
               active
                 ? 'bg-brand-50 text-brand-700 border border-brand-200'
