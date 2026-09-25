@@ -4,9 +4,12 @@ import MonthlyTab from '../components/recurring/MonthlyTab';
 import UpcomingTab from '../components/recurring/UpcomingTab';
 import AllTab from '../components/recurring/AllTab';
 import RecurringFormModal from '../components/recurring/RecurringFormModal';
+import MatchSuggestionsPanel from '../components/recurring/MatchSuggestionsPanel';
+import OccurrenceMatchModal from '../components/recurring/OccurrenceMatchModal';
 import { Button } from '../components/ui/Button';
-import { useRecurringTransactions, useCreateRecurring, useUpdateRecurring } from '../hooks/useRecurringTransactions';
-import type { RecurringTransaction } from '../types';
+import { useSchedules, useCreateSchedule, useUpdateSchedule, useScheduleOccurrences } from '../hooks/useSchedules';
+import type { Schedule, ScheduleOccurrence } from '../types';
+import { format, subDays, addDays } from 'date-fns';
 
 const tabs = [
   { id: 'monthly' as const, label: 'Monthly', icon: CalendarRange },
@@ -19,24 +22,31 @@ type TabId = (typeof tabs)[number]['id'];
 export default function RecurringTransactionsPage() {
   const [activeTab, setActiveTab] = useState<TabId>('monthly');
   const [formOpen, setFormOpen] = useState(false);
-  const [editItem, setEditItem] = useState<RecurringTransaction | null>(null);
+  const [editItem, setEditItem] = useState<Schedule | null>(null);
+  const [matchOccurrenceId, setMatchOccurrenceId] = useState<string | null>(null);
 
-  const { data: allRecurring = [] } = useRecurringTransactions();
-  const createRecurring = useCreateRecurring();
-  const updateRecurring = useUpdateRecurring();
+  const { data: allRecurring = [] } = useSchedules();
+  const createSchedule = useCreateSchedule();
+  const updateSchedule = useUpdateSchedule();
 
-  function handleEdit(item: RecurringTransaction) {
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const matchFrom = format(subDays(new Date(), 30), 'yyyy-MM-dd');
+  const matchTo = format(addDays(new Date(), 90), 'yyyy-MM-dd');
+  const { data: allOccurrences = [] } = useScheduleOccurrences(matchFrom, matchTo);
+  const matchOccurrence = matchOccurrenceId ? allOccurrences.find(o => o.id === matchOccurrenceId) ?? null : null;
+
+  function handleEdit(item: Schedule) {
     setEditItem(item);
     setFormOpen(true);
   }
 
   function handleSave(data: any) {
     if (editItem) {
-      updateRecurring.mutate({ id: editItem.id, ...data }, {
+      updateSchedule.mutate({ id: editItem.id, ...data }, {
         onSuccess: () => { setFormOpen(false); setEditItem(null); },
       });
     } else {
-      createRecurring.mutate(data, {
+      createSchedule.mutate(data, {
         onSuccess: () => { setFormOpen(false); },
       });
     }
@@ -82,9 +92,11 @@ export default function RecurringTransactionsPage() {
         </div>
       </div>
 
+      <MatchSuggestionsPanel />
+
       <div className="flex-1 overflow-y-auto">
-        {activeTab === 'monthly' && <MonthlyTab onEdit={handleEdit} allRecurring={allRecurring} />}
-        {activeTab === 'upcoming' && <UpcomingTab onEdit={handleEdit} allRecurring={allRecurring} />}
+        {activeTab === 'monthly' && <MonthlyTab onEdit={handleEdit} allRecurring={allRecurring} onMatchOccurrence={setMatchOccurrenceId} />}
+        {activeTab === 'upcoming' && <UpcomingTab onEdit={handleEdit} allRecurring={allRecurring} onMatchOccurrence={setMatchOccurrenceId} />}
         {activeTab === 'all' && <AllTab allRecurring={allRecurring} onEdit={handleEdit} />}
       </div>
 
@@ -93,6 +105,12 @@ export default function RecurringTransactionsPage() {
         onClose={handleClose}
         onSave={handleSave}
         editItem={editItem}
+      />
+
+      <OccurrenceMatchModal
+        isOpen={matchOccurrenceId !== null}
+        onClose={() => setMatchOccurrenceId(null)}
+        occurrence={matchOccurrence}
       />
     </div>
   );

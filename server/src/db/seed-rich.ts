@@ -1,9 +1,10 @@
 import { db } from './index.js';
 import {
   accounts, categories, categoryGroups, payees, transactions,
-  budgetMonths, recurringTransactions, rules, customReports, goals,
+  budgetMonths, schedules, rules, customReports, goals,
 } from './schema.js';
 import { nanoid } from 'nanoid';
+import { buildRecurrenceRule, type RecurrenceType } from '../utils/recurrence.js';
 
 // ═══════════════════════════════════════════════════════
 // HELPERS
@@ -184,45 +185,49 @@ PAYEE_DEFS.forEach(p => {
 // PHASE 3: Recurring Transactions
 // ═══════════════════════════════════════════════════════
 
-console.log('Rich seed: Inserting recurring transactions...');
+console.log('Rich seed: Inserting schedules...');
 
 const REC_DEFS: {
-  title: string; amount: number; frequency: string; startDate: string;
+  name: string; amount: number; recurrenceType: RecurrenceType; startDate: string;
   endDate: string | null; accountName: string; categoryName: string;
-  payeeName: string | null; status: string; autoCreate: number; isApproximate: number;
+  payeeName: string | null; status: string; autoCreate: number; amountType: string;
   notes: string | null;
 }[] = [
-  { title: 'Salary', amount: 450000, frequency: 'semimonthly', startDate: '2024-10-01', endDate: null, accountName: 'Primary Checking', categoryName: 'Paychecks', payeeName: 'Acme Corp', status: 'active', autoCreate: 1, isApproximate: 0, notes: null },
-  { title: 'Rent', amount: -180000, frequency: 'monthly', startDate: '2024-10-01', endDate: null, accountName: 'Primary Checking', categoryName: 'Rent / Mortgage', payeeName: 'Greenfield Properties', status: 'active', autoCreate: 0, isApproximate: 0, notes: null },
-  { title: 'Electric Bill', amount: -12000, frequency: 'monthly', startDate: '2024-10-05', endDate: null, accountName: 'Primary Checking', categoryName: 'Electric', payeeName: 'Duke Energy', status: 'active', autoCreate: 0, isApproximate: 1, notes: null },
-  { title: 'Water Bill', amount: -5000, frequency: 'monthly', startDate: '2024-10-10', endDate: null, accountName: 'Primary Checking', categoryName: 'Water', payeeName: 'City Water Dept', status: 'active', autoCreate: 0, isApproximate: 1, notes: null },
-  { title: 'Internet', amount: -7000, frequency: 'monthly', startDate: '2024-10-12', endDate: null, accountName: 'Primary Checking', categoryName: 'Internet', payeeName: 'Spectrum Internet', status: 'active', autoCreate: 1, isApproximate: 0, notes: null },
-  { title: 'Phone Bill', amount: -8500, frequency: 'monthly', startDate: '2024-10-15', endDate: null, accountName: 'Primary Checking', categoryName: 'Phone', payeeName: 'AT&T Wireless', status: 'active', autoCreate: 1, isApproximate: 0, notes: null },
-  { title: 'Natural Gas', amount: -5500, frequency: 'monthly', startDate: '2024-10-18', endDate: null, accountName: 'Primary Checking', categoryName: 'Gas (Natural)', payeeName: 'Piedmont Natural Gas', status: 'active', autoCreate: 0, isApproximate: 1, notes: null },
-  { title: 'Netflix', amount: -1599, frequency: 'monthly', startDate: '2024-10-03', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Streaming Services', payeeName: 'Netflix', status: 'active', autoCreate: 1, isApproximate: 0, notes: null },
-  { title: 'Spotify', amount: -1099, frequency: 'monthly', startDate: '2024-10-05', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Streaming Services', payeeName: 'Spotify', status: 'active', autoCreate: 1, isApproximate: 0, notes: null },
-  { title: 'Hulu', amount: -1799, frequency: 'monthly', startDate: '2024-10-08', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Streaming Services', payeeName: 'Hulu', status: 'active', autoCreate: 1, isApproximate: 0, notes: null },
-  { title: 'Planet Fitness', amount: -4500, frequency: 'monthly', startDate: '2024-10-01', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Gym / Fitness', payeeName: 'Planet Fitness', status: 'active', autoCreate: 0, isApproximate: 0, notes: null },
-  { title: 'Car Insurance', amount: -42000, frequency: 'quarterly', startDate: '2024-10-15', endDate: null, accountName: 'Primary Checking', categoryName: 'Car Insurance', payeeName: 'State Farm', status: 'active', autoCreate: 0, isApproximate: 0, notes: 'Quarterly premium' },
-  { title: 'Amazon Prime', amount: -13900, frequency: 'yearly', startDate: '2024-11-20', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Electronics', payeeName: 'Amazon', status: 'active', autoCreate: 1, isApproximate: 0, notes: 'Annual membership' },
-  { title: 'Old Phone Plan', amount: -6500, frequency: 'monthly', startDate: '2024-10-01', endDate: '2025-06-30', accountName: 'Primary Checking', categoryName: 'Phone', payeeName: 'T-Mobile', status: 'canceled', autoCreate: 0, isApproximate: 0, notes: 'Canceled - switched to AT&T' },
-  { title: 'Freelance Income', amount: 200000, frequency: 'monthly', startDate: '2025-01-15', endDate: null, accountName: 'Primary Checking', categoryName: 'Business Income', payeeName: null, status: 'paused', autoCreate: 0, isApproximate: 1, notes: 'On hold' },
-  { title: 'Weekly Coffee', amount: -2500, frequency: 'weekly', startDate: '2024-10-07', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Coffee Shops', payeeName: 'Starbucks', status: 'active', autoCreate: 1, isApproximate: 0, notes: null },
-  { title: 'House Cleaner', amount: -15000, frequency: 'biweekly', startDate: '2024-10-14', endDate: null, accountName: 'Primary Checking', categoryName: 'Home Maintenance', payeeName: 'Merry Maids', status: 'active', autoCreate: 0, isApproximate: 0, notes: null },
-  { title: 'Savings Transfer', amount: -50000, frequency: 'monthly', startDate: '2024-10-25', endDate: null, accountName: 'Primary Checking', categoryName: 'Savings', payeeName: null, status: 'active', autoCreate: 0, isApproximate: 0, notes: 'Monthly savings goal' },
+  { name: 'Salary', amount: 450000, recurrenceType: 'semimonthly', startDate: '2024-10-01', endDate: null, accountName: 'Primary Checking', categoryName: 'Paychecks', payeeName: 'Acme Corp', status: 'active', autoCreate: 1, amountType: 'exact', notes: null },
+  { name: 'Rent', amount: -180000, recurrenceType: 'monthly', startDate: '2024-10-01', endDate: null, accountName: 'Primary Checking', categoryName: 'Rent / Mortgage', payeeName: 'Greenfield Properties', status: 'active', autoCreate: 0, amountType: 'exact', notes: null },
+  { name: 'Electric Bill', amount: -12000, recurrenceType: 'monthly', startDate: '2024-10-05', endDate: null, accountName: 'Primary Checking', categoryName: 'Electric', payeeName: 'Duke Energy', status: 'active', autoCreate: 0, amountType: 'approximate', notes: null },
+  { name: 'Water Bill', amount: -5000, recurrenceType: 'monthly', startDate: '2024-10-10', endDate: null, accountName: 'Primary Checking', categoryName: 'Water', payeeName: 'City Water Dept', status: 'active', autoCreate: 0, amountType: 'approximate', notes: null },
+  { name: 'Internet', amount: -7000, recurrenceType: 'monthly', startDate: '2024-10-12', endDate: null, accountName: 'Primary Checking', categoryName: 'Internet', payeeName: 'Spectrum Internet', status: 'active', autoCreate: 1, amountType: 'exact', notes: null },
+  { name: 'Phone Bill', amount: -8500, recurrenceType: 'monthly', startDate: '2024-10-15', endDate: null, accountName: 'Primary Checking', categoryName: 'Phone', payeeName: 'AT&T Wireless', status: 'active', autoCreate: 1, amountType: 'exact', notes: null },
+  { name: 'Natural Gas', amount: -5500, recurrenceType: 'monthly', startDate: '2024-10-18', endDate: null, accountName: 'Primary Checking', categoryName: 'Gas (Natural)', payeeName: 'Piedmont Natural Gas', status: 'active', autoCreate: 0, amountType: 'approximate', notes: null },
+  { name: 'Netflix', amount: -1599, recurrenceType: 'monthly', startDate: '2024-10-03', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Streaming Services', payeeName: 'Netflix', status: 'active', autoCreate: 1, amountType: 'exact', notes: null },
+  { name: 'Spotify', amount: -1099, recurrenceType: 'monthly', startDate: '2024-10-05', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Streaming Services', payeeName: 'Spotify', status: 'active', autoCreate: 1, amountType: 'exact', notes: null },
+  { name: 'Hulu', amount: -1799, recurrenceType: 'monthly', startDate: '2024-10-08', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Streaming Services', payeeName: 'Hulu', status: 'active', autoCreate: 1, amountType: 'exact', notes: null },
+  { name: 'Planet Fitness', amount: -4500, recurrenceType: 'monthly', startDate: '2024-10-01', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Gym / Fitness', payeeName: 'Planet Fitness', status: 'active', autoCreate: 0, amountType: 'exact', notes: null },
+  { name: 'Car Insurance', amount: -42000, recurrenceType: 'quarterly', startDate: '2024-10-15', endDate: null, accountName: 'Primary Checking', categoryName: 'Car Insurance', payeeName: 'State Farm', status: 'active', autoCreate: 0, amountType: 'exact', notes: 'Quarterly premium' },
+  { name: 'Amazon Prime', amount: -13900, recurrenceType: 'yearly', startDate: '2024-11-20', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Electronics', payeeName: 'Amazon', status: 'active', autoCreate: 1, amountType: 'exact', notes: 'Annual membership' },
+  { name: 'Old Phone Plan', amount: -6500, recurrenceType: 'monthly', startDate: '2024-10-01', endDate: '2025-06-30', accountName: 'Primary Checking', categoryName: 'Phone', payeeName: 'T-Mobile', status: 'canceled', autoCreate: 0, amountType: 'exact', notes: 'Canceled - switched to AT&T' },
+  { name: 'Freelance Income', amount: 200000, recurrenceType: 'monthly', startDate: '2025-01-15', endDate: null, accountName: 'Primary Checking', categoryName: 'Business Income', payeeName: null, status: 'paused', autoCreate: 0, amountType: 'approximate', notes: 'On hold' },
+  { name: 'Weekly Coffee', amount: -2500, recurrenceType: 'weekly', startDate: '2024-10-07', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Coffee Shops', payeeName: 'Starbucks', status: 'active', autoCreate: 1, amountType: 'exact', notes: null },
+  { name: 'House Cleaner', amount: -15000, recurrenceType: 'biweekly', startDate: '2024-10-14', endDate: null, accountName: 'Primary Checking', categoryName: 'Home Maintenance', payeeName: 'Merry Maids', status: 'active', autoCreate: 0, amountType: 'exact', notes: null },
+  { name: 'Savings Transfer', amount: -50000, recurrenceType: 'monthly', startDate: '2024-10-25', endDate: null, accountName: 'Primary Checking', categoryName: 'Savings', payeeName: null, status: 'active', autoCreate: 0, amountType: 'exact', notes: 'Monthly savings goal' },
 ];
 
 const rec: Record<string, string> = {};
 REC_DEFS.forEach(r => {
   const id = nanoid();
-  rec[r.title] = id;
-  db.insert(recurringTransactions).values({
-    id, title: r.title, amount: r.amount, isApproximate: r.isApproximate,
-    frequency: r.frequency, startDate: r.startDate, endDate: r.endDate,
+  rec[r.name] = id;
+  db.insert(schedules).values({
+    id, name: r.name, amount: r.amount, amountType: r.amountType,
+    recurrenceType: r.recurrenceType,
+    recurrenceRule: JSON.stringify(buildRecurrenceRule(r.recurrenceType, r.startDate)),
+    startDate: r.startDate, endDate: r.endDate,
+    weekendAdjust: 'none', dateFlexibility: 3,
     accountId: acct[r.accountName] ?? null,
     categoryId: catId(r.categoryName),
     payeeId: r.payeeName ? (pay[r.payeeName] ?? null) : null,
     notes: r.notes, status: r.status, autoCreate: r.autoCreate,
+    source: 'manual',
     createdAt: now, updatedAt: now,
   }).run();
 });
@@ -240,7 +245,7 @@ function insertTx(vals: {
   payeeId?: string | null; payeeName?: string | null;
   categoryId?: string | null; notes?: string | null;
   reconciled?: number;
-  recurringTransactionId?: string | null;
+  scheduleId?: string | null;
   isParent?: number; parentTransactionId?: string | null;
   transferTransactionId?: string | null;
 }): string {
@@ -259,7 +264,7 @@ function insertTx(vals: {
     isParent: vals.isParent ?? 0,
     parentTransactionId: vals.parentTransactionId ?? null,
     importedId: null,
-    recurringTransactionId: vals.recurringTransactionId ?? null,
+    scheduleId: vals.scheduleId ?? null,
     createdAt: now,
   }).run();
   txCount++;
@@ -277,14 +282,14 @@ function insertTransfer(
     payeeId: null, payeeName: `Transfer: ${toAcctName}`,
     categoryId: null, notes: null, reconciled,
     isParent: 0, parentTransactionId: null, transferTransactionId: toId,
-    importedId: null, recurringTransactionId: null, createdAt: now,
+    importedId: null, scheduleId: null, createdAt: now,
   }).run();
   db.insert(transactions).values({
     id: toId, accountId: acct[toAcctName], date, amount,
     payeeId: null, payeeName: `Transfer: ${fromAcctName}`,
     categoryId: null, notes: null, reconciled,
     isParent: 0, parentTransactionId: null, transferTransactionId: fromId,
-    importedId: null, recurringTransactionId: null, createdAt: now,
+    importedId: null, scheduleId: null, createdAt: now,
   }).run();
   txCount += 2;
 }
@@ -301,7 +306,7 @@ function insertSplit(
     payeeId, payeeName, categoryId: null, notes: null,
     reconciled, isParent: 1, parentTransactionId: null,
     transferTransactionId: null, importedId: null,
-    recurringTransactionId: null, createdAt: now,
+    scheduleId: null, createdAt: now,
   }).run();
   txCount++;
   for (const ch of children) {
@@ -310,7 +315,7 @@ function insertSplit(
       payeeId, payeeName, categoryId: ch.categoryId,
       notes: ch.notes, reconciled, isParent: 0,
       parentTransactionId: parentId, transferTransactionId: null,
-      importedId: null, recurringTransactionId: null, createdAt: now,
+      importedId: null, scheduleId: null, createdAt: now,
     }).run();
     txCount++;
   }
@@ -365,13 +370,13 @@ for (let mi = 0; mi < 24; mi++) {
   insertTx({
     accountId: acct['Primary Checking'], date: d(1), amount: randCents(4400, 4600),
     payeeId: pay['Acme Corp'], payeeName: 'Acme Corp',
-    categoryId: catId('Paychecks'), recurringTransactionId: rec['Salary'],
+    categoryId: catId('Paychecks'), scheduleId: rec['Salary'],
     ...cr(),
   });
   insertTx({
     accountId: acct['Primary Checking'], date: d(15), amount: randCents(4400, 4600),
     payeeId: pay['Acme Corp'], payeeName: 'Acme Corp',
-    categoryId: catId('Paychecks'), recurringTransactionId: rec['Salary'],
+    categoryId: catId('Paychecks'), scheduleId: rec['Salary'],
     ...cr(),
   });
 
@@ -379,7 +384,7 @@ for (let mi = 0; mi < 24; mi++) {
   insertTx({
     accountId: acct['Primary Checking'], date: d(1), amount: -180000,
     payeeId: pay['Greenfield Properties'], payeeName: 'Greenfield Properties',
-    categoryId: catId('Rent / Mortgage'), recurringTransactionId: rec['Rent'],
+    categoryId: catId('Rent / Mortgage'), scheduleId: rec['Rent'],
     ...cr(),
   });
 
@@ -391,7 +396,7 @@ for (let mi = 0; mi < 24; mi++) {
   insertTx({
     accountId: acct['Primary Checking'], date: d(5), amount: -electricAmt,
     payeeId: pay['Duke Energy'], payeeName: 'Duke Energy',
-    categoryId: catId('Electric'), recurringTransactionId: rec['Electric Bill'],
+    categoryId: catId('Electric'), scheduleId: rec['Electric Bill'],
     ...cr(),
   });
 
@@ -399,7 +404,7 @@ for (let mi = 0; mi < 24; mi++) {
   insertTx({
     accountId: acct['Primary Checking'], date: d(10), amount: -randCents(40, 62),
     payeeId: pay['City Water Dept'], payeeName: 'City Water Dept',
-    categoryId: catId('Water'), recurringTransactionId: rec['Water Bill'],
+    categoryId: catId('Water'), scheduleId: rec['Water Bill'],
     ...cr(),
   });
 
@@ -407,7 +412,7 @@ for (let mi = 0; mi < 24; mi++) {
   insertTx({
     accountId: acct['Primary Checking'], date: d(12), amount: -7000,
     payeeId: pay['Spectrum Internet'], payeeName: 'Spectrum Internet',
-    categoryId: catId('Internet'), recurringTransactionId: rec['Internet'],
+    categoryId: catId('Internet'), scheduleId: rec['Internet'],
     ...cr(),
   });
 
@@ -415,7 +420,7 @@ for (let mi = 0; mi < 24; mi++) {
   insertTx({
     accountId: acct['Primary Checking'], date: d(15), amount: -8500,
     payeeId: pay['AT&T Wireless'], payeeName: 'AT&T Wireless',
-    categoryId: catId('Phone'), recurringTransactionId: rec['Phone Bill'],
+    categoryId: catId('Phone'), scheduleId: rec['Phone Bill'],
     ...cr(),
   });
 
@@ -426,7 +431,7 @@ for (let mi = 0; mi < 24; mi++) {
     insertTx({
       accountId: acct['Primary Checking'], date: d(18), amount: -gasNatAmt,
       payeeId: pay['Piedmont Natural Gas'], payeeName: 'Piedmont Natural Gas',
-      categoryId: catId('Gas (Natural)'), recurringTransactionId: rec['Natural Gas'],
+      categoryId: catId('Gas (Natural)'), scheduleId: rec['Natural Gas'],
       ...cr(),
     });
   }
@@ -443,19 +448,19 @@ for (let mi = 0; mi < 24; mi++) {
   insertTx({
     accountId: acct['Chase Credit Card'], date: d(3), amount: -1599,
     payeeId: pay['Netflix'], payeeName: 'Netflix',
-    categoryId: catId('Streaming Services'), recurringTransactionId: rec['Netflix'],
+    categoryId: catId('Streaming Services'), scheduleId: rec['Netflix'],
     ...cr(),
   });
   insertTx({
     accountId: acct['Chase Credit Card'], date: d(5), amount: -1099,
     payeeId: pay['Spotify'], payeeName: 'Spotify',
-    categoryId: catId('Streaming Services'), recurringTransactionId: rec['Spotify'],
+    categoryId: catId('Streaming Services'), scheduleId: rec['Spotify'],
     ...cr(),
   });
   insertTx({
     accountId: acct['Chase Credit Card'], date: d(8), amount: -1799,
     payeeId: pay['Hulu'], payeeName: 'Hulu',
-    categoryId: catId('Streaming Services'), recurringTransactionId: rec['Hulu'],
+    categoryId: catId('Streaming Services'), scheduleId: rec['Hulu'],
     ...cr(),
   });
 
@@ -463,7 +468,7 @@ for (let mi = 0; mi < 24; mi++) {
   insertTx({
     accountId: acct['Chase Credit Card'], date: d(1), amount: -4500,
     payeeId: pay['Planet Fitness'], payeeName: 'Planet Fitness',
-    categoryId: catId('Gym / Fitness'), recurringTransactionId: rec['Planet Fitness'],
+    categoryId: catId('Gym / Fitness'), scheduleId: rec['Planet Fitness'],
     ...cr(),
   });
 
@@ -471,14 +476,14 @@ for (let mi = 0; mi < 24; mi++) {
   insertTx({
     accountId: acct['Primary Checking'], date: d(10), amount: -15000,
     payeeId: pay['Merry Maids'], payeeName: 'Merry Maids',
-    categoryId: catId('Home Maintenance'), recurringTransactionId: rec['House Cleaner'],
+    categoryId: catId('Home Maintenance'), scheduleId: rec['House Cleaner'],
     ...cr(),
   });
   if (!isCurrentMonth || true) {
     insertTx({
       accountId: acct['Primary Checking'], date: d(24), amount: -15000,
       payeeId: pay['Merry Maids'], payeeName: 'Merry Maids',
-      categoryId: catId('Home Maintenance'), recurringTransactionId: rec['House Cleaner'],
+      categoryId: catId('Home Maintenance'), scheduleId: rec['House Cleaner'],
       ...cr(),
     });
   }
@@ -489,7 +494,7 @@ for (let mi = 0; mi < 24; mi++) {
     insertTx({
       accountId: acct['Chase Credit Card'], date: d(coffeeDay), amount: -randCents(4, 8),
       payeeId: pay['Starbucks'], payeeName: 'Starbucks',
-      categoryId: catId('Coffee Shops'), recurringTransactionId: rec['Weekly Coffee'],
+      categoryId: catId('Coffee Shops'), scheduleId: rec['Weekly Coffee'],
       ...cr(),
     });
   }
@@ -499,7 +504,7 @@ for (let mi = 0; mi < 24; mi++) {
     insertTx({
       accountId: acct['Primary Checking'], date: d(15), amount: -42000,
       payeeId: pay['State Farm'], payeeName: 'State Farm',
-      categoryId: catId('Car Insurance'), recurringTransactionId: rec['Car Insurance'],
+      categoryId: catId('Car Insurance'), scheduleId: rec['Car Insurance'],
       ...cr(),
     });
   }
@@ -509,7 +514,7 @@ for (let mi = 0; mi < 24; mi++) {
     insertTx({
       accountId: acct['Chase Credit Card'], date: d(20), amount: -13900,
       payeeId: pay['Amazon'], payeeName: 'Amazon',
-      categoryId: catId('Electronics'), recurringTransactionId: rec['Amazon Prime'],
+      categoryId: catId('Electronics'), scheduleId: rec['Amazon Prime'],
       ...cr(),
     });
   }
@@ -519,7 +524,7 @@ for (let mi = 0; mi < 24; mi++) {
     insertTx({
       accountId: acct['Primary Checking'], date: d(20), amount: -6500,
       payeeId: pay['T-Mobile'], payeeName: 'T-Mobile',
-      categoryId: catId('Phone'), recurringTransactionId: rec['Old Phone Plan'],
+      categoryId: catId('Phone'), scheduleId: rec['Old Phone Plan'],
       ...cr(),
     });
   }
@@ -529,7 +534,7 @@ for (let mi = 0; mi < 24; mi++) {
     insertTx({
       accountId: acct['Primary Checking'], date: d(15), amount: randCents(1800, 2200),
       payeeId: null, payeeName: 'Freelance Client',
-      categoryId: catId('Business Income'), recurringTransactionId: rec['Freelance Income'],
+      categoryId: catId('Business Income'), scheduleId: rec['Freelance Income'],
       ...cr(),
     });
   }
@@ -996,7 +1001,7 @@ GOAL_DEFS.forEach((g, i) => {
 console.log(`\nRich seed complete!`);
 console.log(`  Accounts: ${ACCOUNT_DEFS.length}`);
 console.log(`  Payees: ${PAYEE_DEFS.length}`);
-console.log(`  Recurring: ${REC_DEFS.length}`);
+console.log(`  Schedules: ${REC_DEFS.length}`);
 console.log(`  Transactions: ${txCount}`);
 console.log(`  Budget entries: ${budgetCount}`);
 console.log(`  Rules: ${RULE_DEFS.length}`);

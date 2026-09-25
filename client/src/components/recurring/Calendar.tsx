@@ -5,21 +5,23 @@ import {
   addMonths, subMonths,
 } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { RecurringOccurrence, OccurrenceStatus } from '../../types';
+import type { ScheduleOccurrence, OccurrenceDisplayStatus } from '../../types';
 
 const DAY_HEADERS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const DOT_COLORS: Record<OccurrenceStatus, string> = {
-  paid: 'bg-positive',
-  paid_different: 'bg-caution',
+const DOT_COLORS: Record<OccurrenceDisplayStatus, string> = {
   upcoming: 'bg-brand-500',
-  overdue: 'bg-negative',
+  due: 'bg-brand-600',
+  waiting: 'bg-caution',
+  paid: 'bg-positive',
+  skipped: 'bg-text-disabled',
+  cancelled: 'bg-text-disabled',
 };
 
 interface Props {
   month: string;
   onMonthChange: (month: string) => void;
-  occurrences: RecurringOccurrence[];
+  occurrences: ScheduleOccurrence[];
   onDateClick?: (date: string) => void;
 }
 
@@ -33,7 +35,7 @@ export default function Calendar({ month, onMonthChange, occurrences, onDateClic
   }, [month]);
 
   const occByDate = useMemo(() => {
-    const map = new Map<string, RecurringOccurrence[]>();
+    const map = new Map<string, ScheduleOccurrence[]>();
     for (const occ of occurrences) {
       const key = occ.expectedDate;
       const list = map.get(key) || [];
@@ -95,8 +97,8 @@ export default function Calendar({ month, onMonthChange, occurrences, onDateClic
                   {dayOccs.slice(0, 4).map((occ, i) => (
                     <div
                       key={i}
-                      className={`w-1.5 h-1.5 rounded-full ${DOT_COLORS[occ.status]}`}
-                      title={`${occ.title} (${occ.status})`}
+                      className={`w-1.5 h-1.5 rounded-full ${DOT_COLORS[occ.displayStatus]}`}
+                      title={`${occ.scheduleName} (${occ.displayStatus})`}
                     />
                   ))}
                 </div>

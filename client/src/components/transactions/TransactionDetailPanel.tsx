@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { X, ArrowLeftRight, Lock, Trash2 } from 'lucide-react';
+import { X, ArrowLeftRight, Lock, Trash2, Repeat, Unlink } from 'lucide-react';
 import { useUpdateTransaction, useDeleteTransaction } from '../../hooks/useTransactions';
+import { useSchedules, useUnmatchByTransaction } from '../../hooks/useSchedules';
 import { CategoryPicker } from './CategoryPicker';
 import { PayeeCombobox } from './PayeeCombobox';
 import { Button } from '../ui/Button';
 import { ConfirmModal } from '../ui/ConfirmModal';
 import { payeeColor, ACCOUNT_TYPE_COLORS } from '../../utils/transactionColors';
 import { formatCurrency } from '../../utils/currency';
+import { RECURRENCE_TYPE_LABELS } from '../../types';
 import type { Transaction, CategoryGroup, Payee, Account } from '../../types';
 
 interface Props {
@@ -23,6 +25,10 @@ interface Props {
 export function TransactionDetailPanel({ transaction: tx, categoryMap, groups, payees, accounts, accountName, accountType, onClose }: Props) {
   const updateTx = useUpdateTransaction();
   const deleteTx = useDeleteTransaction();
+  const { data: schedules = [] } = useSchedules();
+  const unmatchByTx = useUnmatchByTransaction();
+  const linkedSchedule = tx.scheduleId ? schedules.find(s => s.id === tx.scheduleId) : null;
+  const freqMap = new Map(RECURRENCE_TYPE_LABELS.map(f => [f.value, f.label]));
 
   const [localDate, setLocalDate] = useState(tx.date);
   const [localNotes, setLocalNotes] = useState(tx.notes ?? '');
@@ -220,6 +226,28 @@ export function TransactionDetailPanel({ transaction: tx, categoryMap, groups, p
             className={`${inputCls} resize-none`}
           />
         </div>
+
+        {linkedSchedule && (
+          <div>
+            <label className="text-xs font-medium text-text-secondary mb-1.5 block">Recurring</label>
+            <div className="flex items-center gap-3 px-3 py-2.5 bg-surface-alt rounded-lg border border-border-light">
+              <Repeat size={14} className="text-brand-600 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-text truncate">{linkedSchedule.name}</p>
+                <p className="text-xs text-text-tertiary">{freqMap.get(linkedSchedule.recurrenceType) || linkedSchedule.recurrenceType}</p>
+              </div>
+              {!isReconciled && (
+                <button
+                  onClick={() => unmatchByTx.mutate(tx.id)}
+                  className="p-1 rounded text-text-tertiary hover:text-caution hover:bg-caution-subtle transition-colors"
+                  title="Unlink from recurring"
+                >
+                  <Unlink size={14} />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {!isReconciled && (

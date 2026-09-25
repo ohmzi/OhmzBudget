@@ -51,15 +51,13 @@ export const transactions = sqliteTable('transactions', {
   isParent: integer('is_parent').notNull().default(0),
   parentTransactionId: text('parent_transaction_id'),
   importedId: text('imported_id'),
-  recurringTransactionId: text('recurring_transaction_id'),
   scheduleId: text('schedule_id').references(() => schedules.id, { onDelete: 'set null' }),
   createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
 }, (table) => [
   index('transactions_account_date_idx').on(table.accountId, table.date),
   index('transactions_category_idx').on(table.categoryId),
   index('transactions_date_idx').on(table.date),
-  index('transactions_recurring_idx').on(table.recurringTransactionId),
-  index('transactions_imported_id_idx').on(table.importedId),
+index('transactions_imported_id_idx').on(table.importedId),
   index('idx_transactions_schedule').on(table.scheduleId),
 ]);
 
@@ -79,25 +77,6 @@ export const rules = sqliteTable('rules', {
   actions: text('actions').notNull(),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
-});
-
-// Legacy table — kept inert during transition to schedules system
-export const recurringTransactions = sqliteTable('recurring_transactions', {
-  id: text('id').primaryKey(),
-  title: text('title').notNull(),
-  amount: integer('amount').notNull(),
-  isApproximate: integer('is_approximate').notNull().default(0),
-  frequency: text('frequency').notNull(),
-  startDate: text('start_date').notNull(),
-  endDate: text('end_date'),
-  accountId: text('account_id').references(() => accounts.id, { onDelete: 'set null' }),
-  categoryId: text('category_id').references(() => categories.id, { onDelete: 'set null' }),
-  payeeId: text('payee_id').references(() => payees.id, { onDelete: 'set null' }),
-  notes: text('notes'),
-  status: text('status').notNull().default('active'),
-  autoCreate: integer('auto_create').notNull().default(0),
-  createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
-  updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
 });
 
 export const schedules = sqliteTable('schedules', {

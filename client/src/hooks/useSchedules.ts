@@ -212,6 +212,16 @@ export function useUnmatchOccurrence() {
   });
 }
 
+export function useUnmatchByTransaction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (transactionId: string) => api.unmatchByTransaction(transactionId),
+    onSuccess: () => {
+      invalidateAll(qc);
+    },
+  });
+}
+
 export function useDismissMatch() {
   const qc = useQueryClient();
   return useMutation({

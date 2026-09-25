@@ -14,6 +14,7 @@ import {
 import {
   linkOccurrenceToTransaction,
   unlinkOccurrence,
+  unlinkOccurrenceByTransactionId,
   dismissMatchSuggestion,
   getMatchSuggestions,
 } from '../services/matchingEngine.js';
@@ -153,6 +154,16 @@ schedulesRouter.get('/match-suggestions', (_req, res) => {
 schedulesRouter.post('/auto-create', (_req, res) => {
   const created = autoCreateDueScheduled();
   res.json({ created });
+});
+
+// POST /unmatch-transaction — unlink by transaction ID
+schedulesRouter.post('/unmatch-transaction', (req, res) => {
+  const bodySchema = z.object({ transactionId: z.string() });
+  const parsed = bodySchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  unlinkOccurrenceByTransactionId(parsed.data.transactionId);
+  res.json({ ok: true });
 });
 
 // --- Parameterized routes ---

@@ -22,7 +22,6 @@ export interface Transaction {
   isParent: number;
   parentTransactionId: string | null;
   importedId: string | null;
-  recurringTransactionId: string | null;
   scheduleId: string | null;
   createdAt: string;
   children?: Transaction[];
@@ -206,59 +205,7 @@ export interface PayeeWithCount extends Payee {
   transactionCount: number;
 }
 
-// Recurring Transactions
-export type RecurringFrequency = 'weekly' | 'biweekly' | 'semimonthly' | 'monthly' | 'quarterly' | 'semiannually' | 'yearly';
-export type RecurringStatus = 'active' | 'paused' | 'canceled';
-export type OccurrenceStatus = 'paid' | 'paid_different' | 'upcoming' | 'overdue';
-
-export const FREQUENCY_LABELS: { value: RecurringFrequency; label: string }[] = [
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'biweekly', label: 'Every 2 Weeks' },
-  { value: 'semimonthly', label: 'Twice a Month' },
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'quarterly', label: 'Quarterly' },
-  { value: 'semiannually', label: 'Every 6 Months' },
-  { value: 'yearly', label: 'Yearly' },
-];
-
-export interface RecurringTransaction {
-  id: string;
-  title: string;
-  amount: number;
-  isApproximate: number;
-  frequency: RecurringFrequency;
-  startDate: string;
-  endDate: string | null;
-  accountId: string | null;
-  categoryId: string | null;
-  payeeId: string | null;
-  notes: string | null;
-  status: RecurringStatus;
-  autoCreate: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface RecurringOccurrence {
-  recurringTransactionId: string;
-  title: string;
-  expectedDate: string;
-  expectedAmount: number;
-  isApproximate: boolean;
-  frequency: string;
-  status: OccurrenceStatus;
-  linkedTransactionId: string | null;
-  linkedAmount: number | null;
-  accountId: string | null;
-  categoryId: string | null;
-}
-
-export interface RecurringSummary {
-  income: number;
-  expenses: number;
-}
-
-// --- Schedule System (replaces recurring transactions) ---
+// --- Schedule System ---
 export type RecurrenceType = 'once' | 'weekly' | 'biweekly' | 'semimonthly' | 'monthly' | 'quarterly' | 'semiannually' | 'yearly';
 export type AmountType = 'exact' | 'approximate' | 'variable';
 export type ScheduleStatus = 'active' | 'paused' | 'canceled';

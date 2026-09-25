@@ -3,23 +3,15 @@ import { ChevronDown, ChevronRight, Pencil, Pause, Play, Trash2 } from 'lucide-r
 import { formatCurrency } from '../../utils/currency';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
-import { useUpdateRecurring, useDeleteRecurring } from '../../hooks/useRecurringTransactions';
+import { useUpdateSchedule, useDeleteSchedule } from '../../hooks/useSchedules';
 import { ConfirmModal } from '../ui/ConfirmModal';
-import type { RecurringTransaction } from '../../types';
+import { RECURRENCE_TYPE_LABELS, type Schedule } from '../../types';
 
-const FREQ_LABEL: Record<string, string> = {
-  weekly: 'Weekly',
-  biweekly: 'Biweekly',
-  semimonthly: '2x/month',
-  monthly: 'Monthly',
-  quarterly: 'Quarterly',
-  semiannually: '6 months',
-  yearly: 'Yearly',
-};
+const FREQ_MAP = new Map(RECURRENCE_TYPE_LABELS.map(f => [f.value, f.label]));
 
 interface Props {
-  allRecurring: RecurringTransaction[];
-  onEdit: (item: RecurringTransaction) => void;
+  allRecurring: Schedule[];
+  onEdit: (item: Schedule) => void;
 }
 
 export default function AllTab({ allRecurring, onEdit }: Props) {
@@ -28,8 +20,8 @@ export default function AllTab({ allRecurring, onEdit }: Props) {
 
   const { data: accounts = [] } = useAccounts();
   const { data: groups = [] } = useCategories();
-  const updateRecurring = useUpdateRecurring();
-  const deleteRecurring = useDeleteRecurring();
+  const updateSchedule = useUpdateSchedule();
+  const deleteSchedule = useDeleteSchedule();
 
   const accountMap = useMemo(() => new Map(accounts.map((a) => [a.id, a.name])), [accounts]);
   const categoryMap = useMemo(() => {
@@ -41,7 +33,7 @@ export default function AllTab({ allRecurring, onEdit }: Props) {
   const active = allRecurring.filter((r) => r.status === 'active' || r.status === 'paused');
   const canceled = allRecurring.filter((r) => r.status === 'canceled');
 
-  function Row({ item }: { item: RecurringTransaction }) {
+  function Row({ item }: { item: Schedule }) {
     const isPaused = item.status === 'paused';
     return (
       <div className={`flex items-center gap-3 px-4 py-2.5 border-b border-border-light hover:bg-hover transition-colors group ${
@@ -57,15 +49,20 @@ export default function AllTab({ allRecurring, onEdit }: Props) {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-text truncate">{item.title}</span>
+            <span className="text-sm font-medium text-text truncate">{item.name}</span>
             <span className="text-[10px] font-medium text-text-tertiary bg-surface-alt px-1.5 py-0.5 rounded">
-              {FREQ_LABEL[item.frequency] || item.frequency}
+              {FREQ_MAP.get(item.recurrenceType) || item.recurrenceType}
             </span>
             {isPaused && (
               <span className="text-[10px] font-medium text-caution bg-caution-subtle px-1.5 py-0.5 rounded">Paused</span>
             )}
             {Boolean(item.autoCreate) && (
               <span className="text-[10px] font-medium text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">Auto</span>
+            )}
+            {item.amountType !== 'exact' && (
+              <span className="text-[10px] font-medium text-text-tertiary bg-surface-alt px-1.5 py-0.5 rounded">
+                {item.amountType === 'approximate' ? '~Approx' : 'Variable'}
+              </span>
             )}
           </div>
           <div className="flex items-center gap-1.5 mt-0.5">
@@ -82,12 +79,12 @@ export default function AllTab({ allRecurring, onEdit }: Props) {
         <span className={`text-sm font-medium tabular-nums whitespace-nowrap ${
           item.amount > 0 ? 'text-positive' : 'text-text'
         }`}>
-          {Boolean(item.isApproximate) && '~'}{formatCurrency(item.amount)}
+          {item.amountType !== 'exact' && '~'}{formatCurrency(item.amount)}
         </span>
 
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
-            onClick={() => updateRecurring.mutate({
+            onClick={() => updateSchedule.mutate({
               id: item.id,
               status: isPaused ? 'active' : 'paused',
             })}
@@ -150,7 +147,7 @@ export default function AllTab({ allRecurring, onEdit }: Props) {
         isOpen={deleteId !== null}
         onClose={() => setDeleteId(null)}
         onConfirm={() => {
-          if (deleteId) deleteRecurring.mutate({ id: deleteId });
+          if (deleteId) deleteSchedule.mutate({ id: deleteId });
           setDeleteId(null);
         }}
         title="Cancel Recurring Item?"

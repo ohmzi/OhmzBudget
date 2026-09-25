@@ -1,8 +1,8 @@
 import { formatCurrency } from '../../utils/currency';
-import type { RecurringSummary } from '../../types';
+import type { ScheduleSummary } from '../../types';
 
 interface Props {
-  summary: RecurringSummary | undefined;
+  summary: ScheduleSummary | undefined;
   isLoading: boolean;
 }
 

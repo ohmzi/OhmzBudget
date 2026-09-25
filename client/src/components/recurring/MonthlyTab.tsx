@@ -3,27 +3,30 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 import Calendar from './Calendar';
 import RecurringItemRow from './RecurringItemRow';
 import RecurringSummaryBar from './RecurringSummaryBar';
-import { useOccurrences, useRecurringSummary, useMarkAsPaid } from '../../hooks/useRecurringTransactions';
+import { useScheduleOccurrences, useScheduleSummary, useMarkOccurrencePaid, useSkipOccurrence, useUnmatchOccurrence } from '../../hooks/useSchedules';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
-import type { RecurringTransaction } from '../../types';
+import type { Schedule } from '../../types';
 
 interface Props {
-  onEdit: (item: RecurringTransaction) => void;
-  allRecurring: RecurringTransaction[];
+  onEdit: (item: Schedule) => void;
+  allRecurring: Schedule[];
+  onMatchOccurrence?: (occurrenceId: string) => void;
 }
 
-export default function MonthlyTab({ onEdit, allRecurring }: Props) {
+export default function MonthlyTab({ onEdit, allRecurring, onMatchOccurrence }: Props) {
   const [month, setMonth] = useState(format(new Date(), 'yyyy-MM'));
 
   const from = format(startOfMonth(new Date(`${month}-01`)), 'yyyy-MM-dd');
   const to = format(endOfMonth(new Date(`${month}-01`)), 'yyyy-MM-dd');
 
-  const { data: occurrences = [], isLoading } = useOccurrences(from, to);
-  const { data: summary, isLoading: summaryLoading } = useRecurringSummary(month);
+  const { data: occurrences = [], isLoading } = useScheduleOccurrences(from, to);
+  const { data: summary, isLoading: summaryLoading } = useScheduleSummary(month);
   const { data: accounts = [] } = useAccounts();
   const { data: groups = [] } = useCategories();
-  const markPaid = useMarkAsPaid();
+  const markPaid = useMarkOccurrencePaid();
+  const skipOcc = useSkipOccurrence();
+  const unmatchOcc = useUnmatchOccurrence();
 
   const accountMap = useMemo(() => new Map(accounts.map((a) => [a.id, a.name])), [accounts]);
   const categoryMap = useMemo(() => {
@@ -56,15 +59,18 @@ export default function MonthlyTab({ onEdit, allRecurring }: Props) {
             </div>
           ) : (
             <div className="bg-surface rounded-lg shadow-card border border-border-light overflow-hidden">
-              {occurrences.map((occ, i) => (
+              {occurrences.map((occ) => (
                 <RecurringItemRow
-                  key={`${occ.recurringTransactionId}-${occ.expectedDate}-${i}`}
+                  key={`${occ.scheduleId}-${occ.id}`}
                   occurrence={occ}
-                  accountName={occ.accountId ? accountMap.get(occ.accountId) : undefined}
-                  categoryName={occ.categoryId ? categoryMap.get(occ.categoryId) : undefined}
-                  onMarkPaid={() => markPaid.mutate({ id: occ.recurringTransactionId, date: occ.expectedDate })}
+                  accountName={occ.scheduleAccountId ? accountMap.get(occ.scheduleAccountId) : undefined}
+                  categoryName={occ.scheduleCategoryId ? categoryMap.get(occ.scheduleCategoryId) : undefined}
+                  onMarkPaid={() => markPaid.mutate({ scheduleId: occ.scheduleId, date: occ.expectedDate, occurrenceId: occ.id })}
+                  onSkip={() => skipOcc.mutate(occ.id)}
+                  onMatch={onMatchOccurrence ? () => onMatchOccurrence(occ.id) : undefined}
+                  onUnmatch={() => unmatchOcc.mutate(occ.id)}
                   onEdit={() => {
-                    const rec = recMap.get(occ.recurringTransactionId);
+                    const rec = recMap.get(occ.scheduleId);
                     if (rec) onEdit(rec);
                   }}
                 />

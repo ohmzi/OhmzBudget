@@ -74,6 +74,12 @@ export const matchOccurrence = (occurrenceId: string, transactionId: string) =>
 export const unmatchOccurrence = (occurrenceId: string) =>
   apiFetch<{ ok: boolean }>(`/schedules/occurrences/${occurrenceId}/unmatch`, { method: 'POST' });
 
+export const unmatchByTransaction = (transactionId: string) =>
+  apiFetch<{ ok: boolean }>('/schedules/unmatch-transaction', {
+    method: 'POST',
+    body: JSON.stringify({ transactionId }),
+  });
+
 export const dismissMatch = (occurrenceId: string, transactionId: string) =>
   apiFetch<{ ok: boolean }>(`/schedules/occurrences/${occurrenceId}/dismiss`, {
     method: 'POST',

@@ -9,7 +9,6 @@ import { rulesRouter } from './routes/rules.js';
 import { reportsRouter } from './routes/reports.js';
 import { exportRouter } from './routes/export.js';
 import { customReportsRouter } from './routes/customReports.js';
-import { recurringTransactionsRouter, autoCreateDueRecurring } from './routes/recurringTransactions.js';
 import { schedulesRouter } from './routes/schedules.js';
 import { goalsRouter } from './routes/goals.js';
 import { plaidRouter } from './routes/plaid.js';
@@ -36,7 +35,6 @@ app.use('/api/rules', rulesRouter);
 app.use('/api/reports', reportsRouter);
 app.use('/api/export', exportRouter);
 app.use('/api/custom-reports', customReportsRouter);
-app.use('/api/recurring-transactions', recurringTransactionsRouter);
 app.use('/api/schedules', schedulesRouter);
 app.use('/api/goals', goalsRouter);
 app.use('/api/plaid', plaidRouter);
@@ -62,10 +60,6 @@ export async function startServer(port: number | string): Promise<void> {
       const horizon = format(addDays(new Date(), 90), 'yyyy-MM-dd');
       const ensured = ensureOccurrencesForAll(horizon);
       if (ensured > 0) console.log(`Ensured ${ensured} new occurrence(s)`);
-
-      // Legacy auto-create (kept during transition)
-      const created = autoCreateDueRecurring();
-      if (created > 0) console.log(`Auto-created ${created} recurring transaction(s)`);
 
       // Bank sync BEFORE schedule auto-create (so real txns get matched first)
       const bankSyncDone = Promise.all([
