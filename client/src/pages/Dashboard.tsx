@@ -27,13 +27,9 @@ export default function Dashboard() {
         <SpendingComparison />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mt-5">
-        <div className="lg:col-span-3">
-          <BudgetProgress currentMonth={currentMonth} />
-        </div>
-        <div className="lg:col-span-2">
-          <UpcomingBills />
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-5">
+        <BudgetProgress currentMonth={currentMonth} />
+        <UpcomingBills />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5 items-start">

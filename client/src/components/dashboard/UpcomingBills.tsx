@@ -14,7 +14,7 @@ export default function UpcomingBills() {
   const upcoming = useMemo(
     () => occurrences
       .filter((o) => o.status === 'upcoming' || o.status === 'overdue')
-      .slice(0, 7),
+      .slice(0, 5),
     [occurrences],
   );
 
@@ -41,12 +41,12 @@ export default function UpcomingBills() {
       {upcoming.length === 0 ? (
         <p className="text-sm text-text-disabled py-4 text-center">No upcoming bills.</p>
       ) : (
-        <div className="space-y-0.5">
+        <div className="divide-y divide-border-light">
           {upcoming.map((occ, i) => {
             const daysUntil = differenceInDays(parseISO(occ.expectedDate), new Date());
             const isOverdue = occ.status === 'overdue';
             return (
-              <div key={`${occ.recurringTransactionId}-${occ.expectedDate}-${i}`} className="flex items-center gap-3 py-1.5">
+              <div key={`${occ.recurringTransactionId}-${occ.expectedDate}-${i}`} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
                 <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${isOverdue ? 'bg-negative' : 'bg-brand-500'}`} />
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm truncate ${isOverdue ? 'text-negative font-medium' : 'text-text'}`}>
