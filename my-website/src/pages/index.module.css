@@ -1,23 +1,302 @@
-/**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
- */
+/* ============================================================
+   Hero Section
+   ============================================================ */
 
-.heroBanner {
-  padding: 4rem 0;
-  text-align: center;
+.hero {
+  background: linear-gradient(170deg, #0E1A31 0%, #0B1220 50%, #091018 100%);
   position: relative;
   overflow: hidden;
 }
 
-@media screen and (max-width: 996px) {
-  .heroBanner {
-    padding: 2rem;
-  }
+.heroContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 5.5rem;
 }
 
-.buttons {
+.heroGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+/* ---- Left column ---- */
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.heroHeadline {
+  display: flex;
+  flex-direction: column;
+  font-size: clamp(2.75rem, 5.5vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  margin: 0 0 1.5rem;
+  border: none;
+}
+
+.headlineWhite {
+  color: #ffffff;
+}
+
+.headlineBlue {
+  color: #3B82F6;
+}
+
+.heroDescription {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: clamp(1rem, 1.15vw, 1.2rem);
+  line-height: 1.65;
+  max-width: 520px;
+  margin: 0 0 2rem;
+}
+
+/* ---- CTA buttons ---- */
+
+.ctaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.ctaPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #2563EB;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.8rem 1.75rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.ctaPrimary:hover {
+  background: #1D4ED8;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0.8rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.ctaSecondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.githubIcon {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---- Attribute row ---- */
+
+.attributeRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.attribute {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.attributeIcon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.attributeDot {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 1.25rem;
+  line-height: 1;
+  user-select: none;
+}
+
+/* ---- Right column: hero illustration ---- */
+
+.heroImageWrapper {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+}
+
+.heroImageWrapper::before {
+  content: '';
+  position: absolute;
+  width: 70%;
+  height: 70%;
+  background: radial-gradient(
+    circle,
+    rgba(37, 99, 235, 0.08) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.heroImage {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
+}
+
+/* ---- Subtle cloud decorations ---- */
+
+.hero::before,
+.hero::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero::before {
+  width: 500px;
+  height: 120px;
+  background: rgba(15, 25, 50, 0.6);
+  bottom: 12%;
+  right: 5%;
+  filter: blur(40px);
+}
+
+.hero::after {
+  width: 350px;
+  height: 80px;
+  background: rgba(15, 25, 50, 0.4);
+  top: 25%;
+  right: 15%;
+  filter: blur(30px);
+}
+
+/* ============================================================
+   Intro Section
+   ============================================================ */
+
+.intro {
+  background: var(--ifm-background-color);
+  padding: 5rem 1.5rem;
+  text-align: center;
+}
+
+.introContainer {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.introHeading {
+  font-size: clamp(1.5rem, 2.5vw, 2.15rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--ifm-font-color-base);
+  margin: 0 0 1rem;
+}
+
+.introDescription {
+  font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+  line-height: 1.6;
+  color: #64748B;
+  margin: 0;
+}
+
+[data-theme='dark'] .introDescription {
+  color: #94A3B8;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media screen and (max-width: 996px) {
+  .heroContainer {
+    padding: 3.5rem 1.25rem 3.5rem;
+  }
+
+  .heroGrid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    text-align: center;
+  }
+
+  .heroText {
+    align-items: center;
+  }
+
+  .heroDescription {
+    max-width: 480px;
+  }
+
+  .ctaRow {
+    justify-content: center;
+  }
+
+  .attributeRow {
+    justify-content: center;
+  }
+
+  .heroImage {
+    max-width: 300px;
+  }
+
+  .hero::before,
+  .hero::after {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .heroHeadline {
+    font-size: 2.25rem;
+  }
+
+  .ctaRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ctaPrimary,
+  .ctaSecondary {
+    justify-content: center;
+  }
+
+  .heroImage {
+    max-width: 240px;
+  }
 }

@@ -4,8 +4,8 @@
  * work well for content-centric websites.
  */
 
-/* You can override the default Infima variables here. */
 :root {
+  --ifm-font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
   --ifm-color-primary: #2563EB;
   --ifm-color-primary-dark: #1E56CF;
   --ifm-color-primary-darker: #1B4FC2;
