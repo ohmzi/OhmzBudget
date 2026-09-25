@@ -3,7 +3,7 @@
    ============================================================ */
 
 .hero {
-  background: linear-gradient(170deg, #0E1A31 0%, #0B1220 50%, #091018 100%);
+  background: linear-gradient(170deg, #0D1B2A 0%, #101E36 50%, #0B1528 100%);
   position: relative;
   overflow: hidden;
 }
@@ -11,7 +11,7 @@
 .heroContainer {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 5rem 1.5rem 5.5rem;
+  padding: 3.5rem 1.5rem 3rem;
 }
 
 .heroGrid {
@@ -36,7 +36,7 @@
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.025em;
-  margin: 0 0 1.5rem;
+  margin: 0 0 1.25rem;
   border: none;
 }
 
@@ -45,7 +45,7 @@
 }
 
 .headlineBlue {
-  color: #3B82F6;
+  color: #2E90FA;
 }
 
 .heroDescription {
@@ -53,7 +53,7 @@
   font-size: clamp(1rem, 1.15vw, 1.2rem);
   line-height: 1.65;
   max-width: 520px;
-  margin: 0 0 2rem;
+  margin: 0 0 1.5rem;
 }
 
 /* ---- CTA buttons ---- */
@@ -62,14 +62,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .ctaPrimary {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: #2563EB;
+  background: #2E7CF6;
   color: #ffffff;
   font-weight: 600;
   font-size: 1rem;
@@ -80,7 +80,7 @@
 }
 
 .ctaPrimary:hover {
-  background: #1D4ED8;
+  background: #1E6AE1;
   color: #ffffff;
   text-decoration: none;
 }
@@ -125,8 +125,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -137,7 +137,7 @@
 }
 
 .attributeDot {
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.4);
   font-size: 1.25rem;
   line-height: 1;
   user-select: none;
@@ -150,6 +150,8 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  margin-top: -1rem;
+  margin-right: -2rem;
 }
 
 .heroImageWrapper::before {
@@ -170,7 +172,7 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 460px;
+  max-width: 540px;
   height: auto;
   object-fit: contain;
   filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
@@ -211,7 +213,7 @@
 
 .intro {
   background: var(--ifm-background-color);
-  padding: 5rem 1.5rem;
+  padding: 3.5rem 1.5rem 5rem;
   text-align: center;
 }
 
