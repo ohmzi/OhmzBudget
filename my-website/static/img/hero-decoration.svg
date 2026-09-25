@@ -4,41 +4,56 @@
   <!-- ======== Clouds ======== -->
   <g id="clouds">
 
-    <!-- Top-right cloud: ~155×50, positioned at upper-right behind the money -->
+    <!-- Top-right cloud: ~160×48, frames upper-right of illustration -->
     <path
-      d="M510 65 H370 C370 65, 365 55, 370 47 C375 39, 385 36, 392 38 C396 28, 407 22, 418 22 C429 22, 439 28, 443 36 C447 30, 455 26, 464 26 C478 26, 489 35, 491 47 C497 42, 505 40, 513 42 C521 44, 526 50, 528 57 C530 60, 528 65, 510 65 Z"
-      fill="#1E3358"
-      opacity="0.30"
+      d="M550 87 H398 C398 87, 393 78, 398 71 C403 64, 412 61, 418 63 C422 54, 432 49, 442 49 C452 49, 461 54, 465 61 C469 56, 477 52, 486 52 C498 52, 508 60, 510 70 C516 66, 523 64, 530 66 C537 68, 542 73, 544 79 C548 76, 553 75, 558 78 C560 80, 558 85, 550 87 Z"
+      fill="#1D3154"
+      opacity="0.28"
     />
 
-    <!-- Mid/lower-right cloud: ~140×45, right side behind lower wing -->
+    <!-- Mid/lower-right cloud: ~145×44, behind outer half of right wing -->
     <path
-      d="M540 275 H410 C410 275, 406 266, 410 259 C414 252, 422 249, 428 251 C431 242, 440 237, 450 237 C460 237, 468 242, 472 249 C475 244, 482 241, 490 241 C502 241, 511 249, 513 259 C518 255, 524 253, 531 255 C538 257, 542 262, 543 268 C545 271, 543 275, 540 275 Z"
-      fill="#1E3358"
-      opacity="0.25"
+      d="M558 282 H418 C418 282, 414 274, 418 268 C422 262, 429 259, 435 261 C438 253, 446 248, 455 248 C464 248, 472 252, 476 259 C479 254, 486 251, 494 251 C505 251, 514 258, 516 267 C521 263, 528 261, 534 263 C541 265, 545 270, 547 276 C550 273, 555 272, 558 275 C560 277, 558 282, 558 282 Z"
+      fill="#1D3154"
+      opacity="0.22"
     />
 
-    <!-- Left/lower-left cloud: ~120×40, subtle, for compositional balance -->
+    <!-- Left/lower-left cloud: atmospheric hint -->
     <path
       d="M130 340 H20 C20 340, 17 332, 20 326 C23 320, 29 318, 34 319 C37 312, 44 308, 52 308 C60 308, 67 312, 70 318 C73 314, 78 311, 85 311 C95 311, 102 318, 104 326 C108 323, 113 321, 119 323 C125 325, 128 329, 129 334 C131 337, 129 340, 130 340 Z"
-      fill="#1E3358"
-      opacity="0.20"
+      fill="#1D3154"
+      opacity="0.14"
     />
   </g>
 
   <!-- ======== Motion streaks ======== -->
-  <g id="motion-lines" stroke="#2584FF" stroke-linecap="round" fill="none">
+  <g id="motion-lines" stroke="#2E82FF" stroke-linecap="round" fill="none">
 
-    <!-- Left group: 3 lines, loosely spaced, primary cluster -->
-    <line x1="80" y1="235" x2="112" y2="215" stroke-width="3" opacity="0.85"/>
-    <line x1="62" y1="278" x2="100" y2="255" stroke-width="3.5" opacity="0.82"/>
-    <line x1="88" y1="315" x2="118" y2="298" stroke-width="3" opacity="0.78"/>
+    <!-- Upper-left wing — short mark -->
+    <line x1="152" y1="108" x2="172" y2="94" stroke-width="3" opacity="0.50"/>
 
-    <!-- Upper-right group: 2 subtle accents -->
-    <line x1="430" y1="55" x2="460" y2="38" stroke-width="3" opacity="0.80"/>
-    <line x1="468" y1="82" x2="492" y2="68" stroke-width="2.5" opacity="0.75"/>
+    <!-- Upper-left wing — small faint accent -->
+    <line x1="128" y1="88" x2="142" y2="81" stroke-width="3" opacity="0.35"/>
 
-    <!-- Lower-right: 1 line to complete composition -->
-    <line x1="415" y1="338" x2="450" y2="318" stroke-width="3" opacity="0.78"/>
+    <!-- Middle-left — longest, strongest -->
+    <line x1="85" y1="200" x2="124" y2="183" stroke-width="3" opacity="0.80"/>
+
+    <!-- Middle-left — shorter, offset right -->
+    <line x1="125" y1="252" x2="148" y2="239" stroke-width="3" opacity="0.45"/>
+
+    <!-- Lower-left — mid length -->
+    <line x1="80" y1="312" x2="111" y2="296" stroke-width="3" opacity="0.70"/>
+
+    <!-- Lower-left — pulled inward, faint -->
+    <line x1="100" y1="370" x2="119" y2="364" stroke-width="3" opacity="0.38"/>
+
+    <!-- Lower-right edge — trailing mark -->
+    <line x1="392" y1="350" x2="420" y2="340" stroke-width="3" opacity="0.50"/>
+
+    <!-- Lower-right edge — much fainter companion -->
+    <line x1="428" y1="380" x2="443" y2="374" stroke-width="3" opacity="0.25"/>
+
+    <!-- Upper-right — very small, faint -->
+    <line x1="452" y1="66" x2="462" y2="59" stroke-width="3" opacity="0.32"/>
   </g>
 </svg>
