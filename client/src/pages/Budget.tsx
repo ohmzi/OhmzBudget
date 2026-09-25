@@ -160,9 +160,9 @@ function IncomeGroupSection({ group, editingId, month, onStartEdit, onSave, onCa
     [group.categories]
   );
 
-  const budgeted = group.categories.filter(c => c.budgeted > 0 || c.spent > 0 || c.balance !== 0);
-  const unbudgeted = group.categories.filter(c => c.budgeted === 0 && c.spent === 0 && c.balance === 0);
-  const visibleCats = showUnbudgeted ? group.categories : budgeted;
+  const active = group.categories.filter(c => c.budgeted !== 0 || (c.balance - c.carryOver - c.budgeted) !== 0);
+  const inactive = group.categories.filter(c => c.budgeted === 0 && (c.balance - c.carryOver - c.budgeted) === 0);
+  const visibleCats = showUnbudgeted ? group.categories : active;
 
   return (
     <>
@@ -204,7 +204,7 @@ function IncomeGroupSection({ group, editingId, month, onStartEdit, onSave, onCa
               onApplyBulk={onApplyBulk}
             />
           ))}
-          {unbudgeted.length > 0 && (
+          {inactive.length > 0 && (
             <tr className="border-b border-border-light">
               <td colSpan={4} className="py-2 pl-10 pr-3">
                 <button
@@ -212,7 +212,7 @@ function IncomeGroupSection({ group, editingId, month, onStartEdit, onSave, onCa
                   className="flex items-center gap-1.5 text-xs text-text-tertiary hover:text-text-secondary"
                 >
                   <Eye size={12} />
-                  {showUnbudgeted ? 'Hide' : 'Show'} {unbudgeted.length} unbudgeted
+                  {showUnbudgeted ? 'Hide' : 'Show'} {inactive.length} inactive {inactive.length === 1 ? 'category' : 'categories'}
                 </button>
               </td>
             </tr>
@@ -247,9 +247,9 @@ function BudgetTypeSection({ label, categories, editingId, month, onStartEdit, o
     [categories]
   );
 
-  const budgeted = categories.filter(c => c.budgeted > 0 || c.spent > 0 || c.balance !== 0);
-  const unbudgeted = categories.filter(c => c.budgeted === 0 && c.spent === 0 && c.balance === 0);
-  const visibleCats = showUnbudgeted ? categories : budgeted;
+  const active = categories.filter(c => c.budgeted !== 0 || c.spent !== 0);
+  const inactive = categories.filter(c => c.budgeted === 0 && c.spent === 0);
+  const visibleCats = showUnbudgeted ? categories : active;
 
   const status = getStatus(totals.spent, totals.budgeted);
   const remaining = totals.budgeted - totals.spent;
@@ -297,7 +297,7 @@ function BudgetTypeSection({ label, categories, editingId, month, onStartEdit, o
             />
           ))}
 
-          {unbudgeted.length > 0 && (
+          {inactive.length > 0 && (
             <tr className="border-b border-border-light">
               <td colSpan={4} className="py-2 pl-10 pr-3">
                 <button
@@ -305,7 +305,7 @@ function BudgetTypeSection({ label, categories, editingId, month, onStartEdit, o
                   className="flex items-center gap-1.5 text-xs text-text-tertiary hover:text-text-secondary"
                 >
                   <Eye size={12} />
-                  {showUnbudgeted ? 'Hide' : 'Show'} {unbudgeted.length} unbudgeted
+                  {showUnbudgeted ? 'Hide' : 'Show'} {inactive.length} inactive {inactive.length === 1 ? 'category' : 'categories'}
                 </button>
               </td>
             </tr>
