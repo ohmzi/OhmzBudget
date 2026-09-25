@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { format, parseISO } from 'date-fns';
 import { Plus, Upload } from 'lucide-react';
@@ -71,6 +71,32 @@ export function TransactionTable({ accountId, categoryId, month, onClearMonth, o
     () => detailId ? transactions.find(tx => tx.id === detailId) ?? null : null,
     [detailId, transactions],
   );
+
+  const [panelMounted, setPanelMounted] = useState(false);
+  const [panelVisible, setPanelVisible] = useState(false);
+  const panelTxRef = useRef<typeof selectedTx>(null);
+
+  if (selectedTx) panelTxRef.current = selectedTx;
+  const panelTx = selectedTx ?? panelTxRef.current;
+
+  const hasSelectedTx = !!selectedTx;
+  useEffect(() => {
+    if (hasSelectedTx) {
+      setPanelMounted(true);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setPanelVisible(true));
+      });
+    } else {
+      setPanelVisible(false);
+    }
+  }, [hasSelectedTx]);
+
+  const handlePanelTransitionEnd = useCallback(() => {
+    if (!panelVisible) {
+      setPanelMounted(false);
+      panelTxRef.current = null;
+    }
+  }, [panelVisible]);
 
   const groupedByDate = useMemo(() => {
     const result: Array<{ date: string; txs: typeof transactions; total: number }> = [];
@@ -192,17 +218,24 @@ export function TransactionTable({ accountId, categoryId, month, onClearMonth, o
           )}
         </div>
 
-        {selectedTx && !overlayDetail && (
-          <TransactionDetailPanel
-            transaction={selectedTx}
-            categoryMap={categoryMap}
-            groups={groups as CategoryGroup[]}
-            payees={payees}
-            accounts={accounts}
-            accountName={accountInfoMap.get(selectedTx.accountId)?.name}
-            accountType={accountInfoMap.get(selectedTx.accountId)?.type}
-            onClose={() => setDetailId(null)}
-          />
+        {panelMounted && panelTx && !overlayDetail && (
+          <div className="w-96 shrink-0 overflow-hidden">
+            <div
+              className={`h-full transition-transform duration-200 ease-out ${panelVisible ? 'translate-x-0' : 'translate-x-full'}`}
+              onTransitionEnd={handlePanelTransitionEnd}
+            >
+              <TransactionDetailPanel
+                transaction={panelTx}
+                categoryMap={categoryMap}
+                groups={groups as CategoryGroup[]}
+                payees={payees}
+                accounts={accounts}
+                accountName={accountInfoMap.get(panelTx.accountId)?.name}
+                accountType={accountInfoMap.get(panelTx.accountId)?.type}
+                onClose={() => setDetailId(null)}
+              />
+            </div>
+          </div>
         )}
       </div>
 
@@ -210,18 +243,22 @@ export function TransactionTable({ accountId, categoryId, month, onClearMonth, o
         <ImportModal isOpen={showImport} onClose={() => setShowImport(false)} accountId={accountId} />
       )}
 
-      {selectedTx && overlayDetail && createPortal(
+      {panelMounted && panelTx && overlayDetail && createPortal(
         <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailId(null)}>
-          <div className="absolute inset-0 bg-black/20" />
-          <div className="relative h-full" onClick={(e) => e.stopPropagation()}>
+          <div className={`absolute inset-0 bg-black/20 transition-opacity duration-200 ${panelVisible ? 'opacity-100' : 'opacity-0'}`} />
+          <div
+            className={`relative h-full transition-transform duration-200 ease-out ${panelVisible ? 'translate-x-0' : 'translate-x-full'}`}
+            onClick={(e) => e.stopPropagation()}
+            onTransitionEnd={handlePanelTransitionEnd}
+          >
             <TransactionDetailPanel
-              transaction={selectedTx}
+              transaction={panelTx}
               categoryMap={categoryMap}
               groups={groups as CategoryGroup[]}
               payees={payees}
               accounts={accounts}
-              accountName={accountInfoMap.get(selectedTx.accountId)?.name}
-              accountType={accountInfoMap.get(selectedTx.accountId)?.type}
+              accountName={accountInfoMap.get(panelTx.accountId)?.name}
+              accountType={accountInfoMap.get(panelTx.accountId)?.type}
               onClose={() => setDetailId(null)}
             />
           </div>
