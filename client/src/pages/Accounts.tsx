@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, ChevronRight, ChevronDown, TrendingUp, TrendingDown } from 'lucide-react';
 import { useAccounts, useBalancesAgo } from '../hooks/useAccounts';
 import { AddAccountModal } from '../components/accounts/AddAccountModal';
-import { EditAccountModal } from '../components/accounts/EditAccountModal';
 import { AssetLiabilitySummary } from '../components/accounts/AssetLiabilitySummary';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -42,10 +41,9 @@ interface AccountGroupProps {
   label: string;
   accounts: Account[];
   balancesAgo: Record<string, number>;
-  onEdit: (account: Account) => void;
 }
 
-function AccountGroup({ label, accounts, balancesAgo, onEdit }: AccountGroupProps) {
+function AccountGroup({ label, accounts, balancesAgo }: AccountGroupProps) {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const groupTotal = accounts.reduce((sum, a) => sum + a.balance, 0);
@@ -87,12 +85,6 @@ function AccountGroup({ label, accounts, balancesAgo, onEdit }: AccountGroupProp
               <div className="min-w-0">
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-medium text-text truncate">{account.name}</span>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onEdit(account); }}
-                    className="opacity-0 group-hover:opacity-100 text-xs text-text-tertiary hover:text-brand-600 transition-opacity"
-                  >
-                    Edit
-                  </button>
                 </div>
                 <span className="text-xs text-text-tertiary mt-0.5 block">
                   {ACCOUNT_TYPE_LABEL[account.type] ?? account.type}
@@ -113,8 +105,6 @@ export default function AccountsPage() {
   const { data: accounts = [], isLoading } = useAccounts();
   const { data: balancesAgo = {} } = useBalancesAgo();
   const [addOpen, setAddOpen] = useState(false);
-  const [editing, setEditing] = useState<Account | null>(null);
-
   const allGroups = useMemo(() => groupAccountsByType(accounts), [accounts]);
 
   if (isLoading) {
@@ -170,7 +160,6 @@ export default function AccountsPage() {
                 label={g.label}
                 accounts={g.accounts}
                 balancesAgo={balancesAgo}
-                onEdit={setEditing}
               />
             ))}
           </div>
@@ -178,7 +167,6 @@ export default function AccountsPage() {
       )}
 
       <AddAccountModal isOpen={addOpen} onClose={() => setAddOpen(false)} />
-      <EditAccountModal account={editing} onClose={() => setEditing(null)} />
     </div>
   );
 }
