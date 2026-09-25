@@ -100,11 +100,20 @@ function HeroSection(): ReactNode {
               </div>
             </div>
           </div>
-          <div className={styles.heroImageWrapper}>
+          <div className={styles.heroArtwork}>
+            <div className={styles.heroGlow} />
+            <img
+              src="/img/hero-decoration.svg"
+              className={styles.heroDecoration}
+              alt=""
+              aria-hidden="true"
+              width="560"
+              height="420"
+            />
             <img
               src="/img/logo.png"
+              className={styles.heroMoney}
               alt="FlyBudget — flying money illustration"
-              className={styles.heroImage}
               width="480"
               height="480"
             />

@@ -143,26 +143,47 @@
   user-select: none;
 }
 
-/* ---- Right column: hero illustration ---- */
+/* ---- Right column: hero artwork composition ---- */
 
-.heroImageWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.heroArtwork {
   position: relative;
-  margin-top: -1.5rem;
-  margin-right: -2rem;
-  margin-bottom: -2rem;
+  width: 560px;
+  height: 420px;
+  flex-shrink: 0;
 }
 
-.heroImage {
-  position: relative;
+.heroGlow {
+  position: absolute;
+  z-index: 0;
+  width: 420px;
+  height: 420px;
+  right: 25px;
+  top: 5px;
+  border-radius: 50%;
+  background: rgba(30, 120, 255, 0.10);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.heroDecoration {
+  position: absolute;
   z-index: 1;
+  inset: 0;
   width: 100%;
-  max-width: 500px;
-  height: auto;
+  height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
+  pointer-events: none;
+}
+
+.heroMoney {
+  position: absolute;
+  z-index: 2;
+  width: 475px;
+  max-width: none;
+  right: 0;
+  top: -6px;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 32px rgba(0, 0, 0, 0.18));
 }
 
 
@@ -232,12 +253,24 @@
     justify-content: center;
   }
 
-  .heroImageWrapper {
-    margin: 0;
+  .heroArtwork {
+    width: 100%;
+    max-width: 400px;
+    height: 300px;
+    margin: 0 auto;
   }
 
-  .heroImage {
-    max-width: 300px;
+  .heroGlow {
+    width: 280px;
+    height: 280px;
+    right: 15px;
+    top: 10px;
+  }
+
+  .heroMoney {
+    width: 340px;
+    right: 0;
+    top: 0;
   }
 }
 
@@ -256,7 +289,12 @@
     justify-content: center;
   }
 
-  .heroImage {
-    max-width: 240px;
+  .heroArtwork {
+    max-width: 300px;
+    height: 230px;
+  }
+
+  .heroMoney {
+    width: 260px;
   }
 }

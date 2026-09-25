@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 420" fill="none">
+  <!-- Cloud shape credit: Font Awesome (CC BY 4.0, fontawesome.com) -->
+
+  <!-- ======== Clouds ======== -->
+  <g id="clouds">
+
+    <!-- Top-right cloud: ~155×50, positioned at upper-right behind the money -->
+    <path
+      d="M510 65 H370 C370 65, 365 55, 370 47 C375 39, 385 36, 392 38 C396 28, 407 22, 418 22 C429 22, 439 28, 443 36 C447 30, 455 26, 464 26 C478 26, 489 35, 491 47 C497 42, 505 40, 513 42 C521 44, 526 50, 528 57 C530 60, 528 65, 510 65 Z"
+      fill="#1E3358"
+      opacity="0.30"
+    />
+
+    <!-- Mid/lower-right cloud: ~140×45, right side behind lower wing -->
+    <path
+      d="M540 275 H410 C410 275, 406 266, 410 259 C414 252, 422 249, 428 251 C431 242, 440 237, 450 237 C460 237, 468 242, 472 249 C475 244, 482 241, 490 241 C502 241, 511 249, 513 259 C518 255, 524 253, 531 255 C538 257, 542 262, 543 268 C545 271, 543 275, 540 275 Z"
+      fill="#1E3358"
+      opacity="0.25"
+    />
+
+    <!-- Left/lower-left cloud: ~120×40, subtle, for compositional balance -->
+    <path
+      d="M130 340 H20 C20 340, 17 332, 20 326 C23 320, 29 318, 34 319 C37 312, 44 308, 52 308 C60 308, 67 312, 70 318 C73 314, 78 311, 85 311 C95 311, 102 318, 104 326 C108 323, 113 321, 119 323 C125 325, 128 329, 129 334 C131 337, 129 340, 130 340 Z"
+      fill="#1E3358"
+      opacity="0.20"
+    />
+  </g>
+
+  <!-- ======== Motion streaks ======== -->
+  <g id="motion-lines" stroke="#2584FF" stroke-linecap="round" fill="none">
+
+    <!-- Left group: 3 lines, loosely spaced, primary cluster -->
+    <line x1="80" y1="235" x2="112" y2="215" stroke-width="3" opacity="0.85"/>
+    <line x1="62" y1="278" x2="100" y2="255" stroke-width="3.5" opacity="0.82"/>
+    <line x1="88" y1="315" x2="118" y2="298" stroke-width="3" opacity="0.78"/>
+
+    <!-- Upper-right group: 2 subtle accents -->
+    <line x1="430" y1="55" x2="460" y2="38" stroke-width="3" opacity="0.80"/>
+    <line x1="468" y1="82" x2="492" y2="68" stroke-width="2.5" opacity="0.75"/>
+
+    <!-- Lower-right: 1 line to complete composition -->
+    <line x1="415" y1="338" x2="450" y2="318" stroke-width="3" opacity="0.78"/>
+  </g>
+</svg>
