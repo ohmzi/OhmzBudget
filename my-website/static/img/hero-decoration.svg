@@ -25,35 +25,4 @@
       opacity="0.14"
     />
   </g>
-
-  <!-- ======== Motion streaks ======== -->
-  <g id="motion-lines" stroke="#2E82FF" stroke-linecap="round" fill="none">
-
-    <!-- Upper-left wing — short mark -->
-    <line x1="152" y1="108" x2="172" y2="94" stroke-width="3" opacity="0.50"/>
-
-    <!-- Upper-left wing — small faint accent -->
-    <line x1="128" y1="88" x2="142" y2="81" stroke-width="3" opacity="0.35"/>
-
-    <!-- Middle-left — longest, strongest -->
-    <line x1="85" y1="200" x2="124" y2="183" stroke-width="3" opacity="0.80"/>
-
-    <!-- Middle-left — shorter, offset right -->
-    <line x1="125" y1="252" x2="148" y2="239" stroke-width="3" opacity="0.45"/>
-
-    <!-- Lower-left — mid length -->
-    <line x1="80" y1="312" x2="111" y2="296" stroke-width="3" opacity="0.70"/>
-
-    <!-- Lower-left — pulled inward, faint -->
-    <line x1="100" y1="370" x2="119" y2="364" stroke-width="3" opacity="0.38"/>
-
-    <!-- Lower-right edge — trailing mark -->
-    <line x1="392" y1="350" x2="420" y2="340" stroke-width="3" opacity="0.50"/>
-
-    <!-- Lower-right edge — much fainter companion -->
-    <line x1="428" y1="380" x2="443" y2="374" stroke-width="3" opacity="0.25"/>
-
-    <!-- Upper-right — very small, faint -->
-    <line x1="452" y1="66" x2="462" y2="59" stroke-width="3" opacity="0.32"/>
-  </g>
 </svg>
