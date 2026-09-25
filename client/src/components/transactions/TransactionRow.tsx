@@ -55,7 +55,7 @@ export function TransactionRow({ tx, categoryEntry, categoryMap, groups, payees,
   return (
     <div>
       <div
-        className={`group/row flex items-center px-4 py-2.5 cursor-pointer border-b border-border-light transition-colors ${
+        className={`group/row flex items-center px-4 py-2 cursor-pointer border-b border-border-light transition-colors ${
           isSelected ? 'bg-brand-50 border-l-2 border-l-brand-600' : 'bg-surface hover:bg-hover'
         }`}
         onClick={() => onOpenDetail(tx.id)}
@@ -63,10 +63,10 @@ export function TransactionRow({ tx, categoryEntry, categoryMap, groups, payees,
         {/* Payee */}
         <div className="group/payee flex items-center gap-1 flex-[1.8] min-w-0 relative mr-3">
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold shrink-0"
+            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[11px] font-semibold shrink-0"
             style={{ backgroundColor: bgColor }}
           >
-            {isTransfer ? <ArrowLeftRight size={14} /> : initial}
+            {isTransfer ? <ArrowLeftRight size={12} /> : initial}
           </div>
           {canEditPayee ? (
             <button
