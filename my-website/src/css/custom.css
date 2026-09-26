@@ -32,3 +32,25 @@
 .navbar__search-input {
   border-radius: 4px !important;
 }
+
+main {
+  background: var(--ifm-background-color);
+}
+
+.footer,
+.footer--dark {
+  --ifm-footer-background-color: #1e2b45;
+  --ifm-footer-link-hover-color: #ccc;
+}
+
+.footer .footer__links {
+  margin-bottom: 1rem;
+}
+
+.footer .footer__link-item {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.footer .footer__link-item:hover {
+  color: #fff;
+}

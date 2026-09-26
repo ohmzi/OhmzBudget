@@ -127,17 +127,76 @@ function HeroSection(): ReactNode {
   );
 }
 
-function IntroSection(): ReactNode {
+function SmallFeature({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: ReactNode;
+  children: ReactNode;
+}): ReactNode {
   return (
-    <section className={styles.intro}>
-      <div className={styles.introContainer}>
-        <Heading as="h2" className={styles.introHeading}>
-          Everything you need to understand where your money goes.
+    <div className={styles.smallFeature}>
+      <div className={styles.smallFeatureIcon}>{icon}</div>
+      <div>
+        <h3 className={styles.smallFeatureTitle}>{title}</h3>
+        <p className={styles.smallFeatureText}>{children}</p>
+      </div>
+    </div>
+  );
+}
+
+function FeaturesSection(): ReactNode {
+  return (
+    <section className={styles.featuresSection}>
+      <img
+        src="/img/homepage/footer-bg.svg"
+        className={styles.footerBg}
+        alt=""
+        aria-hidden="true"
+      />
+      <div className={styles.featuresContainer}>
+        <Heading as="h2" className={styles.featuresSectionHeader}>
+          Why FlyBudget?
         </Heading>
-        <p className={styles.introDescription}>
-          Track spending, set budgets, reach your goals, and take control of
-          your financial future.
-        </p>
+        <div className={styles.smallFeaturesGrid}>
+          <SmallFeature
+            title="Feature 1"
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="3" width="20" height="18" rx="2" />
+                <line x1="2" y1="9" x2="22" y2="9" />
+                <line x1="9" y1="3" x2="9" y2="21" />
+              </svg>
+            }
+          >
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </SmallFeature>
+
+          <SmallFeature
+            title="Feature 2"
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+            }
+          >
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </SmallFeature>
+        </div>
+
+        <div className={styles.ownDataSection}>
+          <h2 className={styles.ownDataTitle}>Own your data</h2>
+          <p className={styles.ownDataText}>
+            FlyBudget runs entirely on your computer. No cloud accounts, no
+            subscriptions, no data collection. Your financial data never
+            leaves your machine unless you choose to export it.
+          </p>
+        </div>
       </div>
     </section>
   );
@@ -149,7 +208,7 @@ export default function Home(): ReactNode {
     <Layout description={siteConfig.tagline}>
       <HeroSection />
       <main>
-        <IntroSection />
+        <FeaturesSection />
       </main>
     </Layout>
   );

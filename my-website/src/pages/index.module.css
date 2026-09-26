@@ -189,38 +189,105 @@
 
 
 /* ============================================================
-   Intro Section
+   Features Section (forked from Actual Budget)
    ============================================================ */
 
-.intro {
-  background: var(--ifm-background-color);
-  padding: 2rem 1.5rem 4rem;
-  text-align: center;
+.featuresSection {
+  background: linear-gradient(180deg, #152035 0%, #111a2e 100%);
+  color: white;
+  fill: currentColor;
+  margin-top: 6rem;
+  padding-top: 8rem;
+  padding-bottom: 20rem;
+  position: relative;
 }
 
-.introContainer {
+.footerBg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  bottom: 0;
+  height: 200px;
+  pointer-events: none;
+}
+
+.featuresSectionHeader {
+  text-align: center;
+  margin-bottom: 4rem;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 700;
+  color: white;
+  border: none;
+}
+
+.featuresContainer {
   max-width: 900px;
   margin: 0 auto;
+  padding: 0 2rem;
+  position: relative;
+  z-index: 1;
 }
 
-.introHeading {
-  font-size: clamp(1.5rem, 2.2vw, 1.85rem);
-  font-weight: 700;
-  line-height: 1.25;
-  letter-spacing: -0.015em;
-  color: var(--ifm-font-color-base);
-  margin: 0 0 1rem;
+.smallFeaturesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem 4rem;
+  margin-bottom: 4rem;
 }
 
-.introDescription {
-  font-size: clamp(0.95rem, 1.1vw, 1.1rem);
-  line-height: 1.6;
-  color: #64748B;
+.smallFeature {
+  display: flex;
+  gap: 1rem;
+}
+
+.smallFeatureIcon {
+  display: block;
+  min-width: 24px;
+  max-width: 24px;
+  color: #3B82F6;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.smallFeatureTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+  color: white;
+}
+
+.smallFeatureText {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
   margin: 0;
+  line-height: 1.5;
 }
 
-[data-theme='dark'] .introDescription {
-  color: #94A3B8;
+.smallFeatureText a {
+  color: #60A5FA;
+}
+
+.ownDataSection {
+  text-align: center;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ownDataTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: white;
+}
+
+.ownDataText {
+  max-width: 600px;
+  margin: 0 auto;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  line-height: 1.6;
 }
 
 /* ============================================================
@@ -273,6 +340,13 @@
     width: 340px;
     right: 0;
     top: 0;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .smallFeaturesGrid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
   }
 }
 
