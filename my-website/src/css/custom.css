@@ -29,6 +29,15 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
+.navbar__logo img {
+  height: 2.25rem;
+}
+
+.navbar__title {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
 .navbar__search-input {
   border-radius: 4px !important;
 }
