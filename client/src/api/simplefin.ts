@@ -1,11 +1,19 @@
 import { apiFetch } from './client';
-import type { SimplefinConnection, SimplefinSetupResult, SimplefinSyncResult, AccountType } from '../types';
+import type {
+  SimplefinConnection,
+  SimplefinSetupResult,
+  SimplefinSyncResult,
+  AccountType,
+} from '../types';
 
 export const getSimplefinStatus = () =>
   apiFetch<{ configured: boolean; connectionCount: number }>('/simplefin/status');
 
 export const setupSimplefin = (setupToken: string) =>
-  apiFetch<SimplefinSetupResult>('/simplefin/setup', { method: 'POST', body: JSON.stringify({ setupToken }) });
+  apiFetch<SimplefinSetupResult>('/simplefin/setup', {
+    method: 'POST',
+    body: JSON.stringify({ setupToken }),
+  });
 
 export interface SimplefinAccountMappingAction {
   simplefinAccountId: string;
@@ -16,10 +24,13 @@ export interface SimplefinAccountMappingAction {
   isOffBudget?: number;
 }
 
-export const mapSimplefinAccounts = (connectionId: string, mappings: SimplefinAccountMappingAction[]) =>
+export const mapSimplefinAccounts = (
+  connectionId: string,
+  mappings: SimplefinAccountMappingAction[],
+) =>
   apiFetch<{ mapped: number; created: number; skipped: number }>(
     `/simplefin/connections/${connectionId}/map-accounts`,
-    { method: 'POST', body: JSON.stringify({ mappings }) }
+    { method: 'POST', body: JSON.stringify({ mappings }) },
   );
 
 export const getSimplefinConnections = () =>

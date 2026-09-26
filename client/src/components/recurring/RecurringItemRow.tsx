@@ -1,7 +1,11 @@
 import { Check, Pencil, SkipForward, Link2, Unlink } from 'lucide-react';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { formatCurrency } from '../../utils/currency';
-import { RECURRENCE_TYPE_LABELS, type ScheduleOccurrence, type OccurrenceDisplayStatus } from '../../types';
+import {
+  RECURRENCE_TYPE_LABELS,
+  type ScheduleOccurrence,
+  type OccurrenceDisplayStatus,
+} from '../../types';
 
 const STATUS_PILL: Record<OccurrenceDisplayStatus, string> = {
   upcoming: 'bg-brand-50 text-brand-600',
@@ -30,7 +34,7 @@ const STATUS_LABEL: Record<OccurrenceDisplayStatus, string> = {
   cancelled: 'Cancelled',
 };
 
-const FREQ_MAP = new Map(RECURRENCE_TYPE_LABELS.map(f => [f.value, f.label]));
+const FREQ_MAP = new Map(RECURRENCE_TYPE_LABELS.map((f) => [f.value, f.label]));
 
 interface Props {
   occurrence: ScheduleOccurrence;
@@ -43,24 +47,44 @@ interface Props {
   onUnmatch?: () => void;
 }
 
-export default function RecurringItemRow({ occurrence: occ, accountName, categoryName, onMarkPaid, onEdit, onSkip, onMatch, onUnmatch }: Props) {
+export default function RecurringItemRow({
+  occurrence: occ,
+  accountName,
+  categoryName,
+  onMarkPaid,
+  onEdit,
+  onSkip,
+  onMatch,
+  onUnmatch,
+}: Props) {
   const daysUntil = differenceInDays(parseISO(occ.expectedDate), new Date());
   const isPaid = occ.displayStatus === 'paid';
-  const isPending = occ.displayStatus === 'upcoming' || occ.displayStatus === 'due' || occ.displayStatus === 'waiting';
+  const isPending =
+    occ.displayStatus === 'upcoming' ||
+    occ.displayStatus === 'due' ||
+    occ.displayStatus === 'waiting';
   const isSkippedOrCancelled = occ.displayStatus === 'skipped' || occ.displayStatus === 'cancelled';
-  const hasDifferentAmount = isPaid && occ.matchedAmount !== null && occ.matchedAmount !== occ.expectedAmount;
+  const hasDifferentAmount =
+    isPaid && occ.matchedAmount !== null && occ.matchedAmount !== occ.expectedAmount;
 
   return (
-    <div className={`flex items-center gap-3 px-4 py-2.5 border-b border-border-light hover:bg-hover transition-colors group ${
-      occ.displayStatus === 'waiting' ? 'bg-caution-subtle/30' : ''
-    }`}>
-      <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded shrink-0 ${STATUS_PILL[occ.displayStatus]}`} title={STATUS_LABEL[occ.displayStatus]}>
+    <div
+      className={`flex items-center gap-3 px-4 py-2.5 border-b border-border-light hover:bg-hover transition-colors group ${
+        occ.displayStatus === 'waiting' ? 'bg-caution-subtle/30' : ''
+      }`}
+    >
+      <span
+        className={`text-[10px] font-medium px-1.5 py-0.5 rounded shrink-0 ${STATUS_PILL[occ.displayStatus]}`}
+        title={STATUS_LABEL[occ.displayStatus]}
+      >
         {STATUS_PILL_LABEL[occ.displayStatus]}
       </span>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className={`text-sm font-medium truncate ${isPaid || isSkippedOrCancelled ? 'text-text-disabled line-through' : 'text-text'}`}>
+          <span
+            className={`text-sm font-medium truncate ${isPaid || isSkippedOrCancelled ? 'text-text-disabled line-through' : 'text-text'}`}
+          >
             {occ.scheduleName}
           </span>
           <span className="text-[10px] font-medium text-text-tertiary bg-surface-alt px-1.5 py-0.5 rounded">
@@ -68,7 +92,9 @@ export default function RecurringItemRow({ occurrence: occ, accountName, categor
           </span>
         </div>
         <div className="flex items-center gap-1.5 mt-0.5">
-          <span className="text-xs text-text-tertiary">{format(parseISO(occ.expectedDate), 'MMM d, yyyy')}</span>
+          <span className="text-xs text-text-tertiary">
+            {format(parseISO(occ.expectedDate), 'MMM d, yyyy')}
+          </span>
           {isPending && daysUntil >= 0 && (
             <span className="text-xs text-text-tertiary">
               · {daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : `in ${daysUntil} days`}
@@ -85,10 +111,17 @@ export default function RecurringItemRow({ occurrence: occ, accountName, categor
       </div>
 
       <div className="flex items-center gap-2">
-        <span className={`text-sm font-medium tabular-nums whitespace-nowrap ${
-          isPaid || isSkippedOrCancelled ? 'text-text-disabled' : occ.expectedAmount > 0 ? 'text-positive' : 'text-text'
-        }`}>
-          {occ.amountType !== 'exact' ? '~' : ''}{formatCurrency(occ.expectedAmount)}
+        <span
+          className={`text-sm font-medium tabular-nums whitespace-nowrap ${
+            isPaid || isSkippedOrCancelled
+              ? 'text-text-disabled'
+              : occ.expectedAmount > 0
+                ? 'text-positive'
+                : 'text-text'
+          }`}
+        >
+          {occ.amountType !== 'exact' ? '~' : ''}
+          {formatCurrency(occ.expectedAmount)}
         </span>
 
         {hasDifferentAmount && (

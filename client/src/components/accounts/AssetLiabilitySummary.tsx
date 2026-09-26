@@ -65,14 +65,22 @@ export function AssetLiabilitySummary({ accounts }: Props) {
         <div className="mt-3 space-y-1.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS.investment }} />
+              <span
+                className="inline-block w-2.5 h-2.5 rounded-full"
+                style={{ backgroundColor: COLORS.investment }}
+              />
               <span className="text-sm text-text-secondary">Investments</span>
             </div>
-            <span className="text-sm tabular-nums text-text">{formatCurrency(investmentTotal)}</span>
+            <span className="text-sm tabular-nums text-text">
+              {formatCurrency(investmentTotal)}
+            </span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS.cash }} />
+              <span
+                className="inline-block w-2.5 h-2.5 rounded-full"
+                style={{ backgroundColor: COLORS.cash }}
+              />
               <span className="text-sm text-text-secondary">Cash</span>
             </div>
             <span className="text-sm tabular-nums text-text">{formatCurrency(cashTotal)}</span>
@@ -102,7 +110,10 @@ export function AssetLiabilitySummary({ accounts }: Props) {
         <div className="mt-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS.credit }} />
+              <span
+                className="inline-block w-2.5 h-2.5 rounded-full"
+                style={{ backgroundColor: COLORS.credit }}
+              />
               <span className="text-sm text-text-secondary">Credit Cards</span>
             </div>
             <span className="text-sm tabular-nums text-text">{formatCurrency(creditTotal)}</span>

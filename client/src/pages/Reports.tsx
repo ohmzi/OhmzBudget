@@ -2,13 +2,25 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { format, subMonths, parseISO, startOfYear, endOfYear, subYears } from 'date-fns';
 import {
-  AreaChart, Area, BarChart, Bar, LineChart, Line, Legend,
-  XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Cell,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  Legend,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
 } from 'recharts';
 import {
-  useNetWorth, useIncomeVsExpenses,
-  useSpendingByCategory, useSpendingTrends,
+  useNetWorth,
+  useIncomeVsExpenses,
+  useSpendingByCategory,
+  useSpendingTrends,
 } from '../hooks/useReports';
 import { useCategories } from '../hooks/useCategories';
 import { formatCurrency, formatCentsAxis } from '../utils/currency';
@@ -17,7 +29,14 @@ import { chartColors, CATEGORY_COLORS } from '../utils/chartColors';
 import { computeChartTicks, parseDates, formatDateLabel, useChartWidth } from '../utils/chartTicks';
 import { Button } from '../components/ui/Button';
 import { Download, Plus } from 'lucide-react';
-import { CurrencyTooltip, ChartSkeleton, EmptyState, StatCardRow, EXPENSE_COLORS, monthLabel } from '../components/reports/ChartHelpers';
+import {
+  CurrencyTooltip,
+  ChartSkeleton,
+  EmptyState,
+  StatCardRow,
+  EXPENSE_COLORS,
+  monthLabel,
+} from '../components/reports/ChartHelpers';
 import type { StatCard } from '../components/reports/ChartHelpers';
 
 type Tab = 'all' | 'net-worth' | 'income' | 'spending' | 'trends';
@@ -41,11 +60,11 @@ const PRESETS: { id: Preset; label: string }[] = [
 ];
 
 const CHART_HEIGHT: Record<Tab, string> = {
-  'all': 'h-auto',
+  all: 'h-auto',
   'net-worth': 'h-72',
-  'income': 'h-72',
-  'spending': 'h-96',
-  'trends': 'h-80',
+  income: 'h-72',
+  spending: 'h-96',
+  trends: 'h-80',
 };
 
 function NetWorthChart({ from, to }: { from: string; to: string }) {
@@ -53,25 +72,37 @@ function NetWorthChart({ from, to }: { from: string; to: string }) {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartWidth = useChartWidth(chartRef);
 
-  const rawMonths = useMemo(() => data.map(d => d.month), [data]);
+  const rawMonths = useMemo(() => data.map((d) => d.month), [data]);
   const dates = useMemo(() => parseDates(rawMonths), [rawMonths]);
   const tickResult = useMemo(
-    () => computeChartTicks({ dates, rawStrings: rawMonths, chartWidth, labelSpacingPx: 140, minTicks: 4, maxTicks: 12 }),
+    () =>
+      computeChartTicks({
+        dates,
+        rawStrings: rawMonths,
+        chartWidth,
+        labelSpacingPx: 140,
+        minTicks: 4,
+        maxTicks: 12,
+      }),
     [dates, rawMonths, chartWidth],
   );
 
   const yDomain = useMemo(() => {
     if (data.length === 0) return [0, 'auto'] as [number, string];
-    const allValues = data.flatMap(d => [d.assets, d.liabilities, d.netWorth]);
+    const allValues = data.flatMap((d) => [d.assets, d.liabilities, d.netWorth]);
     const min = Math.min(...allValues);
     const max = Math.max(...allValues);
     const range = max - min || Math.abs(max) || 10000;
     const pad = range * 0.05;
-    return [Math.floor((min - pad) / 100) * 100, Math.ceil((max + pad) / 100) * 100] as [number, number];
+    return [Math.floor((min - pad) / 100) * 100, Math.ceil((max + pad) / 100) * 100] as [
+      number,
+      number,
+    ];
   }, [data]);
 
   if (isLoading) return <ChartSkeleton />;
-  const hasData = data.length > 0 && data.some(d => d.assets !== 0 || d.liabilities !== 0 || d.netWorth !== 0);
+  const hasData =
+    data.length > 0 && data.some((d) => d.assets !== 0 || d.liabilities !== 0 || d.netWorth !== 0);
   if (!hasData) return <EmptyState />;
 
   return (
@@ -102,11 +133,42 @@ function NetWorthChart({ from, to }: { from: string; to: string }) {
             tickLine={false}
             padding={{ left: 8, right: 8 }}
           />
-          <YAxis tickFormatter={formatCentsAxis} tick={{ fontSize: 11, fill: chartColors.axis }} axisLine={false} tickLine={false} width={60} domain={yDomain} />
+          <YAxis
+            tickFormatter={formatCentsAxis}
+            tick={{ fontSize: 11, fill: chartColors.axis }}
+            axisLine={false}
+            tickLine={false}
+            width={60}
+            domain={yDomain}
+          />
           <Tooltip content={<CurrencyTooltip />} labelFormatter={formatDateLabel} />
-          <Area type="monotone" dataKey="assets" name="Assets" stroke={chartColors.positiveLight} strokeWidth={2} fill="url(#gAssets)" dot={false} />
-          <Area type="monotone" dataKey="liabilities" name="Liabilities" stroke={chartColors.negativeLight} strokeWidth={2} fill="url(#gLiab)" dot={false} />
-          <Area type="monotone" dataKey="netWorth" name="Net Worth" stroke={chartColors.brand} strokeWidth={2} fill="url(#gNet)" dot={false} />
+          <Area
+            type="monotone"
+            dataKey="assets"
+            name="Assets"
+            stroke={chartColors.positiveLight}
+            strokeWidth={2}
+            fill="url(#gAssets)"
+            dot={false}
+          />
+          <Area
+            type="monotone"
+            dataKey="liabilities"
+            name="Liabilities"
+            stroke={chartColors.negativeLight}
+            strokeWidth={2}
+            fill="url(#gLiab)"
+            dot={false}
+          />
+          <Area
+            type="monotone"
+            dataKey="netWorth"
+            name="Net Worth"
+            stroke={chartColors.brand}
+            strokeWidth={2}
+            fill="url(#gNet)"
+            dot={false}
+          />
         </AreaChart>
       </ResponsiveContainer>
     </div>
@@ -115,21 +177,44 @@ function NetWorthChart({ from, to }: { from: string; to: string }) {
 
 function IncomeExpensesChart({ from, to }: { from: string; to: string }) {
   const { data = [], isLoading } = useIncomeVsExpenses(from, to);
-  const chartData = useMemo(() => data.map(d => ({ ...d, month: monthLabel(d.month) })), [data]);
+  const chartData = useMemo(() => data.map((d) => ({ ...d, month: monthLabel(d.month) })), [data]);
 
   if (isLoading) return <ChartSkeleton />;
-  const hasData = chartData.length > 0 && data.some(d => d.income !== 0 || d.expenses !== 0);
+  const hasData = chartData.length > 0 && data.some((d) => d.income !== 0 || d.expenses !== 0);
   if (!hasData) return <EmptyState />;
 
   return (
     <ResponsiveContainer width="100%" height="100%">
       <BarChart data={chartData} margin={{ top: 4, right: 16, left: 16, bottom: 0 }} barGap={2}>
         <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
-        <XAxis dataKey="month" tick={{ fontSize: 11, fill: chartColors.axis }} axisLine={false} tickLine={false} />
-        <YAxis tickFormatter={formatCentsAxis} tick={{ fontSize: 11, fill: chartColors.axis }} axisLine={false} tickLine={false} width={60} />
+        <XAxis
+          dataKey="month"
+          tick={{ fontSize: 11, fill: chartColors.axis }}
+          axisLine={false}
+          tickLine={false}
+        />
+        <YAxis
+          tickFormatter={formatCentsAxis}
+          tick={{ fontSize: 11, fill: chartColors.axis }}
+          axisLine={false}
+          tickLine={false}
+          width={60}
+        />
         <Tooltip content={<CurrencyTooltip />} />
-        <Bar dataKey="income" name="Income" fill={chartColors.positive} radius={[3, 3, 0, 0]} maxBarSize={32} />
-        <Bar dataKey="expenses" name="Expenses" fill={chartColors.negativeLight} radius={[3, 3, 0, 0]} maxBarSize={32} />
+        <Bar
+          dataKey="income"
+          name="Income"
+          fill={chartColors.positive}
+          radius={[3, 3, 0, 0]}
+          maxBarSize={32}
+        />
+        <Bar
+          dataKey="expenses"
+          name="Expenses"
+          fill={chartColors.negativeLight}
+          radius={[3, 3, 0, 0]}
+          maxBarSize={32}
+        />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -138,13 +223,14 @@ function IncomeExpensesChart({ from, to }: { from: string; to: string }) {
 function SpendingChart({ from, to }: { from: string; to: string }) {
   const { data = [], isLoading } = useSpendingByCategory(from, to);
   const chartData = useMemo(
-    () => [...data]
-      .sort((a, b) => b.totalSpent - a.totalSpent)
-      .slice(0, 10)
-      .map(d => {
-        const full = `${d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`;
-        return { name: full.length > 22 ? full.slice(0, 21) + '…' : full, value: d.totalSpent };
-      }),
+    () =>
+      [...data]
+        .sort((a, b) => b.totalSpent - a.totalSpent)
+        .slice(0, 10)
+        .map((d) => {
+          const full = `${d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`;
+          return { name: full.length > 22 ? full.slice(0, 21) + '…' : full, value: d.totalSpent };
+        }),
     [data],
   );
 
@@ -153,16 +239,36 @@ function SpendingChart({ from, to }: { from: string; to: string }) {
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 24, left: 8, bottom: 0 }}>
+      <BarChart
+        data={chartData}
+        layout="vertical"
+        margin={{ top: 4, right: 24, left: 8, bottom: 0 }}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} horizontal={false} />
-        <XAxis type="number" tickFormatter={formatCentsAxis} tick={{ fontSize: 11, fill: chartColors.axis }} axisLine={false} tickLine={false} />
-        <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: chartColors.axis }} axisLine={false} tickLine={false} width={160} interval={0} />
+        <XAxis
+          type="number"
+          tickFormatter={formatCentsAxis}
+          tick={{ fontSize: 11, fill: chartColors.axis }}
+          axisLine={false}
+          tickLine={false}
+        />
+        <YAxis
+          type="category"
+          dataKey="name"
+          tick={{ fontSize: 11, fill: chartColors.axis }}
+          axisLine={false}
+          tickLine={false}
+          width={160}
+          interval={0}
+        />
         <Tooltip
           content={({ active, payload, label }) =>
             active && payload?.length ? (
               <div className="bg-surface border border-border rounded-md shadow-hover px-3 py-2">
                 <p className="text-xs text-text-tertiary mb-0.5">{label}</p>
-                <p className="text-xs font-medium text-brand-600">{formatCurrency(payload[0].value as number)}</p>
+                <p className="text-xs font-medium text-brand-600">
+                  {formatCurrency(payload[0].value as number)}
+                </p>
               </div>
             ) : null
           }
@@ -177,7 +283,17 @@ function SpendingChart({ from, to }: { from: string; to: string }) {
   );
 }
 
-function SpendingTrendsChart({ from, to, compact, topCategoryIds }: { from: string; to: string; compact?: boolean; topCategoryIds?: string[] }) {
+function SpendingTrendsChart({
+  from,
+  to,
+  compact,
+  topCategoryIds,
+}: {
+  from: string;
+  to: string;
+  compact?: boolean;
+  topCategoryIds?: string[];
+}) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const activeIds = compact && topCategoryIds?.length ? topCategoryIds : selectedIds;
   const { data: groups = [] } = useCategories();
@@ -190,13 +306,15 @@ function SpendingTrendsChart({ from, to, compact, topCategoryIds }: { from: stri
 
   const chartData = useMemo(() => {
     if (!trendData.length) return [];
-    const monthSet = new Set(trendData.map(r => r.month));
+    const monthSet = new Set(trendData.map((r) => r.month));
     const months = [...monthSet].sort();
-    return months.map(month => {
+    return months.map((month) => {
       const row: Record<string, string | number> = { month: monthLabel(month) };
       for (const point of trendData) {
         if (point.month === month) {
-          const key = point.categoryName ? `${point.categoryIcon ? point.categoryIcon + ' ' : ''}${point.categoryName}` : point.categoryId;
+          const key = point.categoryName
+            ? `${point.categoryIcon ? point.categoryIcon + ' ' : ''}${point.categoryName}`
+            : point.categoryId;
           row[key] = point.total;
         }
       }
@@ -205,15 +323,15 @@ function SpendingTrendsChart({ from, to, compact, topCategoryIds }: { from: stri
   }, [trendData]);
 
   const selectedNames = useMemo(() => {
-    return activeIds.map(id => {
+    return activeIds.map((id) => {
       const cat = expenseCategories.find((c: any) => c.id === id);
       return cat ? `${cat.icon ? cat.icon + ' ' : ''}${cat.name}` : id;
     });
   }, [activeIds, expenseCategories]);
 
   function toggleCategory(id: string) {
-    setSelectedIds(prev =>
-      prev.includes(id) ? prev.filter(x => x !== id) : prev.length < 5 ? [...prev, id] : prev
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : prev.length < 5 ? [...prev, id] : prev,
     );
   }
 
@@ -232,11 +350,12 @@ function SpendingTrendsChart({ from, to, compact, topCategoryIds }: { from: stri
                   checked
                     ? 'bg-brand-50 border-brand-500 text-brand-700'
                     : disabled
-                    ? 'bg-surface-alt border-border-light text-text-disabled cursor-not-allowed'
-                    : 'bg-surface border-border text-text-secondary hover:border-text-tertiary'
+                      ? 'bg-surface-alt border-border-light text-text-disabled cursor-not-allowed'
+                      : 'bg-surface border-border text-text-secondary hover:border-text-tertiary'
                 }`}
               >
-                {cat.icon ? `${cat.icon} ` : ''}{cat.name}
+                {cat.icon ? `${cat.icon} ` : ''}
+                {cat.name}
               </button>
             );
           })}
@@ -257,8 +376,19 @@ function SpendingTrendsChart({ from, to, compact, topCategoryIds }: { from: stri
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 4, right: 16, left: 16, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: chartColors.axis }} axisLine={false} tickLine={false} />
-              <YAxis tickFormatter={formatCentsAxis} tick={{ fontSize: 11, fill: chartColors.axis }} axisLine={false} tickLine={false} width={60} />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 11, fill: chartColors.axis }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tickFormatter={formatCentsAxis}
+                tick={{ fontSize: 11, fill: chartColors.axis }}
+                axisLine={false}
+                tickLine={false}
+                width={60}
+              />
               <Tooltip content={<CurrencyTooltip />} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               {selectedNames.map((name, i) => (
@@ -287,20 +417,29 @@ const OVERVIEW_CHARTS: { id: Exclude<Tab, 'all'>; label: string }[] = [
   { id: 'trends', label: 'Spending Trends' },
 ];
 
-function OverviewGrid({ from, to, onSelectTab }: { from: string; to: string; onSelectTab: (tab: Tab) => void }) {
+function OverviewGrid({
+  from,
+  to,
+  onSelectTab,
+}: {
+  from: string;
+  to: string;
+  onSelectTab: (tab: Tab) => void;
+}) {
   const { data: spData = [] } = useSpendingByCategory(from, to);
   const topCategoryIds = useMemo(
-    () => [...spData]
-      .filter(d => d.categoryId)
-      .sort((a, b) => b.totalSpent - a.totalSpent)
-      .slice(0, 3)
-      .map(d => d.categoryId!),
+    () =>
+      [...spData]
+        .filter((d) => d.categoryId)
+        .sort((a, b) => b.totalSpent - a.totalSpent)
+        .slice(0, 3)
+        .map((d) => d.categoryId!),
     [spData],
   );
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-      {OVERVIEW_CHARTS.map(chart => (
+      {OVERVIEW_CHARTS.map((chart) => (
         <button
           key={chart.id}
           onClick={() => onSelectTab(chart.id)}
@@ -313,7 +452,9 @@ function OverviewGrid({ from, to, onSelectTab }: { from: string; to: string; onS
             {chart.id === 'net-worth' && <NetWorthChart from={from} to={to} />}
             {chart.id === 'income' && <IncomeExpensesChart from={from} to={to} />}
             {chart.id === 'spending' && <SpendingChart from={from} to={to} />}
-            {chart.id === 'trends' && <SpendingTrendsChart from={from} to={to} compact topCategoryIds={topCategoryIds} />}
+            {chart.id === 'trends' && (
+              <SpendingTrendsChart from={from} to={to} compact topCategoryIds={topCategoryIds} />
+            )}
           </div>
         </button>
       ))}
@@ -332,11 +473,14 @@ export default function ReportsPage() {
     if (preset === 'custom') return;
     const now = new Date();
     const ranges: Record<string, { from: string; to: string }> = {
-      '1m':        { from: format(now, 'yyyy-MM'), to: format(now, 'yyyy-MM') },
-      '3m':        { from: format(subMonths(now, 2), 'yyyy-MM'), to: format(now, 'yyyy-MM') },
-      '6m':        { from: format(subMonths(now, 5), 'yyyy-MM'), to: format(now, 'yyyy-MM') },
-      'ytd':       { from: format(startOfYear(now), 'yyyy-MM'),  to: format(now, 'yyyy-MM') },
-      'last-year': { from: format(startOfYear(subYears(now, 1)), 'yyyy-MM'), to: format(endOfYear(subYears(now, 1)), 'yyyy-MM') },
+      '1m': { from: format(now, 'yyyy-MM'), to: format(now, 'yyyy-MM') },
+      '3m': { from: format(subMonths(now, 2), 'yyyy-MM'), to: format(now, 'yyyy-MM') },
+      '6m': { from: format(subMonths(now, 5), 'yyyy-MM'), to: format(now, 'yyyy-MM') },
+      ytd: { from: format(startOfYear(now), 'yyyy-MM'), to: format(now, 'yyyy-MM') },
+      'last-year': {
+        from: format(startOfYear(subYears(now, 1)), 'yyyy-MM'),
+        to: format(endOfYear(subYears(now, 1)), 'yyyy-MM'),
+      },
     };
     const r = ranges[preset];
     setFrom(r.from);
@@ -400,13 +544,36 @@ export default function ReportsPage() {
     const filename = `reports-${activeTab}-${from}-${to}.csv`;
     switch (activeTab) {
       case 'net-worth':
-        downloadCsv(filename, nwData.map(d => ({ month: d.month, assets_cents: d.assets, liabilities_cents: d.liabilities, net_worth_cents: d.netWorth })));
+        downloadCsv(
+          filename,
+          nwData.map((d) => ({
+            month: d.month,
+            assets_cents: d.assets,
+            liabilities_cents: d.liabilities,
+            net_worth_cents: d.netWorth,
+          })),
+        );
         break;
       case 'income':
-        downloadCsv(filename, ieData.map(d => ({ month: d.month, income_cents: d.income, expenses_cents: d.expenses, net_cents: d.net })));
+        downloadCsv(
+          filename,
+          ieData.map((d) => ({
+            month: d.month,
+            income_cents: d.income,
+            expenses_cents: d.expenses,
+            net_cents: d.net,
+          })),
+        );
         break;
       case 'spending':
-        downloadCsv(filename, spData.map(d => ({ category: `${d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`, group: d.groupName ?? '', total_cents: d.totalSpent })));
+        downloadCsv(
+          filename,
+          spData.map((d) => ({
+            category: `${d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`,
+            group: d.groupName ?? '',
+            total_cents: d.totalSpent,
+          })),
+        );
         break;
       case 'trends':
         break;
@@ -422,7 +589,7 @@ export default function ReportsPage() {
           <h1 className="text-lg font-semibold text-text shrink-0">Reports</h1>
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex gap-0">
-              {PRESETS.map(p => (
+              {PRESETS.map((p) => (
                 <button
                   key={p.id}
                   onClick={() => setPreset(p.id)}
@@ -457,7 +624,12 @@ export default function ReportsPage() {
                 />
               </>
             )}
-            <Button variant="secondary" size="sm" onClick={handleExport} disabled={activeTab === 'all'}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleExport}
+              disabled={activeTab === 'all'}
+            >
               <Download size={13} /> Export CSV
             </Button>
             <Link
@@ -492,10 +664,10 @@ export default function ReportsPage() {
           <OverviewGrid from={from} to={to} onSelectTab={setActiveTab} />
         ) : (
           <div className={`w-full ${chartHeight}`}>
-              {activeTab === 'net-worth' && <NetWorthChart from={from} to={to} />}
-              {activeTab === 'income' && <IncomeExpensesChart from={from} to={to} />}
-              {activeTab === 'spending' && <SpendingChart from={from} to={to} />}
-              {activeTab === 'trends' && <SpendingTrendsChart from={from} to={to} />}
+            {activeTab === 'net-worth' && <NetWorthChart from={from} to={to} />}
+            {activeTab === 'income' && <IncomeExpensesChart from={from} to={to} />}
+            {activeTab === 'spending' && <SpendingChart from={from} to={to} />}
+            {activeTab === 'trends' && <SpendingTrendsChart from={from} to={to} />}
           </div>
         )}
       </div>

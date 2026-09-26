@@ -159,7 +159,12 @@ export function useDeleteSchedule() {
 export function useMarkOccurrencePaid() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ scheduleId, date, amount, occurrenceId }: {
+    mutationFn: ({
+      scheduleId,
+      date,
+      amount,
+      occurrenceId,
+    }: {
       scheduleId: string;
       date: string;
       amount?: number;
@@ -194,8 +199,13 @@ export function useSkipOccurrence() {
 export function useMatchOccurrence() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ occurrenceId, transactionId }: { occurrenceId: string; transactionId: string }) =>
-      api.matchOccurrence(occurrenceId, transactionId),
+    mutationFn: ({
+      occurrenceId,
+      transactionId,
+    }: {
+      occurrenceId: string;
+      transactionId: string;
+    }) => api.matchOccurrence(occurrenceId, transactionId),
     onSuccess: () => {
       invalidateAll(qc);
     },
@@ -225,8 +235,13 @@ export function useUnmatchByTransaction() {
 export function useDismissMatch() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ occurrenceId, transactionId }: { occurrenceId: string; transactionId: string }) =>
-      api.dismissMatch(occurrenceId, transactionId),
+    mutationFn: ({
+      occurrenceId,
+      transactionId,
+    }: {
+      occurrenceId: string;
+      transactionId: string;
+    }) => api.dismissMatch(occurrenceId, transactionId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: MQK });
     },

@@ -16,7 +16,12 @@ import { simplefinRouter } from './routes/simplefin.js';
 import { syncAllItems } from './services/plaidSyncService.js';
 import { isPlaidConfigured } from './services/plaidService.js';
 import { syncAllSimplefinConnections } from './services/simplefinSyncService.js';
-import { migrateRecurrenceRules, migrateOccurrencesFromLegacy, ensureOccurrencesForAll, autoCreateDueScheduled } from './services/scheduleService.js';
+import {
+  migrateRecurrenceRules,
+  migrateOccurrencesFromLegacy,
+  ensureOccurrencesForAll,
+  autoCreateDueScheduled,
+} from './services/scheduleService.js';
 import { format, addDays } from 'date-fns';
 
 const app = express();
@@ -64,15 +69,19 @@ export async function startServer(port: number | string): Promise<void> {
       // Bank sync BEFORE schedule auto-create (so real txns get matched first)
       const bankSyncDone = Promise.all([
         isPlaidConfigured()
-          ? syncAllItems().then(results => {
-              const total = results.reduce((s, r) => s + r.added, 0);
-              if (total > 0) console.log(`Plaid sync: imported ${total} new transaction(s)`);
-            }).catch(err => console.error('Plaid sync error:', err.message))
+          ? syncAllItems()
+              .then((results) => {
+                const total = results.reduce((s, r) => s + r.added, 0);
+                if (total > 0) console.log(`Plaid sync: imported ${total} new transaction(s)`);
+              })
+              .catch((err) => console.error('Plaid sync error:', err.message))
           : Promise.resolve(),
-        syncAllSimplefinConnections().then(results => {
-          const total = results.reduce((s, r) => s + r.added, 0);
-          if (total > 0) console.log(`SimpleFIN sync: imported ${total} new transaction(s)`);
-        }).catch(err => console.error('SimpleFIN sync error:', err.message)),
+        syncAllSimplefinConnections()
+          .then((results) => {
+            const total = results.reduce((s, r) => s + r.added, 0);
+            if (total > 0) console.log(`SimpleFIN sync: imported ${total} new transaction(s)`);
+          })
+          .catch((err) => console.error('SimpleFIN sync error:', err.message)),
       ]);
 
       bankSyncDone.then(() => {

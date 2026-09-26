@@ -44,7 +44,7 @@ export function ConnectedInstitutionCard({ item }: Props) {
     await disconnectItem.mutateAsync(item.id);
   }
 
-  const enabledAccounts = item.accounts.filter(a => a.isEnabled);
+  const enabledAccounts = item.accounts.filter((a) => a.isEnabled);
 
   return (
     <>
@@ -77,15 +77,19 @@ export function ConnectedInstitutionCard({ item }: Props) {
           <div className="flex items-start gap-2 bg-caution-subtle border border-caution/10 rounded-md px-3 py-2">
             <AlertTriangle size={14} className="text-caution mt-0.5 shrink-0" />
             <p className="text-xs text-caution">
-              Your bank requires you to re-authenticate. Click "Reconnect" to update your credentials.
+              Your bank requires you to re-authenticate. Click "Reconnect" to update your
+              credentials.
             </p>
           </div>
         )}
 
         {enabledAccounts.length > 0 && (
           <div className="space-y-1.5">
-            {enabledAccounts.map(acct => (
-              <div key={acct.plaidAccountId} className="flex items-center justify-between text-xs text-text-secondary">
+            {enabledAccounts.map((acct) => (
+              <div
+                key={acct.plaidAccountId}
+                className="flex items-center justify-between text-xs text-text-secondary"
+              >
                 <span>
                   <span className="capitalize">{acct.plaidAccountType}</span>
                   {acct.mask && <span className="text-text-tertiary ml-1">****{acct.mask}</span>}
@@ -101,9 +105,13 @@ export function ConnectedInstitutionCard({ item }: Props) {
         <div className="flex items-center gap-2 pt-1">
           <Button variant="secondary" size="sm" onClick={handleSync} disabled={isSyncing}>
             {isSyncing ? (
-              <><Loader2 size={12} className="animate-spin" /> Syncing...</>
+              <>
+                <Loader2 size={12} className="animate-spin" /> Syncing...
+              </>
             ) : (
-              <><RefreshCw size={12} /> Sync Now</>
+              <>
+                <RefreshCw size={12} /> Sync Now
+              </>
             )}
           </Button>
 
@@ -137,7 +145,8 @@ export function ConnectedInstitutionCard({ item }: Props) {
 
         {syncItem.isSuccess && syncItem.data && (
           <p className="text-xs text-positive">
-            Synced: {syncItem.data.added} added, {syncItem.data.modified} modified, {syncItem.data.removed} removed.
+            Synced: {syncItem.data.added} added, {syncItem.data.modified} modified,{' '}
+            {syncItem.data.removed} removed.
           </p>
         )}
       </div>

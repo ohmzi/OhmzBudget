@@ -29,8 +29,10 @@ async function waitForServer(port: number, ms = 15000): Promise<void> {
   while (Date.now() < deadline) {
     try {
       if ((await fetch(`http://127.0.0.1:${port}/api/health`)).ok) return;
-    } catch { /* not ready yet */ }
-    await new Promise(r => setTimeout(r, 150));
+    } catch {
+      /* not ready yet */
+    }
+    await new Promise((r) => setTimeout(r, 150));
   }
   throw new Error(`Server failed to start on port ${port}`);
 }

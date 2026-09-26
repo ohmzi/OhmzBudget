@@ -45,10 +45,10 @@ export function PayeePicker({ value, payeeName, onChange, payees, onClose }: Pro
   );
 
   const filtered = query
-    ? sorted.filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
+    ? sorted.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()))
     : sorted;
 
-  const exactMatch = payees.find(p => p.name.toLowerCase() === query.toLowerCase());
+  const exactMatch = payees.find((p) => p.name.toLowerCase() === query.toLowerCase());
 
   function handleCreate() {
     if (!query.trim()) return;
@@ -66,16 +66,19 @@ export function PayeePicker({ value, payeeName, onChange, payees, onClose }: Pro
     <div
       ref={containerRef}
       className="absolute top-full left-0 z-50 mt-1 w-72 bg-surface border border-border rounded-lg shadow-lg"
-      onClick={e => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
     >
       <div className="p-2 border-b border-border-light">
         <div className="relative">
-          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
+          <Search
+            size={14}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none"
+          />
           <input
             ref={searchRef}
             type="text"
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Search merchants..."
             className="w-full pl-8 pr-3 py-1.5 text-sm border border-border rounded-md bg-surface text-text focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600"
           />
@@ -86,7 +89,7 @@ export function PayeePicker({ value, payeeName, onChange, payees, onClose }: Pro
         <div className="px-3 py-1.5 text-xs font-medium text-text-tertiary bg-surface-alt">
           Your merchants
         </div>
-        {filtered.map(p => {
+        {filtered.map((p) => {
           const color = payeeColor(p.name);
           const isSelected = p.id === value;
           return (

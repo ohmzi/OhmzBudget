@@ -1,5 +1,10 @@
 import { db } from '../db/index.js';
-import { schedules, scheduleOccurrences, scheduleMatchDismissals, transactions } from '../db/schema.js';
+import {
+  schedules,
+  scheduleOccurrences,
+  scheduleMatchDismissals,
+  transactions,
+} from '../db/schema.js';
 import { eq, and, gte, lte, isNull, isNotNull, ne, sql } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { format, parseISO, addDays, subDays } from 'date-fns';
@@ -10,7 +15,11 @@ export function linkOccurrenceToTransaction(
   matchType: 'automatic' | 'manual',
   confidence: number,
 ): void {
-  const occ = db.select().from(scheduleOccurrences).where(eq(scheduleOccurrences.id, occurrenceId)).get();
+  const occ = db
+    .select()
+    .from(scheduleOccurrences)
+    .where(eq(scheduleOccurrences.id, occurrenceId))
+    .get();
   if (!occ) return;
 
   const now = format(new Date(), 'yyyy-MM-dd');
@@ -33,7 +42,11 @@ export function linkOccurrenceToTransaction(
 }
 
 export function unlinkOccurrence(occurrenceId: string): void {
-  const occ = db.select().from(scheduleOccurrences).where(eq(scheduleOccurrences.id, occurrenceId)).get();
+  const occ = db
+    .select()
+    .from(scheduleOccurrences)
+    .where(eq(scheduleOccurrences.id, occurrenceId))
+    .get();
   if (!occ) return;
 
   if (occ.matchedTransactionId) {
@@ -56,7 +69,8 @@ export function unlinkOccurrence(occurrenceId: string): void {
 }
 
 export function unlinkOccurrenceByTransactionId(transactionId: string): void {
-  const occ = db.select()
+  const occ = db
+    .select()
     .from(scheduleOccurrences)
     .where(eq(scheduleOccurrences.matchedTransactionId, transactionId))
     .get();
@@ -84,9 +98,22 @@ interface MatchCandidate {
 }
 
 function scoreMatch(
-  tx: { date: string; amount: number; payeeId: string | null; payeeName: string | null; accountId: string },
+  tx: {
+    date: string;
+    amount: number;
+    payeeId: string | null;
+    payeeName: string | null;
+    accountId: string;
+  },
   occ: { expectedDate: string; expectedAmount: number },
-  schedule: { amount: number; amountType: string; dateFlexibility: number; payeeId: string | null; accountId: string | null; name: string },
+  schedule: {
+    amount: number;
+    amountType: string;
+    dateFlexibility: number;
+    payeeId: string | null;
+    accountId: string | null;
+    name: string;
+  },
 ): { score: number; payeeScore: number } {
   const txDate = parseISO(tx.date);
   const occDate = parseISO(occ.expectedDate);
@@ -149,11 +176,12 @@ export function attemptAutoMatch(transactionId: string): boolean {
   if (tx.scheduleId) return false;
 
   const isExpense = tx.amount < 0;
-  const activeSchedules = db.select()
+  const activeSchedules = db
+    .select()
     .from(schedules)
     .where(eq(schedules.status, 'active'))
     .all()
-    .filter(s => {
+    .filter((s) => {
       if (isExpense && s.amount > 0) return false;
       if (!isExpense && s.amount < 0) return false;
       if (s.accountId && s.accountId !== tx.accountId) return false;
@@ -165,14 +193,21 @@ export function attemptAutoMatch(transactionId: string): boolean {
   const candidates: MatchCandidate[] = [];
 
   for (const schedule of activeSchedules) {
-    const pendingOccs = db.select()
+    const pendingOccs = db
+      .select()
       .from(scheduleOccurrences)
       .where(
         and(
           eq(scheduleOccurrences.scheduleId, schedule.id),
           eq(scheduleOccurrences.status, 'pending'),
-          gte(scheduleOccurrences.expectedDate, format(subDays(parseISO(tx.date), schedule.dateFlexibility), 'yyyy-MM-dd')),
-          lte(scheduleOccurrences.expectedDate, format(addDays(parseISO(tx.date), schedule.dateFlexibility), 'yyyy-MM-dd')),
+          gte(
+            scheduleOccurrences.expectedDate,
+            format(subDays(parseISO(tx.date), schedule.dateFlexibility), 'yyyy-MM-dd'),
+          ),
+          lte(
+            scheduleOccurrences.expectedDate,
+            format(addDays(parseISO(tx.date), schedule.dateFlexibility), 'yyyy-MM-dd'),
+          ),
         ),
       )
       .all();
@@ -180,7 +215,8 @@ export function attemptAutoMatch(transactionId: string): boolean {
     for (const occ of pendingOccs) {
       const { score, payeeScore } = scoreMatch(tx, occ, schedule);
       if (score >= 40) {
-        const dismissed = db.select()
+        const dismissed = db
+          .select()
           .from(scheduleMatchDismissals)
           .where(
             and(
@@ -241,10 +277,11 @@ export function getMatchSuggestions(): MatchSuggestion[] {
   const windowStart = format(subDays(new Date(), 14), 'yyyy-MM-dd');
   const windowEnd = format(addDays(new Date(), 7), 'yyyy-MM-dd');
 
-  const pendingOccs = db.select({
-    occ: scheduleOccurrences,
-    schedule: schedules,
-  })
+  const pendingOccs = db
+    .select({
+      occ: scheduleOccurrences,
+      schedule: schedules,
+    })
     .from(scheduleOccurrences)
     .innerJoin(schedules, eq(scheduleOccurrences.scheduleId, schedules.id))
     .where(
@@ -260,14 +297,21 @@ export function getMatchSuggestions(): MatchSuggestion[] {
   const suggestions: MatchSuggestion[] = [];
 
   for (const { occ, schedule } of pendingOccs) {
-    const nearbyTxns = db.select()
+    const nearbyTxns = db
+      .select()
       .from(transactions)
       .where(
         and(
           isNull(transactions.scheduleId),
           isNull(transactions.transferTransactionId),
-          gte(transactions.date, format(subDays(parseISO(occ.expectedDate), schedule.dateFlexibility), 'yyyy-MM-dd')),
-          lte(transactions.date, format(addDays(parseISO(occ.expectedDate), schedule.dateFlexibility), 'yyyy-MM-dd')),
+          gte(
+            transactions.date,
+            format(subDays(parseISO(occ.expectedDate), schedule.dateFlexibility), 'yyyy-MM-dd'),
+          ),
+          lte(
+            transactions.date,
+            format(addDays(parseISO(occ.expectedDate), schedule.dateFlexibility), 'yyyy-MM-dd'),
+          ),
         ),
       )
       .all();
@@ -278,7 +322,8 @@ export function getMatchSuggestions(): MatchSuggestion[] {
       if (schedule.amount < 0 && tx.amount > 0) continue;
       if (schedule.amount > 0 && tx.amount < 0) continue;
 
-      const dismissed = db.select()
+      const dismissed = db
+        .select()
         .from(scheduleMatchDismissals)
         .where(
           and(
@@ -320,11 +365,13 @@ export function getMatchSuggestions(): MatchSuggestion[] {
 
 export function dismissMatchSuggestion(occurrenceId: string, transactionId: string): void {
   try {
-    db.insert(scheduleMatchDismissals).values({
-      id: nanoid(),
-      occurrenceId,
-      transactionId,
-    }).run();
+    db.insert(scheduleMatchDismissals)
+      .values({
+        id: nanoid(),
+        occurrenceId,
+        transactionId,
+      })
+      .run();
   } catch (e: any) {
     if (e.message?.includes('UNIQUE constraint failed')) return;
     throw e;
@@ -341,11 +388,12 @@ export function reconcileWithAutoCreated(
   const dateFrom = format(subDays(parseISO(date), flexibility), 'yyyy-MM-dd');
   const dateTo = format(addDays(parseISO(date), flexibility), 'yyyy-MM-dd');
 
-  const paidOccs = db.select({
-    occ: scheduleOccurrences,
-    schedule: schedules,
-    tx: transactions,
-  })
+  const paidOccs = db
+    .select({
+      occ: scheduleOccurrences,
+      schedule: schedules,
+      tx: transactions,
+    })
     .from(scheduleOccurrences)
     .innerJoin(schedules, eq(scheduleOccurrences.scheduleId, schedules.id))
     .innerJoin(transactions, eq(scheduleOccurrences.matchedTransactionId, transactions.id))
@@ -358,11 +406,11 @@ export function reconcileWithAutoCreated(
       ),
     )
     .all()
-    .filter(r => r.tx.importedId?.startsWith('schedule:'));
+    .filter((r) => r.tx.importedId?.startsWith('schedule:'));
 
   if (paidOccs.length === 0) return null;
 
-  const matchingOccs = paidOccs.filter(r => {
+  const matchingOccs = paidOccs.filter((r) => {
     const { schedule, tx } = r;
     const amountDiff = Math.abs(amount - tx.amount);
     const absExpected = Math.abs(tx.amount);
@@ -396,10 +444,7 @@ export function reconcileWithAutoCreated(
     updates.date = date;
   }
 
-  db.update(transactions)
-    .set(updates)
-    .where(eq(transactions.id, existingTxId))
-    .run();
+  db.update(transactions).set(updates).where(eq(transactions.id, existingTxId)).run();
 
   return existingTxId;
 }

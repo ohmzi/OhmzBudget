@@ -10,7 +10,9 @@
     "build:client:electron": "npm run build --prefix client -- --mode electron",
     "build:server:bundle": "esbuild server/src/index.ts --bundle --platform=node --target=node22 --external:better-sqlite3 --format=cjs --outfile=electron/dist/server.js",
     "compile:electron": "tsc -p electron/tsconfig.json",
-    "rebuild:sqlite": "electron-rebuild -f -w better-sqlite3 --module-dir server"
+    "rebuild:sqlite": "electron-rebuild -f -w better-sqlite3 --module-dir server",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,7 @@
     "electron": "^41.3.0",
     "electron-builder": "^26.8.1",
     "esbuild": "^0.28.2",
+    "prettier": "^3.9.9",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3",
     "wait-on": "^9.0.5"

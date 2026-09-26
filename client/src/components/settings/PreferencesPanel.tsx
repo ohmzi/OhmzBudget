@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import { usePreferencesStore, type Theme, type DateFormatOption, type SidebarMode } from '../../store/preferencesStore';
+import {
+  usePreferencesStore,
+  type Theme,
+  type DateFormatOption,
+  type SidebarMode,
+} from '../../store/preferencesStore';
 import { ConfirmModal } from '../ui/ConfirmModal';
 
 const themeOptions: { value: Theme; label: string }[] = [
@@ -21,7 +26,16 @@ const dateFormats: { value: DateFormatOption; label: string; example: string }[]
 ];
 
 export function PreferencesPanel() {
-  const { theme, currencySymbol, dateFormat, sidebarMode, setTheme, setCurrencySymbol, setDateFormat, setSidebarMode } = usePreferencesStore();
+  const {
+    theme,
+    currencySymbol,
+    dateFormat,
+    sidebarMode,
+    setTheme,
+    setCurrencySymbol,
+    setDateFormat,
+    setSidebarMode,
+  } = usePreferencesStore();
   const [resetOpen, setResetOpen] = useState(false);
 
   function handleReset() {
@@ -37,7 +51,9 @@ export function PreferencesPanel() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold text-text">Preferences</h2>
-          <p className="text-xs text-text-tertiary mt-0.5">Settings are saved automatically to your browser.</p>
+          <p className="text-xs text-text-tertiary mt-0.5">
+            Settings are saved automatically to your browser.
+          </p>
         </div>
         <button
           onClick={() => setResetOpen(true)}
@@ -90,7 +106,9 @@ export function PreferencesPanel() {
               }`}
             >
               <span>{opt.label}</span>
-              <span className="text-xs text-text-tertiary font-normal mt-0.5">{opt.description}</span>
+              <span className="text-xs text-text-tertiary font-normal mt-0.5">
+                {opt.description}
+              </span>
             </button>
           ))}
         </div>

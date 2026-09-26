@@ -1,12 +1,13 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config} from '@docusaurus/types';
+import { themes as prismThemes } from 'prism-react-renderer';
+import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
   title: 'FlyBudget',
-  tagline: 'A fast, open-source budgeting app that gives you complete control over your financial data.',
+  tagline:
+    'A fast, open-source budgeting app that gives you complete control over your financial data.',
   favicon: 'img/logo.png',
 
   future: {
@@ -57,8 +58,7 @@ const config: Config = {
         path: 'tour',
         routeBasePath: 'tour',
         sidebarPath: './sidebarsTour.ts',
-        editUrl:
-          'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
+        editUrl: 'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
       },
     ],
     [
@@ -68,8 +68,7 @@ const config: Config = {
         path: 'contributing',
         routeBasePath: 'contributing',
         sidebarPath: './sidebarsContributing.ts',
-        editUrl:
-          'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
+        editUrl: 'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
       },
     ],
   ],
@@ -80,8 +79,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          editUrl:
-            'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
+          editUrl: 'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
         },
         blog: {
           blogSidebarTitle: 'All Posts',
@@ -90,8 +88,7 @@ const config: Config = {
             type: ['rss', 'atom'],
             xslt: true,
           },
-          editUrl:
-            'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
+          editUrl: 'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -117,7 +114,7 @@ const config: Config = {
         src: 'img/logo.png',
       },
       items: [
-        {to: '/#features', label: 'Features', position: 'left', activeBaseRegex: '$^'},
+        { to: '/#features', label: 'Features', position: 'left', activeBaseRegex: '$^' },
         {
           type: 'docSidebar',
           sidebarId: 'tourSidebar',
@@ -131,8 +128,8 @@ const config: Config = {
           position: 'left',
           label: 'Docs',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
-        {to: '/community', label: 'Community', position: 'left'},
+        { to: '/blog', label: 'Blog', position: 'left' },
+        { to: '/community', label: 'Community', position: 'left' },
         {
           type: 'docSidebar',
           sidebarId: 'contributingSidebar',
@@ -140,7 +137,7 @@ const config: Config = {
           position: 'left',
           label: 'Contributing',
         },
-        {to: '/download', label: 'Download', position: 'left'},
+        { to: '/download', label: 'Download', position: 'left' },
         {
           href: 'https://github.com/dtymoszenko/budgeting-project',
           label: 'GitHub',
@@ -151,10 +148,10 @@ const config: Config = {
     footer: {
       style: 'dark',
       links: [
-        {label: 'GitHub', href: 'https://github.com/dtymoszenko/budgeting-project'},
-        {label: 'Website Source', href: 'https://github.com/dtymoszenko/budgeting-project'},
-        {label: 'Privacy Policy', to: '/docs/intro'},
-        {label: 'Blog', to: '/blog'},
+        { label: 'GitHub', href: 'https://github.com/dtymoszenko/budgeting-project' },
+        { label: 'Website Source', href: 'https://github.com/dtymoszenko/budgeting-project' },
+        { label: 'Privacy Policy', to: '/docs/intro' },
+        { label: 'Blog', to: '/blog' },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} FlyBudget. Built with Docusaurus.`,
     },

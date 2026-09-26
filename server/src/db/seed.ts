@@ -10,7 +10,9 @@ const defaultGroups: {
   categories: { name: string; icon: string; budgetType?: BudgetType }[];
 }[] = [
   {
-    name: 'Income', isIncome: 1, categories: [
+    name: 'Income',
+    isIncome: 1,
+    categories: [
       { name: 'Paychecks', icon: '💵' },
       { name: 'Interest', icon: '💹' },
       { name: 'Business Income', icon: '💼' },
@@ -18,14 +20,18 @@ const defaultGroups: {
     ],
   },
   {
-    name: 'Gifts & Donations', isIncome: 0, categories: [
+    name: 'Gifts & Donations',
+    isIncome: 0,
+    categories: [
       { name: 'Charity', icon: '❤️', budgetType: 'flexible' },
       { name: 'Gifts', icon: '🎁', budgetType: 'flexible' },
       { name: 'Donations', icon: '🤝', budgetType: 'flexible' },
     ],
   },
   {
-    name: 'Transportation', isIncome: 0, categories: [
+    name: 'Transportation',
+    isIncome: 0,
+    categories: [
       { name: 'Gas / Fuel', icon: '⛽', budgetType: 'flexible' },
       { name: 'Car Payment', icon: '🚗', budgetType: 'fixed' },
       { name: 'Car Insurance', icon: '🛡️', budgetType: 'fixed' },
@@ -36,7 +42,9 @@ const defaultGroups: {
     ],
   },
   {
-    name: 'Housing', isIncome: 0, categories: [
+    name: 'Housing',
+    isIncome: 0,
+    categories: [
       { name: 'Rent / Mortgage', icon: '🏠', budgetType: 'fixed' },
       { name: 'Home Insurance', icon: '🛡️', budgetType: 'fixed' },
       { name: 'Property Tax', icon: '🏛️', budgetType: 'fixed' },
@@ -46,7 +54,9 @@ const defaultGroups: {
     ],
   },
   {
-    name: 'Bills & Utilities', isIncome: 0, categories: [
+    name: 'Bills & Utilities',
+    isIncome: 0,
+    categories: [
       { name: 'Electric', icon: '⚡', budgetType: 'fixed' },
       { name: 'Water', icon: '💧', budgetType: 'fixed' },
       { name: 'Gas (Natural)', icon: '🔥', budgetType: 'fixed' },
@@ -57,7 +67,9 @@ const defaultGroups: {
     ],
   },
   {
-    name: 'Food & Dining', isIncome: 0, categories: [
+    name: 'Food & Dining',
+    isIncome: 0,
+    categories: [
       { name: 'Groceries', icon: '🛒', budgetType: 'flexible' },
       { name: 'Restaurants', icon: '🍽️', budgetType: 'flexible' },
       { name: 'Coffee Shops', icon: '☕', budgetType: 'flexible' },
@@ -66,7 +78,9 @@ const defaultGroups: {
     ],
   },
   {
-    name: 'Travel & Lifestyle', isIncome: 0, categories: [
+    name: 'Travel & Lifestyle',
+    isIncome: 0,
+    categories: [
       { name: 'Flights', icon: '✈️', budgetType: 'non_monthly' },
       { name: 'Hotels', icon: '🏨', budgetType: 'non_monthly' },
       { name: 'Vacation', icon: '🏖️', budgetType: 'non_monthly' },
@@ -75,7 +89,9 @@ const defaultGroups: {
     ],
   },
   {
-    name: 'Shopping', isIncome: 0, categories: [
+    name: 'Shopping',
+    isIncome: 0,
+    categories: [
       { name: 'Clothing', icon: '👔', budgetType: 'flexible' },
       { name: 'Electronics', icon: '💻', budgetType: 'flexible' },
       { name: 'Home Goods', icon: '🛋️', budgetType: 'flexible' },
@@ -83,7 +99,9 @@ const defaultGroups: {
     ],
   },
   {
-    name: 'Family', isIncome: 0, categories: [
+    name: 'Family',
+    isIncome: 0,
+    categories: [
       { name: 'Childcare / Daycare', icon: '👶', budgetType: 'fixed' },
       { name: 'Kids Activities', icon: '🎪', budgetType: 'flexible' },
       { name: 'School Supplies', icon: '🎒', budgetType: 'flexible' },
@@ -92,7 +110,9 @@ const defaultGroups: {
     ],
   },
   {
-    name: 'Education', isIncome: 0, categories: [
+    name: 'Education',
+    isIncome: 0,
+    categories: [
       { name: 'Tuition', icon: '🎓', budgetType: 'fixed' },
       { name: 'Books & Supplies', icon: '📚', budgetType: 'non_monthly' },
       { name: 'Student Loans', icon: '📜', budgetType: 'fixed' },
@@ -100,7 +120,9 @@ const defaultGroups: {
     ],
   },
   {
-    name: 'Health & Wellness', isIncome: 0, categories: [
+    name: 'Health & Wellness',
+    isIncome: 0,
+    categories: [
       { name: 'Doctor / Medical', icon: '🩺', budgetType: 'non_monthly' },
       { name: 'Dentist', icon: '🦷', budgetType: 'non_monthly' },
       { name: 'Pharmacy', icon: '💊', budgetType: 'flexible' },
@@ -110,7 +132,9 @@ const defaultGroups: {
     ],
   },
   {
-    name: 'Financial', isIncome: 0, categories: [
+    name: 'Financial',
+    isIncome: 0,
+    categories: [
       { name: 'Savings', icon: '🐷', budgetType: 'non_monthly' },
       { name: 'Investments', icon: '📈', budgetType: 'non_monthly' },
       { name: 'Loan Payment', icon: '🏦', budgetType: 'fixed' },
@@ -118,7 +142,9 @@ const defaultGroups: {
     ],
   },
   {
-    name: 'Business', isIncome: 0, categories: [
+    name: 'Business',
+    isIncome: 0,
+    categories: [
       { name: 'Office Supplies', icon: '📎', budgetType: 'flexible' },
       { name: 'Software / Tools', icon: '⚙️', budgetType: 'flexible' },
       { name: 'Marketing', icon: '📣', budgetType: 'flexible' },
@@ -127,7 +153,9 @@ const defaultGroups: {
     ],
   },
   {
-    name: 'Other', isIncome: 0, categories: [
+    name: 'Other',
+    isIncome: 0,
+    categories: [
       { name: 'Miscellaneous', icon: '📁', budgetType: 'flexible' },
       { name: 'Cash / ATM', icon: '💵', budgetType: 'flexible' },
       { name: 'Uncategorized', icon: '❓', budgetType: 'flexible' },
@@ -143,24 +171,28 @@ if (existingGroups.length > 0) {
 
 defaultGroups.forEach((group, groupIdx) => {
   const groupId = nanoid();
-  db.insert(categoryGroups).values({
-    id: groupId,
-    name: group.name,
-    isIncome: group.isIncome,
-    sortOrder: groupIdx,
-    createdAt: new Date().toISOString(),
-  }).run();
+  db.insert(categoryGroups)
+    .values({
+      id: groupId,
+      name: group.name,
+      isIncome: group.isIncome,
+      sortOrder: groupIdx,
+      createdAt: new Date().toISOString(),
+    })
+    .run();
 
   group.categories.forEach((cat, catIdx) => {
-    db.insert(categories).values({
-      id: nanoid(),
-      groupId,
-      name: cat.name,
-      icon: cat.icon,
-      budgetType: cat.budgetType ?? null,
-      sortOrder: catIdx,
-      createdAt: new Date().toISOString(),
-    }).run();
+    db.insert(categories)
+      .values({
+        id: nanoid(),
+        groupId,
+        name: cat.name,
+        icon: cat.icon,
+        budgetType: cat.budgetType ?? null,
+        sortOrder: catIdx,
+        createdAt: new Date().toISOString(),
+      })
+      .run();
   });
 });
 

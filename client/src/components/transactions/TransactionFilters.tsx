@@ -68,7 +68,9 @@ interface Props {
 export function TransactionFilters({ state, onChange, categoryName, externalMonth }: Props) {
   const [rawSearch, setRawSearch] = useState(state.search);
 
-  useEffect(() => { setRawSearch(state.search); }, [state.search]);
+  useEffect(() => {
+    setRawSearch(state.search);
+  }, [state.search]);
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     const search = e.target.value;
@@ -89,7 +91,10 @@ export function TransactionFilters({ state, onChange, categoryName, externalMont
         />
         {rawSearch && (
           <button
-            onClick={() => { setRawSearch(''); onChange({ ...state, search: '' }); }}
+            onClick={() => {
+              setRawSearch('');
+              onChange({ ...state, search: '' });
+            }}
             className="absolute right-2 text-text-tertiary hover:text-text-secondary"
           >
             <X size={13} />
@@ -124,7 +129,6 @@ export function TransactionFilters({ state, onChange, categoryName, externalMont
           </button>
         ))}
       </div>
-
     </div>
   );
 }

@@ -7,7 +7,7 @@ import { useUpdateSchedule, useDeleteSchedule } from '../../hooks/useSchedules';
 import { ConfirmModal } from '../ui/ConfirmModal';
 import { RECURRENCE_TYPE_LABELS, type Schedule } from '../../types';
 
-const FREQ_MAP = new Map(RECURRENCE_TYPE_LABELS.map(f => [f.value, f.label]));
+const FREQ_MAP = new Map(RECURRENCE_TYPE_LABELS.map((f) => [f.value, f.label]));
 
 interface Props {
   allRecurring: Schedule[];
@@ -26,7 +26,8 @@ export default function AllTab({ allRecurring, onEdit }: Props) {
   const accountMap = useMemo(() => new Map(accounts.map((a) => [a.id, a.name])), [accounts]);
   const categoryMap = useMemo(() => {
     const map = new Map<string, string>();
-    for (const g of groups) for (const c of g.categories) map.set(c.id, `${c.icon ? c.icon + ' ' : ''}${c.name}`);
+    for (const g of groups)
+      for (const c of g.categories) map.set(c.id, `${c.icon ? c.icon + ' ' : ''}${c.name}`);
     return map;
   }, [groups]);
 
@@ -36,14 +37,20 @@ export default function AllTab({ allRecurring, onEdit }: Props) {
   function Row({ item }: { item: Schedule }) {
     const isPaused = item.status === 'paused';
     return (
-      <div className={`flex items-center gap-3 px-4 py-2.5 border-b border-border-light hover:bg-hover transition-colors group ${
-        isPaused ? 'opacity-60' : ''
-      }`}>
-        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded shrink-0 ${
-          isPaused ? 'bg-surface-alt text-text-disabled'
-          : item.amount > 0 ? 'bg-positive-subtle text-positive'
-          : 'bg-brand-50 text-brand-600'
-        }`}>
+      <div
+        className={`flex items-center gap-3 px-4 py-2.5 border-b border-border-light hover:bg-hover transition-colors group ${
+          isPaused ? 'opacity-60' : ''
+        }`}
+      >
+        <span
+          className={`text-[10px] font-medium px-1.5 py-0.5 rounded shrink-0 ${
+            isPaused
+              ? 'bg-surface-alt text-text-disabled'
+              : item.amount > 0
+                ? 'bg-positive-subtle text-positive'
+                : 'bg-brand-50 text-brand-600'
+          }`}
+        >
           {item.amount > 0 ? 'Income' : 'Expense'}
         </span>
 
@@ -54,10 +61,14 @@ export default function AllTab({ allRecurring, onEdit }: Props) {
               {FREQ_MAP.get(item.recurrenceType) || item.recurrenceType}
             </span>
             {isPaused && (
-              <span className="text-[10px] font-medium text-caution bg-caution-subtle px-1.5 py-0.5 rounded">Paused</span>
+              <span className="text-[10px] font-medium text-caution bg-caution-subtle px-1.5 py-0.5 rounded">
+                Paused
+              </span>
             )}
             {Boolean(item.autoCreate) && (
-              <span className="text-[10px] font-medium text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">Auto</span>
+              <span className="text-[10px] font-medium text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">
+                Auto
+              </span>
             )}
             {item.amountType !== 'exact' && (
               <span className="text-[10px] font-medium text-text-tertiary bg-surface-alt px-1.5 py-0.5 rounded">
@@ -76,18 +87,23 @@ export default function AllTab({ allRecurring, onEdit }: Props) {
           </div>
         </div>
 
-        <span className={`text-sm font-medium tabular-nums whitespace-nowrap ${
-          item.amount > 0 ? 'text-positive' : 'text-text'
-        }`}>
-          {item.amountType !== 'exact' && '~'}{formatCurrency(item.amount)}
+        <span
+          className={`text-sm font-medium tabular-nums whitespace-nowrap ${
+            item.amount > 0 ? 'text-positive' : 'text-text'
+          }`}
+        >
+          {item.amountType !== 'exact' && '~'}
+          {formatCurrency(item.amount)}
         </span>
 
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
-            onClick={() => updateSchedule.mutate({
-              id: item.id,
-              status: isPaused ? 'active' : 'paused',
-            })}
+            onClick={() =>
+              updateSchedule.mutate({
+                id: item.id,
+                status: isPaused ? 'active' : 'paused',
+              })
+            }
             className="p-1 rounded text-text-tertiary hover:bg-hover hover:text-text-secondary transition-colors"
             title={isPaused ? 'Resume' : 'Pause'}
           >
@@ -121,7 +137,9 @@ export default function AllTab({ allRecurring, onEdit }: Props) {
           </div>
         ) : (
           <div className="bg-surface rounded-lg shadow-card border border-border-light overflow-hidden">
-            {active.map((item) => <Row key={item.id} item={item} />)}
+            {active.map((item) => (
+              <Row key={item.id} item={item} />
+            ))}
           </div>
         )}
       </div>
@@ -137,7 +155,9 @@ export default function AllTab({ allRecurring, onEdit }: Props) {
           </button>
           {canceledOpen && (
             <div className="opacity-50 bg-surface rounded-lg shadow-card border border-border-light overflow-hidden">
-              {canceled.map((item) => <Row key={item.id} item={item} />)}
+              {canceled.map((item) => (
+                <Row key={item.id} item={item} />
+              ))}
             </div>
           )}
         </div>

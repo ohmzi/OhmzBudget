@@ -11,11 +11,17 @@ const paddings = { none: '', sm: 'p-3', md: 'p-5', lg: 'p-6' };
 const accents: Record<string, string> = {
   positive: 'border-l-[3px] border-l-positive',
   negative: 'border-l-[3px] border-l-negative',
-  caution:  'border-l-[3px] border-l-caution',
-  brand:    'border-l-[3px] border-l-brand-600',
+  caution: 'border-l-[3px] border-l-caution',
+  brand: 'border-l-[3px] border-l-brand-600',
 };
 
-export function Card({ children, padding = 'md', hover = false, accentLeft, className = '' }: Props) {
+export function Card({
+  children,
+  padding = 'md',
+  hover = false,
+  accentLeft,
+  className = '',
+}: Props) {
   return (
     <div
       className={`bg-surface rounded-lg shadow-card border border-border-light ${

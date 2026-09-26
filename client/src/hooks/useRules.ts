@@ -12,8 +12,11 @@ export function useRules() {
 export function useCreateRule() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { conditions: RuleCondition[]; actions: RuleAction[]; sortOrder?: number }) =>
-      rulesApi.createRule(data),
+    mutationFn: (data: {
+      conditions: RuleCondition[];
+      actions: RuleAction[];
+      sortOrder?: number;
+    }) => rulesApi.createRule(data),
     onSuccess: (created) => {
       qc.invalidateQueries({ queryKey: QK });
       useUndoStore.getState().push({
@@ -23,7 +26,11 @@ export function useCreateRule() {
           qc.invalidateQueries({ queryKey: QK });
         },
         redo: async () => {
-          await rulesApi.createRule({ conditions: created.conditions, actions: created.actions, sortOrder: created.sortOrder });
+          await rulesApi.createRule({
+            conditions: created.conditions,
+            actions: created.actions,
+            sortOrder: created.sortOrder,
+          });
           qc.invalidateQueries({ queryKey: QK });
         },
       });
@@ -34,8 +41,14 @@ export function useCreateRule() {
 export function useUpdateRule() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: { id: string; conditions?: RuleCondition[]; actions?: RuleAction[] }) =>
-      rulesApi.updateRule(id, data),
+    mutationFn: ({
+      id,
+      ...data
+    }: {
+      id: string;
+      conditions?: RuleCondition[];
+      actions?: RuleAction[];
+    }) => rulesApi.updateRule(id, data),
     onMutate: async ({ id }) => {
       const rules = qc.getQueryData<Rule[]>(QK);
       return { old: rules?.find((r) => r.id === id) };
@@ -47,7 +60,10 @@ export function useUpdateRule() {
       useUndoStore.getState().push({
         description: `Edit rule`,
         undo: async () => {
-          await rulesApi.updateRule(id, { conditions: snapshot.conditions, actions: snapshot.actions });
+          await rulesApi.updateRule(id, {
+            conditions: snapshot.conditions,
+            actions: snapshot.actions,
+          });
           qc.invalidateQueries({ queryKey: QK });
         },
         redo: async () => {
@@ -73,7 +89,11 @@ export function useDeleteRule() {
       useUndoStore.getState().push({
         description: `Delete rule`,
         undo: async () => {
-          await rulesApi.createRule({ conditions: snapshot.conditions, actions: snapshot.actions, sortOrder: snapshot.sortOrder });
+          await rulesApi.createRule({
+            conditions: snapshot.conditions,
+            actions: snapshot.actions,
+            sortOrder: snapshot.sortOrder,
+          });
           qc.invalidateQueries({ queryKey: QK });
         },
         redo: async () => {

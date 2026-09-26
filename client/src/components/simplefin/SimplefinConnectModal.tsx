@@ -2,10 +2,19 @@ import { useState, useEffect } from 'react';
 import { Loader2, CheckCircle2, Link2 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
-import { useSetupSimplefin, useMapSimplefinAccounts, useSyncSimplefinConnection } from '../../hooks/useSimplefin';
+import {
+  useSetupSimplefin,
+  useMapSimplefinAccounts,
+  useSyncSimplefinConnection,
+} from '../../hooks/useSimplefin';
 import { useAccounts } from '../../hooks/useAccounts';
 import { formatCurrency } from '../../utils/currency';
-import type { SimplefinDiscoveredAccount, SimplefinSetupResult, AccountType, Account } from '../../types';
+import type {
+  SimplefinDiscoveredAccount,
+  SimplefinSetupResult,
+  AccountType,
+  Account,
+} from '../../types';
 import type { SimplefinAccountMappingAction } from '../../api/simplefin';
 
 interface Props {
@@ -40,7 +49,7 @@ export function SimplefinConnectModal({ isOpen, onClose, initialSetupResult }: P
           action: 'create' as const,
           accountName: a.name,
           accountType: 'checking' as AccountType,
-        }))
+        })),
       );
       setStep('mapping');
     }
@@ -52,7 +61,7 @@ export function SimplefinConnectModal({ isOpen, onClose, initialSetupResult }: P
   const { data: existingAccounts = [] } = useAccounts();
 
   const linkedAccountIds = new Set(
-    mappings.filter(m => m.action === 'link').map(m => m.accountId)
+    mappings.filter((m) => m.action === 'link').map((m) => m.accountId),
   );
 
   async function handleSetup() {
@@ -65,7 +74,7 @@ export function SimplefinConnectModal({ isOpen, onClose, initialSetupResult }: P
           action: 'create' as const,
           accountName: a.name,
           accountType: 'checking' as AccountType,
-        }))
+        })),
       );
       setStep('mapping');
     } catch {
@@ -74,17 +83,15 @@ export function SimplefinConnectModal({ isOpen, onClose, initialSetupResult }: P
   }
 
   function updateMapping(simplefinAccountId: string, updates: Partial<MappingChoice>) {
-    setMappings(prev =>
-      prev.map(m =>
-        m.simplefinAccountId === simplefinAccountId ? { ...m, ...updates } : m
-      )
+    setMappings((prev) =>
+      prev.map((m) => (m.simplefinAccountId === simplefinAccountId ? { ...m, ...updates } : m)),
     );
   }
 
   async function handleSaveAndSync() {
     if (!setupResult) return;
 
-    const actions: SimplefinAccountMappingAction[] = mappings.map(m => ({
+    const actions: SimplefinAccountMappingAction[] = mappings.map((m) => ({
       simplefinAccountId: m.simplefinAccountId,
       action: m.action,
       accountId: m.action === 'link' ? m.accountId : undefined,
@@ -97,7 +104,7 @@ export function SimplefinConnectModal({ isOpen, onClose, initialSetupResult }: P
     try {
       await mapAccounts.mutateAsync({ connectionId: setupResult.connectionId, mappings: actions });
       const syncResult = await syncConnection.mutateAsync(setupResult.connectionId);
-      const activeCount = mappings.filter(m => m.action !== 'skip').length;
+      const activeCount = mappings.filter((m) => m.action !== 'skip').length;
       setSyncSummary({ added: syncResult.added, accounts: activeCount });
       setStep('done');
     } catch {
@@ -126,10 +133,16 @@ export function SimplefinConnectModal({ isOpen, onClose, initialSetupResult }: P
             <h3 className="text-sm font-semibold text-text">Connect with SimpleFIN Bridge</h3>
             <p className="text-xs text-text-secondary mt-2 max-w-sm mx-auto leading-relaxed">
               Visit{' '}
-              <a href="https://beta-bridge.simplefin.org/simplefin/create" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline">
+              <a
+                href="https://beta-bridge.simplefin.org/simplefin/create"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-600 underline"
+              >
                 SimpleFIN Bridge
               </a>{' '}
-              to create a setup token, then paste it below. SimpleFIN costs $1.50/month paid directly to them.
+              to create a setup token, then paste it below. SimpleFIN costs $1.50/month paid
+              directly to them.
             </p>
           </div>
 
@@ -137,14 +150,16 @@ export function SimplefinConnectModal({ isOpen, onClose, initialSetupResult }: P
             <input
               type="text"
               value={token}
-              onChange={e => setToken(e.target.value)}
+              onChange={(e) => setToken(e.target.value)}
               placeholder="Paste your SimpleFIN setup token..."
               className="w-full text-sm border border-border rounded-md px-3 py-2 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600 font-mono"
             />
             <div className="flex justify-center">
               <Button onClick={handleSetup} disabled={!token.trim() || setupSimplefin.isPending}>
                 {setupSimplefin.isPending ? (
-                  <><Loader2 size={16} className="animate-spin" /> Connecting...</>
+                  <>
+                    <Loader2 size={16} className="animate-spin" /> Connecting...
+                  </>
                 ) : (
                   'Connect'
                 )}
@@ -154,7 +169,8 @@ export function SimplefinConnectModal({ isOpen, onClose, initialSetupResult }: P
 
           {setupSimplefin.isError && (
             <p className="text-xs text-negative text-center">
-              {(setupSimplefin.error as any)?.message || 'Failed to connect. Check your setup token and try again.'}
+              {(setupSimplefin.error as any)?.message ||
+                'Failed to connect. Check your setup token and try again.'}
             </p>
           )}
         </div>
@@ -163,17 +179,17 @@ export function SimplefinConnectModal({ isOpen, onClose, initialSetupResult }: P
       {step === 'mapping' && setupResult && (
         <div className="space-y-4">
           <div>
-            <h3 className="text-sm font-semibold text-text">
-              {setupResult.connectionName}
-            </h3>
+            <h3 className="text-sm font-semibold text-text">{setupResult.connectionName}</h3>
             <p className="text-xs text-text-secondary mt-0.5">
               Choose how to set up each discovered account.
             </p>
           </div>
 
           <div className="space-y-3 max-h-80 overflow-y-auto">
-            {setupResult.accounts.map(account => {
-              const mapping = mappings.find(m => m.simplefinAccountId === account.simplefinAccountId)!;
+            {setupResult.accounts.map((account) => {
+              const mapping = mappings.find(
+                (m) => m.simplefinAccountId === account.simplefinAccountId,
+              )!;
               return (
                 <SimplefinAccountMappingCard
                   key={account.simplefinAccountId}
@@ -181,15 +197,20 @@ export function SimplefinConnectModal({ isOpen, onClose, initialSetupResult }: P
                   mapping={mapping}
                   existingAccounts={existingAccounts}
                   linkedAccountIds={linkedAccountIds}
-                  onChange={updates => updateMapping(account.simplefinAccountId, updates)}
+                  onChange={(updates) => updateMapping(account.simplefinAccountId, updates)}
                 />
               );
             })}
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
-            <Button variant="secondary" onClick={handleClose}>Cancel</Button>
-            <Button onClick={handleSaveAndSync} disabled={mappings.every(m => m.action === 'skip')}>
+            <Button variant="secondary" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveAndSync}
+              disabled={mappings.every((m) => m.action === 'skip')}
+            >
               Save & Sync
             </Button>
           </div>
@@ -235,9 +256,15 @@ interface SimplefinAccountMappingCardProps {
   onChange: (updates: Partial<MappingChoice>) => void;
 }
 
-function SimplefinAccountMappingCard({ account, mapping, existingAccounts, linkedAccountIds, onChange }: SimplefinAccountMappingCardProps) {
+function SimplefinAccountMappingCard({
+  account,
+  mapping,
+  existingAccounts,
+  linkedAccountIds,
+  onChange,
+}: SimplefinAccountMappingCardProps) {
   const availableAccounts = existingAccounts.filter(
-    a => !a.closedAt && (!linkedAccountIds.has(a.id) || mapping.accountId === a.id)
+    (a) => !a.closedAt && (!linkedAccountIds.has(a.id) || mapping.accountId === a.id),
   );
 
   return (
@@ -251,7 +278,9 @@ function SimplefinAccountMappingCard({ account, mapping, existingAccounts, linke
 
       <div className="flex gap-2">
         <button
-          onClick={() => onChange({ action: 'create', accountName: account.name, accountType: 'checking' })}
+          onClick={() =>
+            onChange({ action: 'create', accountName: account.name, accountType: 'checking' })
+          }
           className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
             mapping.action === 'create'
               ? 'bg-brand-600 text-white'
@@ -286,11 +315,11 @@ function SimplefinAccountMappingCard({ account, mapping, existingAccounts, linke
       {mapping.action === 'link' && (
         <select
           value={mapping.accountId ?? ''}
-          onChange={e => onChange({ accountId: e.target.value })}
+          onChange={(e) => onChange({ accountId: e.target.value })}
           className="w-full text-sm border border-border rounded-md px-3 py-1.5 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
         >
           <option value="">Select an account...</option>
-          {availableAccounts.map(a => (
+          {availableAccounts.map((a) => (
             <option key={a.id} value={a.id}>
               {a.name} ({formatCurrency(a.balance)})
             </option>
@@ -302,7 +331,7 @@ function SimplefinAccountMappingCard({ account, mapping, existingAccounts, linke
         <input
           type="text"
           value={mapping.accountName}
-          onChange={e => onChange({ accountName: e.target.value })}
+          onChange={(e) => onChange({ accountName: e.target.value })}
           placeholder="Account name"
           className="w-full text-sm border border-border rounded-md px-3 py-1.5 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
         />

@@ -3,7 +3,7 @@
    ============================================================ */
 
 .hero {
-  background: linear-gradient(170deg, #0D1B2A 0%, #101E36 50%, #0B1528 100%);
+  background: linear-gradient(170deg, #0d1b2a 0%, #101e36 50%, #0b1528 100%);
   position: relative;
   overflow: hidden;
 }
@@ -45,7 +45,7 @@
 }
 
 .headlineBlue {
-  color: #1E90FF;
+  color: #1e90ff;
 }
 
 .heroDescription {
@@ -69,7 +69,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: #2E7CF6;
+  background: #2e7cf6;
   color: #ffffff;
   font-weight: 600;
   font-size: 1rem;
@@ -80,7 +80,7 @@
 }
 
 .ctaPrimary:hover {
-  background: #1E6AE1;
+  background: #1e6ae1;
   color: #ffffff;
   text-decoration: none;
 }
@@ -97,7 +97,9 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   text-decoration: none;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .ctaSecondary:hover {
@@ -161,7 +163,7 @@
   right: 25px;
   top: 5px;
   border-radius: 50%;
-  background: rgba(30, 120, 255, 0.10);
+  background: rgba(30, 120, 255, 0.1);
   filter: blur(80px);
   pointer-events: none;
 }
@@ -186,7 +188,6 @@
   object-fit: contain;
   filter: drop-shadow(0 20px 32px rgba(0, 0, 0, 0.18));
 }
-
 
 /* ============================================================
    Feature Highlights (white section)
@@ -264,7 +265,7 @@
   display: block;
   min-width: 24px;
   max-width: 24px;
-  color: #3B82F6;
+  color: #3b82f6;
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -284,7 +285,7 @@
 }
 
 .smallFeatureText a {
-  color: #60A5FA;
+  color: #60a5fa;
 }
 
 .ownDataSection {

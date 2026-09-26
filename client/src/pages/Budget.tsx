@@ -10,7 +10,15 @@ import { BudgetEditPopover } from '../components/budget/BudgetEditPopover';
 import { Button } from '../components/ui/Button';
 import type { BudgetCategory, BudgetGroup, BudgetType } from '../types';
 
-function AmountInput({ cents, onSave, onCancel }: { cents: number; onSave: (c: number) => void; onCancel: () => void }) {
+function AmountInput({
+  cents,
+  onSave,
+  onCancel,
+}: {
+  cents: number;
+  onSave: (c: number) => void;
+  onCancel: () => void;
+}) {
   const [raw, setRaw] = useState(centsToInput(cents));
   const cancelled = useRef(false);
 
@@ -22,18 +30,37 @@ function AmountInput({ cents, onSave, onCancel }: { cents: number; onSave: (c: n
       step="0.01"
       value={raw}
       onChange={(e) => setRaw(e.target.value)}
-      onFocus={(e) => { const el = e.target; const len = el.value.length; el.setSelectionRange(len, len); }}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') { (e.target as HTMLInputElement).blur(); }
-        if (e.key === 'Escape') { cancelled.current = true; onCancel(); }
+      onFocus={(e) => {
+        const el = e.target;
+        const len = el.value.length;
+        el.setSelectionRange(len, len);
       }}
-      onBlur={() => { if (!cancelled.current) onSave(parseCents(raw)); }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          (e.target as HTMLInputElement).blur();
+        }
+        if (e.key === 'Escape') {
+          cancelled.current = true;
+          onCancel();
+        }
+      }}
+      onBlur={() => {
+        if (!cancelled.current) onSave(parseCents(raw));
+      }}
       className="w-28 text-right tabular-nums text-sm bg-surface border border-brand-500 rounded-md px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-brand-600"
     />
   );
 }
 
-function SpentBar({ spent, budgeted, isIncome }: { spent: number; budgeted: number; isIncome?: boolean }) {
+function SpentBar({
+  spent,
+  budgeted,
+  isIncome,
+}: {
+  spent: number;
+  budgeted: number;
+  isIncome?: boolean;
+}) {
   if (budgeted <= 0 && spent <= 0) return null;
   const effectiveBudget = Math.max(budgeted, 1);
   const ratio = spent / effectiveBudget;
@@ -50,7 +77,10 @@ function SpentBar({ spent, budgeted, isIncome }: { spent: number; budgeted: numb
 
   return (
     <div className="h-[3px] w-[90%] bg-surface-alt rounded-full overflow-hidden mt-1">
-      <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${fillWidth.toFixed(1)}%` }} />
+      <div
+        className={`h-full rounded-full transition-all ${color}`}
+        style={{ width: `${fillWidth.toFixed(1)}%` }}
+      />
     </div>
   );
 }
@@ -71,9 +101,18 @@ interface CategoryRowProps {
   onApplyBulk: (categoryId: string, cents: number) => void;
 }
 
-function CategoryRow({ cat, isIncome, editingId, month, onStartEdit, onSave, onCancel, onApplyBulk }: CategoryRowProps) {
+function CategoryRow({
+  cat,
+  isIncome,
+  editingId,
+  month,
+  onStartEdit,
+  onSave,
+  onCancel,
+  onApplyBulk,
+}: CategoryRowProps) {
   const isEditing = editingId === cat.id;
-  const actual = isIncome ? (cat.balance - cat.carryOver - cat.budgeted) : cat.spent;
+  const actual = isIncome ? cat.balance - cat.carryOver - cat.budgeted : cat.spent;
   const rawRemaining = cat.budgeted - actual;
   const remaining = isIncome ? Math.max(rawRemaining, 0) : rawRemaining;
 
@@ -91,7 +130,8 @@ function CategoryRow({ cat, isIncome, editingId, month, onStartEdit, onSave, onC
     <tr className="border-b border-border-light">
       <td className="py-1.5 pb-2 pl-10 pr-3">
         <div className="text-sm text-text">
-          {cat.icon && <span className="text-xs mr-1">{cat.icon}</span>}{cat.name}
+          {cat.icon && <span className="text-xs mr-1">{cat.icon}</span>}
+          {cat.name}
         </div>
         <SpentBar spent={actual} budgeted={cat.budgeted} isIncome={isIncome} />
       </td>
@@ -129,7 +169,9 @@ function CategoryRow({ cat, isIncome, editingId, month, onStartEdit, onSave, onC
         </div>
       </td>
       <td className="py-1.5 pl-3 pr-6 text-right align-top">
-        <span className={`tabular-nums text-sm inline-block ${remainingClass}`}>{formatCurrency(remaining)}</span>
+        <span className={`tabular-nums text-sm inline-block ${remainingClass}`}>
+          {formatCurrency(remaining)}
+        </span>
       </td>
     </tr>
   );
@@ -145,31 +187,47 @@ interface IncomeGroupProps {
   onApplyBulk: (categoryId: string, cents: number) => void;
 }
 
-function IncomeGroupSection({ group, editingId, month, onStartEdit, onSave, onCancel, onApplyBulk }: IncomeGroupProps) {
+function IncomeGroupSection({
+  group,
+  editingId,
+  month,
+  onStartEdit,
+  onSave,
+  onCancel,
+  onApplyBulk,
+}: IncomeGroupProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [showUnbudgeted, setShowUnbudgeted] = useState(false);
 
-  const totals = useMemo(
-    () => {
-      const raw = group.categories.reduce(
-        (acc, c) => ({ budgeted: acc.budgeted + c.budgeted, spent: acc.spent + c.spent, balance: acc.balance + c.balance, carryOver: acc.carryOver + c.carryOver }),
-        { budgeted: 0, spent: 0, balance: 0, carryOver: 0 }
-      );
-      return { ...raw, received: raw.balance - raw.carryOver - raw.budgeted };
-    },
-    [group.categories]
-  );
+  const totals = useMemo(() => {
+    const raw = group.categories.reduce(
+      (acc, c) => ({
+        budgeted: acc.budgeted + c.budgeted,
+        spent: acc.spent + c.spent,
+        balance: acc.balance + c.balance,
+        carryOver: acc.carryOver + c.carryOver,
+      }),
+      { budgeted: 0, spent: 0, balance: 0, carryOver: 0 },
+    );
+    return { ...raw, received: raw.balance - raw.carryOver - raw.budgeted };
+  }, [group.categories]);
 
-  const active = group.categories.filter(c => c.budgeted !== 0 || (c.balance - c.carryOver - c.budgeted) !== 0);
-  const inactive = group.categories.filter(c => c.budgeted === 0 && (c.balance - c.carryOver - c.budgeted) === 0);
+  const active = group.categories.filter(
+    (c) => c.budgeted !== 0 || c.balance - c.carryOver - c.budgeted !== 0,
+  );
+  const inactive = group.categories.filter(
+    (c) => c.budgeted === 0 && c.balance - c.carryOver - c.budgeted === 0,
+  );
   const visibleCats = showUnbudgeted ? group.categories : active;
 
   return (
     <>
-      <tr className="h-2" aria-hidden><td colSpan={4} /></tr>
+      <tr className="h-2" aria-hidden>
+        <td colSpan={4} />
+      </tr>
       <tr
         className="bg-surface border-y border-border-light cursor-pointer select-none hover:bg-hover transition-colors"
-        onClick={() => setCollapsed(c => !c)}
+        onClick={() => setCollapsed((c) => !c)}
       >
         <td className="py-2 px-4">
           <div className="flex items-center gap-2">
@@ -185,13 +243,15 @@ function IncomeGroupSection({ group, editingId, month, onStartEdit, onSave, onCa
         <td className="py-2 px-3 text-right tabular-nums text-sm font-semibold text-text">
           {formatCurrency(totals.received)}
         </td>
-        <td className={`py-2 pl-3 pr-6 text-right tabular-nums text-sm font-semibold ${Math.max(totals.budgeted - totals.received, 0) > 0 ? 'text-positive' : 'text-text-tertiary'}`}>
+        <td
+          className={`py-2 pl-3 pr-6 text-right tabular-nums text-sm font-semibold ${Math.max(totals.budgeted - totals.received, 0) > 0 ? 'text-positive' : 'text-text-tertiary'}`}
+        >
           {formatCurrency(Math.max(totals.budgeted - totals.received, 0))}
         </td>
       </tr>
       {!collapsed && (
         <>
-          {visibleCats.map(cat => (
+          {visibleCats.map((cat) => (
             <CategoryRow
               key={cat.id}
               cat={cat}
@@ -208,11 +268,12 @@ function IncomeGroupSection({ group, editingId, month, onStartEdit, onSave, onCa
             <tr className="border-b border-border-light">
               <td colSpan={4} className="py-2 pl-10 pr-3">
                 <button
-                  onClick={() => setShowUnbudgeted(s => !s)}
+                  onClick={() => setShowUnbudgeted((s) => !s)}
                   className="flex items-center gap-1.5 text-xs text-text-tertiary hover:text-text-secondary"
                 >
                   <Eye size={12} />
-                  {showUnbudgeted ? 'Hide' : 'Show'} {inactive.length} inactive {inactive.length === 1 ? 'category' : 'categories'}
+                  {showUnbudgeted ? 'Hide' : 'Show'} {inactive.length} inactive{' '}
+                  {inactive.length === 1 ? 'category' : 'categories'}
                 </button>
               </td>
             </tr>
@@ -235,20 +296,34 @@ interface BudgetTypeSectionProps {
   onApplyBulk: (categoryId: string, cents: number) => void;
 }
 
-function BudgetTypeSection({ label, categories, editingId, month, onStartEdit, onSave, onCancel, onApplyBulk }: BudgetTypeSectionProps) {
+function BudgetTypeSection({
+  label,
+  categories,
+  editingId,
+  month,
+  onStartEdit,
+  onSave,
+  onCancel,
+  onApplyBulk,
+}: BudgetTypeSectionProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [showUnbudgeted, setShowUnbudgeted] = useState(false);
 
   const totals = useMemo(
-    () => categories.reduce(
-      (acc, c) => ({ budgeted: acc.budgeted + c.budgeted, spent: acc.spent + c.spent, balance: acc.balance + c.balance }),
-      { budgeted: 0, spent: 0, balance: 0 }
-    ),
-    [categories]
+    () =>
+      categories.reduce(
+        (acc, c) => ({
+          budgeted: acc.budgeted + c.budgeted,
+          spent: acc.spent + c.spent,
+          balance: acc.balance + c.balance,
+        }),
+        { budgeted: 0, spent: 0, balance: 0 },
+      ),
+    [categories],
   );
 
-  const active = categories.filter(c => c.budgeted !== 0 || c.spent !== 0);
-  const inactive = categories.filter(c => c.budgeted === 0 && c.spent === 0);
+  const active = categories.filter((c) => c.budgeted !== 0 || c.spent !== 0);
+  const inactive = categories.filter((c) => c.budgeted === 0 && c.spent === 0);
   const visibleCats = showUnbudgeted ? categories : active;
 
   const status = getStatus(totals.spent, totals.budgeted);
@@ -257,10 +332,12 @@ function BudgetTypeSection({ label, categories, editingId, month, onStartEdit, o
 
   return (
     <>
-      <tr className="h-2" aria-hidden><td colSpan={4} /></tr>
+      <tr className="h-2" aria-hidden>
+        <td colSpan={4} />
+      </tr>
       <tr
         className="bg-surface border-y border-border-light cursor-pointer select-none hover:bg-hover transition-colors"
-        onClick={() => setCollapsed(c => !c)}
+        onClick={() => setCollapsed((c) => !c)}
       >
         <td className="py-2 px-4">
           <div className="flex items-center gap-2">
@@ -276,14 +353,16 @@ function BudgetTypeSection({ label, categories, editingId, month, onStartEdit, o
         <td className="py-2 px-3 text-right tabular-nums text-sm font-semibold text-text">
           {formatCurrency(totals.spent)}
         </td>
-        <td className={`py-2 pl-3 pr-6 text-right tabular-nums text-sm font-semibold ${remainingColor}`}>
+        <td
+          className={`py-2 pl-3 pr-6 text-right tabular-nums text-sm font-semibold ${remainingColor}`}
+        >
           {formatCurrency(remaining)}
         </td>
       </tr>
 
       {!collapsed && (
         <>
-          {visibleCats.map(cat => (
+          {visibleCats.map((cat) => (
             <CategoryRow
               key={cat.id}
               cat={cat}
@@ -301,11 +380,12 @@ function BudgetTypeSection({ label, categories, editingId, month, onStartEdit, o
             <tr className="border-b border-border-light">
               <td colSpan={4} className="py-2 pl-10 pr-3">
                 <button
-                  onClick={() => setShowUnbudgeted(s => !s)}
+                  onClick={() => setShowUnbudgeted((s) => !s)}
                   className="flex items-center gap-1.5 text-xs text-text-tertiary hover:text-text-secondary"
                 >
                   <Eye size={12} />
-                  {showUnbudgeted ? 'Hide' : 'Show'} {inactive.length} inactive {inactive.length === 1 ? 'category' : 'categories'}
+                  {showUnbudgeted ? 'Hide' : 'Show'} {inactive.length} inactive{' '}
+                  {inactive.length === 1 ? 'category' : 'categories'}
                 </button>
               </td>
             </tr>
@@ -336,36 +416,40 @@ export default function BudgetPage() {
 
   const monthDate = useMemo(() => parseISO(`${selectedMonth}-01`), [selectedMonth]);
 
-  const incomeGroups = useMemo(() => groups.filter(g => g.isIncome), [groups]);
+  const incomeGroups = useMemo(() => groups.filter((g) => g.isIncome), [groups]);
   const allExpenseCats = useMemo(
-    () => groups.filter(g => !g.isIncome).flatMap(g => g.categories),
+    () => groups.filter((g) => !g.isIncome).flatMap((g) => g.categories),
     [groups],
   );
 
-  const expensesByType = useMemo(() =>
-    BUDGET_TYPES.map(t => ({
-      ...t,
-      categories: allExpenseCats.filter(c => c.budgetType === t.key),
-    })).filter(bt => bt.categories.length > 0),
+  const expensesByType = useMemo(
+    () =>
+      BUDGET_TYPES.map((t) => ({
+        ...t,
+        categories: allExpenseCats.filter((c) => c.budgetType === t.key),
+      })).filter((bt) => bt.categories.length > 0),
     [allExpenseCats],
   );
 
   const incomeTotals = useMemo(() => {
-    const cats = incomeGroups.flatMap(g => g.categories);
+    const cats = incomeGroups.flatMap((g) => g.categories);
     return {
       budgeted: cats.reduce((s, c) => s + c.budgeted, 0),
       received: cats.reduce((s, c) => s + (c.balance - c.carryOver - c.budgeted), 0),
     };
   }, [incomeGroups]);
 
-  const expenseTotals = useMemo(() => ({
-    budgeted: allExpenseCats.reduce((s, c) => s + c.budgeted, 0),
-    spent: allExpenseCats.reduce((s, c) => s + c.spent, 0),
-    balance: allExpenseCats.reduce((s, c) => s + c.balance, 0),
-  }), [allExpenseCats]);
+  const expenseTotals = useMemo(
+    () => ({
+      budgeted: allExpenseCats.reduce((s, c) => s + c.budgeted, 0),
+      spent: allExpenseCats.reduce((s, c) => s + c.spent, 0),
+      balance: allExpenseCats.reduce((s, c) => s + c.balance, 0),
+    }),
+    [allExpenseCats],
+  );
 
   const savingsTotals = useMemo(() => {
-    const cats = allExpenseCats.filter(c => c.budgetType === 'savings');
+    const cats = allExpenseCats.filter((c) => c.budgetType === 'savings');
     return {
       budgeted: cats.reduce((s, c) => s + c.budgeted, 0),
       spent: cats.reduce((s, c) => s + c.spent, 0),
@@ -374,8 +458,11 @@ export default function BudgetPage() {
 
   const expensesByBudgetType = useMemo(() => {
     const calc = (type: string) => {
-      const cats = allExpenseCats.filter(c => c.budgetType === type);
-      return { planned: cats.reduce((s, c) => s + c.budgeted, 0), spent: cats.reduce((s, c) => s + c.spent, 0) };
+      const cats = allExpenseCats.filter((c) => c.budgetType === type);
+      return {
+        planned: cats.reduce((s, c) => s + c.budgeted, 0),
+        spent: cats.reduce((s, c) => s + c.spent, 0),
+      };
     };
     return { fixed: calc('fixed'), flexible: calc('flexible'), nonMonthly: calc('non_monthly') };
   }, [allExpenseCats]);
@@ -396,7 +483,8 @@ export default function BudgetPage() {
   const tbb = summary?.toBeBudgeted ?? 0;
   const carryOver = summary?.carryOver ?? 0;
   const expRemaining = expenseTotals.budgeted - expenseTotals.spent;
-  const expBalColor = expRemaining > 0 ? 'text-positive' : expRemaining < 0 ? 'text-negative' : 'text-text-tertiary';
+  const expBalColor =
+    expRemaining > 0 ? 'text-positive' : expRemaining < 0 ? 'text-negative' : 'text-text-tertiary';
 
   return (
     <div className="flex flex-col h-full bg-surface">
@@ -420,147 +508,163 @@ export default function BudgetPage() {
             >
               <ChevronRight size={18} />
             </button>
-            <Button variant="secondary" size="sm" onClick={goToToday}>Today</Button>
+            <Button variant="secondary" size="sm" onClick={goToToday}>
+              Today
+            </Button>
           </div>
         </div>
       </div>
 
       <div className="flex flex-1 overflow-y-auto">
-      <div className="flex-1">
-        <table className="w-full border-collapse">
-          <colgroup>
-            <col style={{ width: '55%' }} />
-            <col style={{ width: '15%' }} />
-            <col style={{ width: '15%' }} />
-            <col style={{ width: '15%' }} />
-          </colgroup>
-          <tbody>
-            {/* Income section header */}
-            <tr
-              className="bg-surface-alt border-y border-border cursor-pointer select-none hover:bg-hover transition-colors"
-              onClick={() => setIncomeCollapsed(c => !c)}
-            >
-              <td className="py-2 px-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-text-tertiary shrink-0">
-                    {incomeCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
-                  </span>
-                  <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wide">Income</span>
-                </div>
-              </td>
-              <td className="py-2 px-3 text-right text-xs font-semibold text-text-tertiary">Planned</td>
-              <td className="py-2 px-3 text-right text-xs font-semibold text-text-tertiary">Actual</td>
-              <td className="py-2 pl-3 pr-6 text-right text-xs font-bold text-text">Remaining</td>
-            </tr>
-
-            {!incomeCollapsed && (
-              <>
-                {incomeGroups.map(group => (
-                  <IncomeGroupSection
-                    key={group.id}
-                    group={group}
-                    editingId={editingId}
-                    month={selectedMonth}
-                    onStartEdit={setEditingId}
-                    onSave={handleSave}
-                    onCancel={() => setEditingId(null)}
-                    onApplyBulk={handleApplyBulk}
-                  />
-                ))}
-
-                {/* Total Income row */}
-                <tr className="bg-surface border-y border-border">
-                  <td className="py-2 px-4 text-sm font-bold text-text">Total Income</td>
-                  <td className="py-2 px-3 text-right tabular-nums text-sm font-semibold text-text-secondary">
-                    {formatCurrency(incomeTotals.budgeted)}
-                  </td>
-                  <td className="py-2 px-3 text-right tabular-nums text-sm font-semibold text-text">
-                    {formatCurrency(incomeTotals.received)}
-                  </td>
-                  <td className="py-2 pl-3 pr-6" />
-                </tr>
-              </>
-            )}
-
-            {/* Expenses section header */}
-            <tr
-              className="bg-surface-alt border-y border-border cursor-pointer select-none hover:bg-hover transition-colors"
-              onClick={() => setExpensesCollapsed(c => !c)}
-            >
-              <td className="py-2 px-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-text-tertiary shrink-0">
-                    {expensesCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
-                  </span>
-                  <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wide">Expenses</span>
-                </div>
-              </td>
-              <td className="py-2 px-3 text-right text-xs font-semibold text-text-tertiary">Planned</td>
-              <td className="py-2 px-3 text-right text-xs font-semibold text-text-tertiary">Actual</td>
-              <td className="py-2 pl-3 pr-6 text-right text-xs font-bold text-text">Remaining</td>
-            </tr>
-
-            {!expensesCollapsed && (
-              <>
-                {expensesByType.map(bt => (
-                  <BudgetTypeSection
-                    key={bt.key}
-                    budgetType={bt.key}
-                    label={bt.label}
-                    categories={bt.categories}
-                    editingId={editingId}
-                    month={selectedMonth}
-                    onStartEdit={setEditingId}
-                    onSave={handleSave}
-                    onCancel={() => setEditingId(null)}
-                    onApplyBulk={handleApplyBulk}
-                  />
-                ))}
-
-                {/* Total Expenses row */}
-                <tr className="bg-surface border-y border-border">
-                  <td className="py-2 px-4 text-sm font-bold text-text">Total Expenses</td>
-                  <td className="py-2 px-3 text-right tabular-nums text-sm font-semibold text-text-secondary">
-                    {formatCurrency(expenseTotals.budgeted)}
-                  </td>
-                  <td className="py-2 px-3 text-right tabular-nums text-sm font-semibold text-text-secondary">
-                    {formatCurrency(expenseTotals.spent)}
-                  </td>
-                  <td className={`py-2 pl-3 pr-6 text-right tabular-nums text-sm font-semibold ${expBalColor}`}>
-                    {formatCurrency(expRemaining)}
-                  </td>
-                </tr>
-              </>
-            )}
-
-            {groups.length === 0 && (
-              <tr>
-                <td colSpan={4} className="py-16 text-center text-sm text-text-tertiary">
-                  No categories yet. Add some in Settings.
+        <div className="flex-1">
+          <table className="w-full border-collapse">
+            <colgroup>
+              <col style={{ width: '55%' }} />
+              <col style={{ width: '15%' }} />
+              <col style={{ width: '15%' }} />
+              <col style={{ width: '15%' }} />
+            </colgroup>
+            <tbody>
+              {/* Income section header */}
+              <tr
+                className="bg-surface-alt border-y border-border cursor-pointer select-none hover:bg-hover transition-colors"
+                onClick={() => setIncomeCollapsed((c) => !c)}
+              >
+                <td className="py-2 px-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-text-tertiary shrink-0">
+                      {incomeCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+                    </span>
+                    <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wide">
+                      Income
+                    </span>
+                  </div>
                 </td>
+                <td className="py-2 px-3 text-right text-xs font-semibold text-text-tertiary">
+                  Planned
+                </td>
+                <td className="py-2 px-3 text-right text-xs font-semibold text-text-tertiary">
+                  Actual
+                </td>
+                <td className="py-2 pl-3 pr-6 text-right text-xs font-bold text-text">Remaining</td>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
 
-      <div className="w-80 shrink-0 border-l border-border p-4 self-start sticky top-0">
-        <div>
-          <BudgetSummaryWidget
-            toBeBudgeted={tbb}
-            carryOver={carryOver}
-            incomePlanned={incomeTotals.budgeted}
-            incomeEarned={incomeTotals.received}
-            expensesPlanned={expenseTotals.budgeted}
-            expensesSpent={expenseTotals.spent}
-            savingsPlanned={savingsTotals.budgeted}
-            savingsContributed={savingsTotals.spent}
-            fixedExpenses={expensesByBudgetType.fixed}
-            flexibleExpenses={expensesByBudgetType.flexible}
-            nonMonthlyExpenses={expensesByBudgetType.nonMonthly}
-          />
+              {!incomeCollapsed && (
+                <>
+                  {incomeGroups.map((group) => (
+                    <IncomeGroupSection
+                      key={group.id}
+                      group={group}
+                      editingId={editingId}
+                      month={selectedMonth}
+                      onStartEdit={setEditingId}
+                      onSave={handleSave}
+                      onCancel={() => setEditingId(null)}
+                      onApplyBulk={handleApplyBulk}
+                    />
+                  ))}
+
+                  {/* Total Income row */}
+                  <tr className="bg-surface border-y border-border">
+                    <td className="py-2 px-4 text-sm font-bold text-text">Total Income</td>
+                    <td className="py-2 px-3 text-right tabular-nums text-sm font-semibold text-text-secondary">
+                      {formatCurrency(incomeTotals.budgeted)}
+                    </td>
+                    <td className="py-2 px-3 text-right tabular-nums text-sm font-semibold text-text">
+                      {formatCurrency(incomeTotals.received)}
+                    </td>
+                    <td className="py-2 pl-3 pr-6" />
+                  </tr>
+                </>
+              )}
+
+              {/* Expenses section header */}
+              <tr
+                className="bg-surface-alt border-y border-border cursor-pointer select-none hover:bg-hover transition-colors"
+                onClick={() => setExpensesCollapsed((c) => !c)}
+              >
+                <td className="py-2 px-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-text-tertiary shrink-0">
+                      {expensesCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+                    </span>
+                    <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wide">
+                      Expenses
+                    </span>
+                  </div>
+                </td>
+                <td className="py-2 px-3 text-right text-xs font-semibold text-text-tertiary">
+                  Planned
+                </td>
+                <td className="py-2 px-3 text-right text-xs font-semibold text-text-tertiary">
+                  Actual
+                </td>
+                <td className="py-2 pl-3 pr-6 text-right text-xs font-bold text-text">Remaining</td>
+              </tr>
+
+              {!expensesCollapsed && (
+                <>
+                  {expensesByType.map((bt) => (
+                    <BudgetTypeSection
+                      key={bt.key}
+                      budgetType={bt.key}
+                      label={bt.label}
+                      categories={bt.categories}
+                      editingId={editingId}
+                      month={selectedMonth}
+                      onStartEdit={setEditingId}
+                      onSave={handleSave}
+                      onCancel={() => setEditingId(null)}
+                      onApplyBulk={handleApplyBulk}
+                    />
+                  ))}
+
+                  {/* Total Expenses row */}
+                  <tr className="bg-surface border-y border-border">
+                    <td className="py-2 px-4 text-sm font-bold text-text">Total Expenses</td>
+                    <td className="py-2 px-3 text-right tabular-nums text-sm font-semibold text-text-secondary">
+                      {formatCurrency(expenseTotals.budgeted)}
+                    </td>
+                    <td className="py-2 px-3 text-right tabular-nums text-sm font-semibold text-text-secondary">
+                      {formatCurrency(expenseTotals.spent)}
+                    </td>
+                    <td
+                      className={`py-2 pl-3 pr-6 text-right tabular-nums text-sm font-semibold ${expBalColor}`}
+                    >
+                      {formatCurrency(expRemaining)}
+                    </td>
+                  </tr>
+                </>
+              )}
+
+              {groups.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="py-16 text-center text-sm text-text-tertiary">
+                    No categories yet. Add some in Settings.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-      </div>
+
+        <div className="w-80 shrink-0 border-l border-border p-4 self-start sticky top-0">
+          <div>
+            <BudgetSummaryWidget
+              toBeBudgeted={tbb}
+              carryOver={carryOver}
+              incomePlanned={incomeTotals.budgeted}
+              incomeEarned={incomeTotals.received}
+              expensesPlanned={expenseTotals.budgeted}
+              expensesSpent={expenseTotals.spent}
+              savingsPlanned={savingsTotals.budgeted}
+              savingsContributed={savingsTotals.spent}
+              fixedExpenses={expensesByBudgetType.fixed}
+              flexibleExpenses={expensesByBudgetType.flexible}
+              nonMonthlyExpenses={expensesByBudgetType.nonMonthly}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

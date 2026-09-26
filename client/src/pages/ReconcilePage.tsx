@@ -3,7 +3,11 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronRight, Check } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useAccounts } from '../hooks/useAccounts';
-import { useTransactions, useReconcileAccount, useCreateTransaction } from '../hooks/useTransactions';
+import {
+  useTransactions,
+  useReconcileAccount,
+  useCreateTransaction,
+} from '../hooks/useTransactions';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { CurrencyInput } from '../components/ui/CurrencyInput';
@@ -15,7 +19,7 @@ export default function ReconcilePage() {
   const navigate = useNavigate();
 
   const { data: accounts = [] } = useAccounts();
-  const account = accounts.find(a => a.id === id);
+  const account = accounts.find((a) => a.id === id);
 
   const { data: unreconciledTxns = [], isLoading } = useTransactions(
     id ? { accountId: id, reconciled: 0 } : {},
@@ -40,9 +44,7 @@ export default function ReconcilePage() {
   }, [account, unreconciledTxns]);
 
   const checkedSum = useMemo(() => {
-    return unreconciledTxns
-      .filter(t => checkedIds.has(t.id))
-      .reduce((s, t) => s + t.amount, 0);
+    return unreconciledTxns.filter((t) => checkedIds.has(t.id)).reduce((s, t) => s + t.amount, 0);
   }, [unreconciledTxns, checkedIds]);
 
   const selectedBalance = reconciledBase + checkedSum;
@@ -50,7 +52,7 @@ export default function ReconcilePage() {
   const isBalanced = difference === 0;
 
   function toggleRow(tx: Transaction) {
-    setCheckedIds(prev => {
+    setCheckedIds((prev) => {
       const next = new Set(prev);
       next.has(tx.id) ? next.delete(tx.id) : next.add(tx.id);
       return next;
@@ -84,9 +86,13 @@ export default function ReconcilePage() {
       <div className="flex flex-col h-full bg-surface">
         <div className="px-6 py-3 border-b border-border shrink-0">
           <div className="flex items-center gap-1.5 text-xs text-text-tertiary mb-1">
-            <Link to="/accounts" className="hover:text-brand-600 transition-colors">Accounts</Link>
+            <Link to="/accounts" className="hover:text-brand-600 transition-colors">
+              Accounts
+            </Link>
             <ChevronRight size={11} />
-            <Link to={`/accounts/${id}`} className="hover:text-brand-600 transition-colors">{account.name}</Link>
+            <Link to={`/accounts/${id}`} className="hover:text-brand-600 transition-colors">
+              {account.name}
+            </Link>
             <ChevronRight size={11} />
             <span className="text-text-secondary">Reconcile</span>
           </div>
@@ -99,8 +105,12 @@ export default function ReconcilePage() {
         <div className="flex-1 flex items-start justify-center pt-16 px-6">
           <div className="w-full max-w-sm space-y-6">
             <div>
-              <h2 className="text-base font-semibold text-text mb-1">Enter your bank's ending balance</h2>
-              <p className="text-sm text-text-secondary">Check your bank statement or online banking for the current balance.</p>
+              <h2 className="text-base font-semibold text-text mb-1">
+                Enter your bank's ending balance
+              </h2>
+              <p className="text-sm text-text-secondary">
+                Check your bank statement or online banking for the current balance.
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -114,14 +124,12 @@ export default function ReconcilePage() {
 
             <div className="rounded-lg border border-border-light bg-surface-alt px-4 py-3">
               <p className="text-xs text-text-tertiary">Current selected balance in app</p>
-              <p className="text-lg font-semibold text-text mt-0.5 tabular-nums">{formatCurrency(selectedBalance)}</p>
+              <p className="text-lg font-semibold text-text mt-0.5 tabular-nums">
+                {formatCurrency(selectedBalance)}
+              </p>
             </div>
 
-            <Button
-              onClick={startStep2}
-              disabled={isLoading}
-              className="w-full"
-            >
+            <Button onClick={startStep2} disabled={isLoading} className="w-full">
               Start Reconciliation
             </Button>
           </div>
@@ -136,9 +144,13 @@ export default function ReconcilePage() {
     <div className="flex flex-col h-full bg-surface">
       <div className="px-6 py-3 border-b border-border shrink-0">
         <div className="flex items-center gap-1.5 text-xs text-text-tertiary mb-1">
-          <Link to="/accounts" className="hover:text-brand-600 transition-colors">Accounts</Link>
+          <Link to="/accounts" className="hover:text-brand-600 transition-colors">
+            Accounts
+          </Link>
           <ChevronRight size={11} />
-          <Link to={`/accounts/${id}`} className="hover:text-brand-600 transition-colors">{account.name}</Link>
+          <Link to={`/accounts/${id}`} className="hover:text-brand-600 transition-colors">
+            {account.name}
+          </Link>
           <ChevronRight size={11} />
           <span className="text-text-secondary">Reconcile</span>
         </div>
@@ -153,44 +165,66 @@ export default function ReconcilePage() {
           <table className="w-full border-collapse">
             <thead className="sticky top-0 bg-surface-alt border-b border-border z-10">
               <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium text-text-tertiary w-24">Date</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-text-tertiary">Payee</th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-text-tertiary w-28">Amount</th>
-                <th className="px-4 py-2 text-center text-xs font-medium text-text-tertiary w-12">C</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-text-tertiary w-24">
+                  Date
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-text-tertiary">
+                  Payee
+                </th>
+                <th className="px-4 py-2 text-right text-xs font-medium text-text-tertiary w-28">
+                  Amount
+                </th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-text-tertiary w-12">
+                  C
+                </th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={4} className="px-4 py-10 text-center text-sm text-text-tertiary">Loading...</td></tr>
+                <tr>
+                  <td colSpan={4} className="px-4 py-10 text-center text-sm text-text-tertiary">
+                    Loading...
+                  </td>
+                </tr>
               ) : sorted.length === 0 ? (
-                <tr><td colSpan={4} className="px-4 py-10 text-center text-sm text-text-tertiary">No unreconciled transactions.</td></tr>
-              ) : sorted.map(tx => {
-                const checked = checkedIds.has(tx.id);
-                return (
-                  <tr
-                    key={tx.id}
-                    onClick={() => toggleRow(tx)}
-                    className={`border-b border-border-light cursor-pointer transition-colors ${checked ? 'bg-positive-subtle hover:bg-positive-subtle' : 'hover:bg-hover'}`}
-                  >
-                    <td className="px-4 py-2 text-xs text-text-tertiary whitespace-nowrap">
-                      {format(parseISO(tx.date), 'MMM d, yyyy')}
-                    </td>
-                    <td className="px-4 py-2 text-sm text-text">
-                      {tx.payeeName ?? <span className="text-text-disabled italic">—</span>}
-                    </td>
-                    <td className={`px-4 py-2 text-sm text-right tabular-nums font-medium ${tx.amount < 0 ? 'text-text' : 'text-positive'}`}>
-                      {formatCurrency(tx.amount)}
-                    </td>
-                    <td className="px-4 py-2 text-center">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mx-auto transition-colors ${
-                        checked ? 'bg-positive border-positive text-white' : 'border-border'
-                      }`}>
-                        {checked && <Check size={10} />}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                <tr>
+                  <td colSpan={4} className="px-4 py-10 text-center text-sm text-text-tertiary">
+                    No unreconciled transactions.
+                  </td>
+                </tr>
+              ) : (
+                sorted.map((tx) => {
+                  const checked = checkedIds.has(tx.id);
+                  return (
+                    <tr
+                      key={tx.id}
+                      onClick={() => toggleRow(tx)}
+                      className={`border-b border-border-light cursor-pointer transition-colors ${checked ? 'bg-positive-subtle hover:bg-positive-subtle' : 'hover:bg-hover'}`}
+                    >
+                      <td className="px-4 py-2 text-xs text-text-tertiary whitespace-nowrap">
+                        {format(parseISO(tx.date), 'MMM d, yyyy')}
+                      </td>
+                      <td className="px-4 py-2 text-sm text-text">
+                        {tx.payeeName ?? <span className="text-text-disabled italic">—</span>}
+                      </td>
+                      <td
+                        className={`px-4 py-2 text-sm text-right tabular-nums font-medium ${tx.amount < 0 ? 'text-text' : 'text-positive'}`}
+                      >
+                        {formatCurrency(tx.amount)}
+                      </td>
+                      <td className="px-4 py-2 text-center">
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mx-auto transition-colors ${
+                            checked ? 'bg-positive border-positive text-white' : 'border-border'
+                          }`}
+                        >
+                          {checked && <Check size={10} />}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -199,20 +233,24 @@ export default function ReconcilePage() {
           <div className="flex-1 px-5 py-6 space-y-5">
             <div>
               <p className="text-xs text-text-tertiary mb-0.5">Selected Balance</p>
-              <p className="text-xl font-semibold text-text tabular-nums">{formatCurrency(selectedBalance)}</p>
+              <p className="text-xl font-semibold text-text tabular-nums">
+                {formatCurrency(selectedBalance)}
+              </p>
             </div>
             <div>
               <p className="text-xs text-text-tertiary mb-0.5">Statement Balance</p>
-              <p className="text-xl font-semibold text-text tabular-nums">{formatCurrency(statementBalance)}</p>
+              <p className="text-xl font-semibold text-text tabular-nums">
+                {formatCurrency(statementBalance)}
+              </p>
             </div>
             <div className="pt-3 border-t border-border-light">
               <p className="text-xs text-text-tertiary mb-0.5">Difference</p>
-              <p className={`text-2xl font-semibold tabular-nums ${isBalanced ? 'text-positive' : 'text-negative'}`}>
+              <p
+                className={`text-2xl font-semibold tabular-nums ${isBalanced ? 'text-positive' : 'text-negative'}`}
+              >
                 {formatCurrency(difference)}
               </p>
-              {isBalanced && (
-                <p className="text-xs text-positive mt-1">Ready to finish!</p>
-              )}
+              {isBalanced && <p className="text-xs text-positive mt-1">Ready to finish!</p>}
             </div>
           </div>
 

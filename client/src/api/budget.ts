@@ -1,8 +1,7 @@
 import { apiFetch } from './client';
 import type { BudgetGroup, BudgetSummary } from '../types';
 
-export const getBudget = (month: string) =>
-  apiFetch<BudgetGroup[]>(`/budget/${month}`);
+export const getBudget = (month: string) => apiFetch<BudgetGroup[]>(`/budget/${month}`);
 
 export const getBudgetSummary = (month: string) =>
   apiFetch<BudgetSummary>(`/budget/${month}/summary`);

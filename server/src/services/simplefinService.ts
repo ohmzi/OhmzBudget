@@ -50,7 +50,10 @@ export async function claimAccessUrl(setupToken: string): Promise<string> {
   return accessUrl.trim();
 }
 
-export async function fetchAccounts(accessUrl: string, startDate?: number): Promise<SimplefinResponse> {
+export async function fetchAccounts(
+  accessUrl: string,
+  startDate?: number,
+): Promise<SimplefinResponse> {
   const url = new URL(accessUrl + '/accounts');
   url.searchParams.set('version', '2');
   if (startDate) url.searchParams.set('start-date', String(startDate));
@@ -60,7 +63,7 @@ export async function fetchAccounts(accessUrl: string, startDate?: number): Prom
   url.password = '';
 
   const response = await fetch(url.toString(), {
-    headers: { 'Authorization': `Basic ${credentials}` },
+    headers: { Authorization: `Basic ${credentials}` },
   });
 
   if (response.status === 402) {

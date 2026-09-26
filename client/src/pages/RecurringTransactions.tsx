@@ -7,7 +7,12 @@ import RecurringFormModal from '../components/recurring/RecurringFormModal';
 import MatchSuggestionsPanel from '../components/recurring/MatchSuggestionsPanel';
 import OccurrenceMatchModal from '../components/recurring/OccurrenceMatchModal';
 import { Button } from '../components/ui/Button';
-import { useSchedules, useCreateSchedule, useUpdateSchedule, useScheduleOccurrences } from '../hooks/useSchedules';
+import {
+  useSchedules,
+  useCreateSchedule,
+  useUpdateSchedule,
+  useScheduleOccurrences,
+} from '../hooks/useSchedules';
 import type { Schedule, ScheduleOccurrence } from '../types';
 import { format, subDays, addDays } from 'date-fns';
 
@@ -33,7 +38,9 @@ export default function RecurringTransactionsPage() {
   const matchFrom = format(subDays(new Date(), 30), 'yyyy-MM-dd');
   const matchTo = format(addDays(new Date(), 90), 'yyyy-MM-dd');
   const { data: allOccurrences = [] } = useScheduleOccurrences(matchFrom, matchTo);
-  const matchOccurrence = matchOccurrenceId ? allOccurrences.find(o => o.id === matchOccurrenceId) ?? null : null;
+  const matchOccurrence = matchOccurrenceId
+    ? (allOccurrences.find((o) => o.id === matchOccurrenceId) ?? null)
+    : null;
 
   function handleEdit(item: Schedule) {
     setEditItem(item);
@@ -42,12 +49,20 @@ export default function RecurringTransactionsPage() {
 
   function handleSave(data: any) {
     if (editItem) {
-      updateSchedule.mutate({ id: editItem.id, ...data }, {
-        onSuccess: () => { setFormOpen(false); setEditItem(null); },
-      });
+      updateSchedule.mutate(
+        { id: editItem.id, ...data },
+        {
+          onSuccess: () => {
+            setFormOpen(false);
+            setEditItem(null);
+          },
+        },
+      );
     } else {
       createSchedule.mutate(data, {
-        onSuccess: () => { setFormOpen(false); },
+        onSuccess: () => {
+          setFormOpen(false);
+        },
       });
     }
   }
@@ -63,9 +78,17 @@ export default function RecurringTransactionsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-lg font-semibold text-text">Recurring</h1>
-            <p className="text-xs text-text-tertiary mt-0.5">Track bills, subscriptions, and recurring income</p>
+            <p className="text-xs text-text-tertiary mt-0.5">
+              Track bills, subscriptions, and recurring income
+            </p>
           </div>
-          <Button size="sm" onClick={() => { setEditItem(null); setFormOpen(true); }}>
+          <Button
+            size="sm"
+            onClick={() => {
+              setEditItem(null);
+              setFormOpen(true);
+            }}
+          >
             <Plus size={13} /> Add Recurring
           </Button>
         </div>
@@ -95,8 +118,20 @@ export default function RecurringTransactionsPage() {
       <MatchSuggestionsPanel />
 
       <div className="flex-1 overflow-y-auto">
-        {activeTab === 'monthly' && <MonthlyTab onEdit={handleEdit} allRecurring={allRecurring} onMatchOccurrence={setMatchOccurrenceId} />}
-        {activeTab === 'upcoming' && <UpcomingTab onEdit={handleEdit} allRecurring={allRecurring} onMatchOccurrence={setMatchOccurrenceId} />}
+        {activeTab === 'monthly' && (
+          <MonthlyTab
+            onEdit={handleEdit}
+            allRecurring={allRecurring}
+            onMatchOccurrence={setMatchOccurrenceId}
+          />
+        )}
+        {activeTab === 'upcoming' && (
+          <UpcomingTab
+            onEdit={handleEdit}
+            allRecurring={allRecurring}
+            onMatchOccurrence={setMatchOccurrenceId}
+          />
+        )}
         {activeTab === 'all' && <AllTab allRecurring={allRecurring} onEdit={handleEdit} />}
       </div>
 

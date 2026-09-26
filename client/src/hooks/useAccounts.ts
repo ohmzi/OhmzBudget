@@ -23,7 +23,12 @@ export function useCreateAccount() {
           qc.invalidateQueries({ queryKey: ['accounts'] });
         },
         redo: async () => {
-          await accountsApi.createAccount({ name: created.name, type: created.type, startingBalance: created.startingBalance, isOffBudget: created.isOffBudget });
+          await accountsApi.createAccount({
+            name: created.name,
+            type: created.type,
+            startingBalance: created.startingBalance,
+            isOffBudget: created.isOffBudget,
+          });
           qc.invalidateQueries({ queryKey: ['accounts'] });
         },
       });
@@ -34,8 +39,13 @@ export function useCreateAccount() {
 export function useUpdateAccount() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof accountsApi.updateAccount>[1] }) =>
-      accountsApi.updateAccount(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Parameters<typeof accountsApi.updateAccount>[1];
+    }) => accountsApi.updateAccount(id, data),
     onMutate: async ({ id }) => {
       const accounts = qc.getQueryData<Account[]>(['accounts']);
       return { old: accounts?.find((a) => a.id === id) };
@@ -47,7 +57,11 @@ export function useUpdateAccount() {
       useUndoStore.getState().push({
         description: `Edit account`,
         undo: async () => {
-          await accountsApi.updateAccount(id, { name: snapshot.name, type: snapshot.type, isOffBudget: snapshot.isOffBudget });
+          await accountsApi.updateAccount(id, {
+            name: snapshot.name,
+            type: snapshot.type,
+            isOffBudget: snapshot.isOffBudget,
+          });
           qc.invalidateQueries({ queryKey: ['accounts'] });
         },
         redo: async () => {

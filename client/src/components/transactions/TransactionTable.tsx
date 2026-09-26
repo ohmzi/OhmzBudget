@@ -2,7 +2,11 @@ import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { format, parseISO } from 'date-fns';
 import { Plus, Upload } from 'lucide-react';
-import { useTransactions, useCreateTransaction, useCreateTransfer } from '../../hooks/useTransactions';
+import {
+  useTransactions,
+  useCreateTransaction,
+  useCreateTransfer,
+} from '../../hooks/useTransactions';
 import { useCategories } from '../../hooks/useCategories';
 import { usePayees } from '../../hooks/usePayees';
 import { useAccounts } from '../../hooks/useAccounts';
@@ -25,7 +29,13 @@ interface Props {
   overlayDetail?: boolean;
 }
 
-export function TransactionTable({ accountId, categoryId, month, onClearMonth, overlayDetail }: Props) {
+export function TransactionTable({
+  accountId,
+  categoryId,
+  month,
+  onClearMonth,
+  overlayDetail,
+}: Props) {
   const [filters, setFilters] = useState<FilterState>(() => ({
     ...DEFAULT_FILTERS,
     datePreset: categoryId ? 'all' : DEFAULT_FILTERS.datePreset,
@@ -68,7 +78,7 @@ export function TransactionTable({ accountId, categoryId, month, onClearMonth, o
   );
 
   const selectedTx = useMemo(
-    () => detailId ? transactions.find(tx => tx.id === detailId) ?? null : null,
+    () => (detailId ? (transactions.find((tx) => tx.id === detailId) ?? null) : null),
     [detailId, transactions],
   );
 
@@ -133,13 +143,16 @@ export function TransactionTable({ accountId, categoryId, month, onClearMonth, o
   function handleCreate(data: CreateTransactionData) {
     if (data.categoryId?.startsWith('transfer:') && accountId) {
       const toAccountId = data.categoryId.slice('transfer:'.length);
-      createTransfer.mutate({
-        fromAccountId: accountId,
-        toAccountId,
-        date: data.date,
-        amount: Math.abs(data.amount),
-        notes: data.notes,
-      }, { onSuccess: () => setShowAdd(false) });
+      createTransfer.mutate(
+        {
+          fromAccountId: accountId,
+          toAccountId,
+          date: data.date,
+          amount: Math.abs(data.amount),
+          notes: data.notes,
+        },
+        { onSuccess: () => setShowAdd(false) },
+      );
       return;
     }
     createTx.mutate(data, { onSuccess: () => setShowAdd(false) });
@@ -149,7 +162,10 @@ export function TransactionTable({ accountId, categoryId, month, onClearMonth, o
     <div className="flex flex-col flex-1 min-h-0">
       <TransactionFilters
         state={filters}
-        onChange={(f) => { if (month && onClearMonth) onClearMonth(); setFilters(f); }}
+        onChange={(f) => {
+          if (month && onClearMonth) onClearMonth();
+          setFilters(f);
+        }}
         categoryName={filters.categoryId ? categoryMap.get(filters.categoryId)?.name : undefined}
         externalMonth={month}
       />
@@ -160,7 +176,13 @@ export function TransactionTable({ accountId, categoryId, month, onClearMonth, o
             <Button variant="secondary" size="sm" onClick={() => setShowImport(true)}>
               <Upload size={13} /> Import CSV
             </Button>
-            <Button size="sm" onClick={() => { setShowAdd(true); setDetailId(null); }}>
+            <Button
+              size="sm"
+              onClick={() => {
+                setShowAdd(true);
+                setDetailId(null);
+              }}
+            >
               <Plus size={13} /> Add Transaction
             </Button>
           </div>
@@ -183,7 +205,9 @@ export function TransactionTable({ accountId, categoryId, month, onClearMonth, o
           {isLoading ? (
             <div className="px-4 py-10 text-center text-sm text-text-tertiary">Loading...</div>
           ) : transactions.length === 0 && !showAdd ? (
-            <div className="px-4 py-10 text-center text-sm text-text-tertiary">No transactions found.</div>
+            <div className="px-4 py-10 text-center text-sm text-text-tertiary">
+              No transactions found.
+            </div>
           ) : (
             groupedByDate.map((group) => (
               <div key={group.date}>
@@ -204,13 +228,21 @@ export function TransactionTable({ accountId, categoryId, month, onClearMonth, o
                     categoryMap={categoryMap}
                     groups={groups as CategoryGroup[]}
                     payees={payees}
-                    accountName={showAccountCol ? accountInfoMap.get(tx.accountId)?.name : undefined}
-                    accountType={showAccountCol ? accountInfoMap.get(tx.accountId)?.type : undefined}
+                    accountName={
+                      showAccountCol ? accountInfoMap.get(tx.accountId)?.name : undefined
+                    }
+                    accountType={
+                      showAccountCol ? accountInfoMap.get(tx.accountId)?.type : undefined
+                    }
                     showAccountCol={showAccountCol}
                     isSelected={detailId === tx.id}
                     onOpenDetail={setDetailId}
-                    onFilterCategory={(catId) => setFilters(f => ({ ...f, categoryId: catId, datePreset: 'all' }))}
-                    onFilterSearch={(search) => setFilters(f => ({ ...f, search, datePreset: 'all' }))}
+                    onFilterCategory={(catId) =>
+                      setFilters((f) => ({ ...f, categoryId: catId, datePreset: 'all' }))
+                    }
+                    onFilterSearch={(search) =>
+                      setFilters((f) => ({ ...f, search, datePreset: 'all' }))
+                    }
                   />
                 ))}
               </div>
@@ -240,31 +272,40 @@ export function TransactionTable({ accountId, categoryId, month, onClearMonth, o
       </div>
 
       {accountId && (
-        <ImportModal isOpen={showImport} onClose={() => setShowImport(false)} accountId={accountId} />
+        <ImportModal
+          isOpen={showImport}
+          onClose={() => setShowImport(false)}
+          accountId={accountId}
+        />
       )}
 
-      {panelMounted && panelTx && overlayDetail && createPortal(
-        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailId(null)}>
-          <div className={`absolute inset-0 bg-black/20 transition-opacity duration-200 ${panelVisible ? 'opacity-100' : 'opacity-0'}`} />
-          <div
-            className={`relative h-full transition-transform duration-200 ease-out ${panelVisible ? 'translate-x-0' : 'translate-x-full'}`}
-            onClick={(e) => e.stopPropagation()}
-            onTransitionEnd={handlePanelTransitionEnd}
-          >
-            <TransactionDetailPanel
-              transaction={panelTx}
-              categoryMap={categoryMap}
-              groups={groups as CategoryGroup[]}
-              payees={payees}
-              accounts={accounts}
-              accountName={accountInfoMap.get(panelTx.accountId)?.name}
-              accountType={accountInfoMap.get(panelTx.accountId)?.type}
-              onClose={() => setDetailId(null)}
+      {panelMounted &&
+        panelTx &&
+        overlayDetail &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailId(null)}>
+            <div
+              className={`absolute inset-0 bg-black/20 transition-opacity duration-200 ${panelVisible ? 'opacity-100' : 'opacity-0'}`}
             />
-          </div>
-        </div>,
-        document.body,
-      )}
+            <div
+              className={`relative h-full transition-transform duration-200 ease-out ${panelVisible ? 'translate-x-0' : 'translate-x-full'}`}
+              onClick={(e) => e.stopPropagation()}
+              onTransitionEnd={handlePanelTransitionEnd}
+            >
+              <TransactionDetailPanel
+                transaction={panelTx}
+                categoryMap={categoryMap}
+                groups={groups as CategoryGroup[]}
+                payees={payees}
+                accounts={accounts}
+                accountName={accountInfoMap.get(panelTx.accountId)?.name}
+                accountType={accountInfoMap.get(panelTx.accountId)?.type}
+                onClose={() => setDetailId(null)}
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

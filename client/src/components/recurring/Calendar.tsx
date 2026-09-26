@@ -1,8 +1,16 @@
 import { useMemo } from 'react';
 import {
-  startOfMonth, endOfMonth, startOfWeek, endOfWeek,
-  eachDayOfInterval, isSameMonth, isSameDay, format, parseISO,
-  addMonths, subMonths,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  isSameMonth,
+  isSameDay,
+  format,
+  parseISO,
+  addMonths,
+  subMonths,
 } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { ScheduleOccurrence, OccurrenceDisplayStatus } from '../../types';
@@ -65,7 +73,10 @@ export default function Calendar({ month, onMonthChange, occurrences, onDateClic
 
       <div className="grid grid-cols-7 gap-px bg-border-light rounded-lg overflow-hidden border border-border-light">
         {DAY_HEADERS.map((d) => (
-          <div key={d} className="bg-surface-alt py-1.5 text-center text-xs font-medium text-text-tertiary">
+          <div
+            key={d}
+            className="bg-surface-alt py-1.5 text-center text-xs font-medium text-text-tertiary"
+          >
             {d}
           </div>
         ))}

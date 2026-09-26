@@ -56,7 +56,9 @@ export function ConnectedAccounts() {
         >
           Plaid
           {items.length > 0 && (
-            <span className="ml-1.5 text-[10px] bg-brand-50 text-brand-600 px-1.5 py-0.5 rounded-full">{items.length}</span>
+            <span className="ml-1.5 text-[10px] bg-brand-50 text-brand-600 px-1.5 py-0.5 rounded-full">
+              {items.length}
+            </span>
           )}
         </button>
         <button
@@ -69,7 +71,9 @@ export function ConnectedAccounts() {
         >
           SimpleFIN
           {sfConnections.length > 0 && (
-            <span className="ml-1.5 text-[10px] bg-brand-50 text-brand-600 px-1.5 py-0.5 rounded-full">{sfConnections.length}</span>
+            <span className="ml-1.5 text-[10px] bg-brand-50 text-brand-600 px-1.5 py-0.5 rounded-full">
+              {sfConnections.length}
+            </span>
           )}
         </button>
       </div>
@@ -80,15 +84,15 @@ export function ConnectedAccounts() {
           {syncAll.isSuccess && syncAll.data && (
             <div className="bg-positive-subtle border border-positive/10 rounded-md px-4 py-2">
               <p className="text-xs text-positive">
-                Plaid sync complete:{' '}
-                {syncAll.data.results.reduce((s, r) => s + r.added, 0)} new transactions imported.
+                Plaid sync complete: {syncAll.data.results.reduce((s, r) => s + r.added, 0)} new
+                transactions imported.
               </p>
             </div>
           )}
 
           {items.length > 0 ? (
             <div className="space-y-3">
-              {items.map(item => (
+              {items.map((item) => (
                 <ConnectedInstitutionCard key={item.id} item={item} />
               ))}
               <div className="flex items-center gap-2">
@@ -97,11 +101,20 @@ export function ConnectedAccounts() {
                     <Plus size={14} /> Add Another Bank
                   </Button>
                 )}
-                <Button variant="secondary" size="sm" onClick={() => syncAll.mutate()} disabled={syncAll.isPending}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => syncAll.mutate()}
+                  disabled={syncAll.isPending}
+                >
                   {syncAll.isPending ? (
-                    <><Loader2 size={12} className="animate-spin" /> Syncing...</>
+                    <>
+                      <Loader2 size={12} className="animate-spin" /> Syncing...
+                    </>
                   ) : (
-                    <><RefreshCw size={12} /> Sync All</>
+                    <>
+                      <RefreshCw size={12} /> Sync All
+                    </>
                   )}
                 </Button>
               </div>
@@ -133,26 +146,35 @@ export function ConnectedAccounts() {
           {syncAllSf.isSuccess && syncAllSf.data && (
             <div className="bg-positive-subtle border border-positive/10 rounded-md px-4 py-2">
               <p className="text-xs text-positive">
-                SimpleFIN sync complete:{' '}
-                {syncAllSf.data.results.reduce((s, r) => s + r.added, 0)} new transactions imported.
+                SimpleFIN sync complete: {syncAllSf.data.results.reduce((s, r) => s + r.added, 0)}{' '}
+                new transactions imported.
               </p>
             </div>
           )}
 
           {sfConnections.length > 0 ? (
             <div className="space-y-3">
-              {sfConnections.map(conn => (
+              {sfConnections.map((conn) => (
                 <SimplefinConnectionCard key={conn.id} connection={conn} />
               ))}
               <div className="flex items-center gap-2">
                 <Button variant="secondary" size="sm" onClick={() => setShowSimplefin(true)}>
                   <Plus size={14} /> Add Another Connection
                 </Button>
-                <Button variant="secondary" size="sm" onClick={() => syncAllSf.mutate()} disabled={syncAllSf.isPending}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => syncAllSf.mutate()}
+                  disabled={syncAllSf.isPending}
+                >
                   {syncAllSf.isPending ? (
-                    <><Loader2 size={12} className="animate-spin" /> Syncing...</>
+                    <>
+                      <Loader2 size={12} className="animate-spin" /> Syncing...
+                    </>
                   ) : (
-                    <><RefreshCw size={12} /> Sync All</>
+                    <>
+                      <RefreshCw size={12} /> Sync All
+                    </>
                   )}
                 </Button>
               </div>
@@ -179,7 +201,10 @@ export function ConnectedAccounts() {
       <ConnectBankModal isOpen={showConnect} onClose={() => setShowConnect(false)} />
       <SimplefinConnectModal
         isOpen={showSimplefin}
-        onClose={() => { setShowSimplefin(false); setSfSetupResult(undefined); }}
+        onClose={() => {
+          setShowSimplefin(false);
+          setSfSetupResult(undefined);
+        }}
         initialSetupResult={sfSetupResult}
       />
     </div>

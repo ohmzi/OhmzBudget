@@ -24,7 +24,7 @@ export default function RecentTransactions() {
   }, [groups]);
 
   const accountInfoMap = useMemo(
-    () => new Map(accounts.map(a => [a.id, { name: a.name, type: a.type }])),
+    () => new Map(accounts.map((a) => [a.id, { name: a.name, type: a.type }])),
     [accounts],
   );
 
@@ -45,14 +45,19 @@ export default function RecentTransactions() {
     <Card padding="none">
       <div className="flex items-center justify-between px-5 pt-4 pb-3">
         <h3 className="text-sm font-semibold text-text">Recent Transactions</h3>
-        <Link to="/transactions" className="text-xs text-brand-600 hover:text-brand-700 font-medium">View all</Link>
+        <Link
+          to="/transactions"
+          className="text-xs text-brand-600 hover:text-brand-700 font-medium"
+        >
+          View all
+        </Link>
       </div>
 
       {transactions.length === 0 ? (
         <p className="text-sm text-text-disabled py-4 text-center">No transactions yet.</p>
       ) : (
         <div>
-          {transactions.map(tx => (
+          {transactions.map((tx) => (
             <TransactionRow
               key={tx.id}
               tx={tx}

@@ -1,6 +1,14 @@
 import { Router } from 'express';
 import { db } from '../db/index.js';
-import { accounts, categories, categoryGroups, transactions, budgetMonths, payees, rules } from '../db/schema.js';
+import {
+  accounts,
+  categories,
+  categoryGroups,
+  transactions,
+  budgetMonths,
+  payees,
+  rules,
+} from '../db/schema.js';
 import { eq, and, gte, lte } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -37,10 +45,18 @@ exportRouter.get('/transactions/csv', (req, res) => {
     .all();
 
   const accts = Object.fromEntries(
-    db.select().from(accounts).all().map((a) => [a.id, a.name])
+    db
+      .select()
+      .from(accounts)
+      .all()
+      .map((a) => [a.id, a.name]),
   );
   const cats = Object.fromEntries(
-    db.select().from(categories).all().map((c) => [c.id, c.name])
+    db
+      .select()
+      .from(categories)
+      .all()
+      .map((c) => [c.id, c.name]),
   );
 
   const header = 'Date,Account,Payee,Category,Notes,Amount,Reconciled\n';
@@ -50,11 +66,11 @@ exportRouter.get('/transactions/csv', (req, res) => {
         r.date,
         escapeCsv(accts[r.accountId] ?? ''),
         escapeCsv(r.payeeName),
-        escapeCsv(r.categoryId ? cats[r.categoryId] ?? '' : ''),
+        escapeCsv(r.categoryId ? (cats[r.categoryId] ?? '') : ''),
         escapeCsv(r.notes),
         (r.amount / 100).toFixed(2),
         r.reconciled ? 'Yes' : 'No',
-      ].join(',')
+      ].join(','),
     )
     .join('\n');
 

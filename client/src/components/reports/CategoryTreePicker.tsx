@@ -9,7 +9,12 @@ interface Props {
   onGroupChange: (ids: string[]) => void;
 }
 
-export default function CategoryTreePicker({ selectedCategoryIds, selectedGroupIds, onCategoryChange, onGroupChange }: Props) {
+export default function CategoryTreePicker({
+  selectedCategoryIds,
+  selectedGroupIds,
+  onCategoryChange,
+  onGroupChange,
+}: Props) {
   const { data: groups = [] } = useCategories();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
@@ -17,7 +22,8 @@ export default function CategoryTreePicker({ selectedCategoryIds, selectedGroupI
 
   function toggleExpand(groupId: string) {
     const next = new Set(expanded);
-    if (next.has(groupId)) next.delete(groupId); else next.add(groupId);
+    if (next.has(groupId)) next.delete(groupId);
+    else next.add(groupId);
     setExpanded(next);
   }
 
@@ -28,11 +34,11 @@ export default function CategoryTreePicker({ selectedCategoryIds, selectedGroupI
 
   function toggleGroup(groupId: string) {
     if (allSelected) {
-      const allGroupIds = groups.filter(g => g.id !== groupId).map(g => g.id);
+      const allGroupIds = groups.filter((g) => g.id !== groupId).map((g) => g.id);
       onGroupChange(allGroupIds);
       onCategoryChange([]);
     } else if (selectedGroupIds.includes(groupId)) {
-      onGroupChange(selectedGroupIds.filter(id => id !== groupId));
+      onGroupChange(selectedGroupIds.filter((id) => id !== groupId));
     } else {
       onGroupChange([...selectedGroupIds, groupId]);
     }
@@ -40,11 +46,14 @@ export default function CategoryTreePicker({ selectedCategoryIds, selectedGroupI
 
   function toggleCategory(catId: string) {
     if (allSelected) {
-      const allCatIds = groups.flatMap(g => g.categories).filter(c => c.id !== catId).map(c => c.id);
+      const allCatIds = groups
+        .flatMap((g) => g.categories)
+        .filter((c) => c.id !== catId)
+        .map((c) => c.id);
       onCategoryChange(allCatIds);
       onGroupChange([]);
     } else if (selectedCategoryIds.includes(catId)) {
-      onCategoryChange(selectedCategoryIds.filter(id => id !== catId));
+      onCategoryChange(selectedCategoryIds.filter((id) => id !== catId));
     } else {
       onCategoryChange([...selectedCategoryIds, catId]);
     }
@@ -68,11 +77,18 @@ export default function CategoryTreePicker({ selectedCategoryIds, selectedGroupI
       >
         {allSelected ? 'All selected' : 'Select all'}
       </button>
-      {groups.map(g => (
+      {groups.map((g) => (
         <div key={g.id}>
           <div className="flex items-center gap-1 py-0.5">
-            <button onClick={() => toggleExpand(g.id)} className="text-text-tertiary hover:text-text-secondary p-0.5">
-              {expanded.has(g.id) ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+            <button
+              onClick={() => toggleExpand(g.id)}
+              className="text-text-tertiary hover:text-text-secondary p-0.5"
+            >
+              {expanded.has(g.id) ? (
+                <ChevronDown className="w-3 h-3" />
+              ) : (
+                <ChevronRight className="w-3 h-3" />
+              )}
             </button>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -86,7 +102,7 @@ export default function CategoryTreePicker({ selectedCategoryIds, selectedGroupI
           </div>
           {expanded.has(g.id) && (
             <div className="ml-6 space-y-0.5">
-              {g.categories.map(c => (
+              {g.categories.map((c) => (
                 <label key={c.id} className="flex items-center gap-2 py-0.5 cursor-pointer">
                   <input
                     type="checkbox"
@@ -94,7 +110,10 @@ export default function CategoryTreePicker({ selectedCategoryIds, selectedGroupI
                     onChange={() => toggleCategory(c.id)}
                     className="rounded border-border text-brand-600 focus:ring-brand-600"
                   />
-                  <span className="text-sm text-text-secondary">{c.icon ? `${c.icon} ` : ''}{c.name}</span>
+                  <span className="text-sm text-text-secondary">
+                    {c.icon ? `${c.icon} ` : ''}
+                    {c.name}
+                  </span>
                 </label>
               ))}
             </div>

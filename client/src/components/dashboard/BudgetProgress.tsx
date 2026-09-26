@@ -30,13 +30,15 @@ export default function BudgetProgress({ currentMonth }: Props) {
       { key: 'flexible', name: 'Flexible' },
       { key: 'non_monthly', name: 'Non-Monthly' },
     ];
-    const allCats = groups.filter(g => !g.isIncome).flatMap(g => g.categories);
-    return types.map(t => ({
-      id: t.key,
-      name: t.name,
-      planned: allCats.filter(c => c.budgetType === t.key).reduce((s, c) => s + c.budgeted, 0),
-      spent: allCats.filter(c => c.budgetType === t.key).reduce((s, c) => s + c.spent, 0),
-    })).filter(g => g.planned > 0);
+    const allCats = groups.filter((g) => !g.isIncome).flatMap((g) => g.categories);
+    return types
+      .map((t) => ({
+        id: t.key,
+        name: t.name,
+        planned: allCats.filter((c) => c.budgetType === t.key).reduce((s, c) => s + c.budgeted, 0),
+        spent: allCats.filter((c) => c.budgetType === t.key).reduce((s, c) => s + c.spent, 0),
+      }))
+      .filter((g) => g.planned > 0);
   }, [groups]);
 
   if (isLoading) {
@@ -46,7 +48,10 @@ export default function BudgetProgress({ currentMonth }: Props) {
         <div className="space-y-6">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i}>
-              <div className="h-4 bg-surface-alt rounded animate-pulse mb-2" style={{ width: `${50 + i * 15}%` }} />
+              <div
+                className="h-4 bg-surface-alt rounded animate-pulse mb-2"
+                style={{ width: `${50 + i * 15}%` }}
+              />
               <div className="h-2 bg-surface-alt rounded-full animate-pulse mb-1" />
               <div className="h-3 bg-surface-alt rounded animate-pulse w-24" />
             </div>
@@ -61,15 +66,19 @@ export default function BudgetProgress({ currentMonth }: Props) {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <h3 className="text-base font-bold text-text">Budget</h3>
-          <Link to="/budget" className="text-sm text-text-tertiary hover:text-text-secondary">{monthLabel}</Link>
+          <Link to="/budget" className="text-sm text-text-tertiary hover:text-text-secondary">
+            {monthLabel}
+          </Link>
         </div>
       </div>
 
       {groupStats.length === 0 ? (
-        <p className="text-sm text-text-disabled py-4 text-center">No budgeted categories this month.</p>
+        <p className="text-sm text-text-disabled py-4 text-center">
+          No budgeted categories this month.
+        </p>
       ) : (
         <div className="divide-y divide-border-light">
-          {groupStats.map(g => {
+          {groupStats.map((g) => {
             const remaining = g.planned - g.spent;
             const status = getStatus(g.spent, g.planned);
             const ratio = Math.min(g.spent / g.planned, 1);
@@ -109,14 +118,17 @@ export default function BudgetProgress({ currentMonth }: Props) {
                   <span className="text-sm text-text-tertiary tabular-nums">
                     {formatCurrency(g.spent)} spent
                   </span>
-                  <span className={`text-sm font-medium tabular-nums ${
-                    status === 'over'
-                      ? 'text-negative'
-                      : status === 'warning'
-                        ? 'text-caution'
-                        : 'text-positive'
-                  }`}>
-                    {status === 'over' ? '-' : ''}{formatCurrency(Math.abs(remaining))} remaining
+                  <span
+                    className={`text-sm font-medium tabular-nums ${
+                      status === 'over'
+                        ? 'text-negative'
+                        : status === 'warning'
+                          ? 'text-caution'
+                          : 'text-positive'
+                    }`}
+                  >
+                    {status === 'over' ? '-' : ''}
+                    {formatCurrency(Math.abs(remaining))} remaining
                   </span>
                 </div>
               </div>

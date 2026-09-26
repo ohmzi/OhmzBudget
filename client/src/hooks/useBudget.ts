@@ -8,21 +8,34 @@ export function useBudget(month: string) {
 }
 
 export function useBudgetSummary(month: string) {
-  return useQuery({ queryKey: ['budget-summary', month], queryFn: () => budgetApi.getBudgetSummary(month) });
+  return useQuery({
+    queryKey: ['budget-summary', month],
+    queryFn: () => budgetApi.getBudgetSummary(month),
+  });
 }
 
 export function useSetBudget() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ month, categoryId, budgeted }: { month: string; categoryId: string; budgeted: number }) =>
-      budgetApi.setBudget(month, categoryId, budgeted),
+    mutationFn: ({
+      month,
+      categoryId,
+      budgeted,
+    }: {
+      month: string;
+      categoryId: string;
+      budgeted: number;
+    }) => budgetApi.setBudget(month, categoryId, budgeted),
     onMutate: async ({ month, categoryId }) => {
       const groups = qc.getQueryData<BudgetGroup[]>(['budget', month]);
       let oldBudgeted = 0;
       if (groups) {
         for (const g of groups) {
           const cat = g.categories.find((c) => c.id === categoryId);
-          if (cat) { oldBudgeted = cat.budgeted; break; }
+          if (cat) {
+            oldBudgeted = cat.budgeted;
+            break;
+          }
         }
       }
       return { oldBudgeted };
@@ -59,8 +72,15 @@ export function useCategoryHistory(categoryId: string | null, currentMonth?: str
 export function useSetBudgetBulk() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ categoryId, budgeted, fromMonth }: { categoryId: string; budgeted: number; fromMonth: string }) =>
-      budgetApi.setBudgetBulk(categoryId, budgeted, fromMonth),
+    mutationFn: ({
+      categoryId,
+      budgeted,
+      fromMonth,
+    }: {
+      categoryId: string;
+      budgeted: number;
+      fromMonth: string;
+    }) => budgetApi.setBudgetBulk(categoryId, budgeted, fromMonth),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['budget'] });
       qc.invalidateQueries({ queryKey: ['budget-summary'] });

@@ -10,11 +10,15 @@ function monthRange(from: string, to: string): string[] {
   const months: string[] = [];
   const [fy, fm] = from.split('-').map(Number);
   const [ty, tm] = to.split('-').map(Number);
-  let y = fy, m = fm;
+  let y = fy,
+    m = fm;
   while (y < ty || (y === ty && m <= tm)) {
     months.push(`${y}-${String(m).padStart(2, '0')}`);
     m++;
-    if (m > 12) { m = 1; y++; }
+    if (m > 12) {
+      m = 1;
+      y++;
+    }
   }
   return months;
 }
@@ -31,10 +35,17 @@ function dayRange(from: string, to: string): string[] {
 }
 
 reportsRouter.get('/net-worth', (req, res) => {
-  let { from = '2024-01', to = '2026-12', granularity = 'monthly' } = req.query as Record<string, string>;
+  let {
+    from = '2024-01',
+    to = '2026-12',
+    granularity = 'monthly',
+  } = req.query as Record<string, string>;
   const isDaily = granularity === 'daily';
 
-  const earliest = db.select({ d: sql<string>`min(${transactions.date})` }).from(transactions).get();
+  const earliest = db
+    .select({ d: sql<string>`min(${transactions.date})` })
+    .from(transactions)
+    .get();
   if (earliest?.d) {
     const minPeriod = isDaily ? earliest.d : earliest.d.slice(0, 7);
     if (from < minPeriod) from = minPeriod;
@@ -88,7 +99,8 @@ reportsRouter.get('/net-worth', (req, res) => {
   }
 
   const result = periods.map((period) => {
-    let assets = 0, liabilities = 0;
+    let assets = 0,
+      liabilities = 0;
     for (const acct of allAccounts) {
       const balance = balanceAt(acct.id, period, acct.startingBalance);
       if (acct.type === 'credit') liabilities += Math.abs(Math.min(balance, 0));
@@ -121,7 +133,9 @@ reportsRouter.get('/spending-by-category', (req, res) => {
     .groupBy(transactions.categoryId)
     .all();
 
-  res.json(rows.filter((r) => r.totalSpent < 0).map((r) => ({ ...r, totalSpent: Math.abs(r.totalSpent) })));
+  res.json(
+    rows.filter((r) => r.totalSpent < 0).map((r) => ({ ...r, totalSpent: Math.abs(r.totalSpent) })),
+  );
 });
 
 reportsRouter.get('/income-vs-expenses', (req, res) => {
@@ -138,7 +152,12 @@ reportsRouter.get('/income-vs-expenses', (req, res) => {
     .from(transactions)
     .innerJoin(categories, eq(transactions.categoryId, categories.id))
     .innerJoin(categoryGroups, eq(categories.groupId, categoryGroups.id))
-    .where(and(gte(transactions.date, monthBounds(from).from), lte(transactions.date, monthBounds(to).to)))
+    .where(
+      and(
+        gte(transactions.date, monthBounds(from).from),
+        lte(transactions.date, monthBounds(to).to),
+      ),
+    )
     .groupBy(sql`strftime('%Y-%m', ${transactions.date})`, categoryGroups.isIncome)
     .all();
 
@@ -169,11 +188,13 @@ reportsRouter.get('/cash-flow', (req, res) => {
     })
     .from(transactions)
     .innerJoin(accounts, eq(transactions.accountId, accounts.id))
-    .where(and(
-      gte(transactions.date, monthBounds(from).from),
-      lte(transactions.date, monthBounds(to).to),
-      eq(accounts.isOffBudget, 0),
-    ))
+    .where(
+      and(
+        gte(transactions.date, monthBounds(from).from),
+        lte(transactions.date, monthBounds(to).to),
+        eq(accounts.isOffBudget, 0),
+      ),
+    )
     .groupBy(sql`strftime('%Y-%m', ${transactions.date})`)
     .all();
 
@@ -231,7 +252,7 @@ reportsRouter.get('/spending-trends', (req, res) => {
   res.json(
     rows
       .filter((r) => r.categoryId && ids.includes(r.categoryId) && r.total < 0)
-      .map((r) => ({ ...r, total: Math.abs(r.total) }))
+      .map((r) => ({ ...r, total: Math.abs(r.total) })),
   );
 });
 
@@ -252,7 +273,9 @@ reportsRouter.get('/spending-comparison', (req, res) => {
         total: sql<number>`coalesce(sum(${transactions.amount}), 0)`,
       })
       .from(transactions)
-      .where(and(lt(transactions.amount, 0), gte(transactions.date, from), lte(transactions.date, to)))
+      .where(
+        and(lt(transactions.amount, 0), gte(transactions.date, from), lte(transactions.date, to)),
+      )
       .groupBy(transactions.date)
       .all();
     const map = new Map<string, number>();
@@ -318,7 +341,8 @@ reportsRouter.get('/spending-comparison', (req, res) => {
       const compDaily = getDailyExpenses(fmtDate(lastMonday), fmtDate(lastSunday));
       currentSeries = buildCumulative(curDaily, dayOfWeek, todayDay);
       comparisonSeries = buildCumulative(compDaily, dayOfWeek, maxDays);
-      currentTotal = currentSeries.length > 0 ? currentSeries[currentSeries.length - 1].cumulative : 0;
+      currentTotal =
+        currentSeries.length > 0 ? currentSeries[currentSeries.length - 1].cumulative : 0;
       break;
     }
 
@@ -334,14 +358,31 @@ reportsRouter.get('/spending-comparison', (req, res) => {
       todayDay = today.getDate();
       periodLabel = 'this month';
       currentLabel = 'This month';
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthNames = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
       comparisonLabel = `${monthNames[month]} ${lastYear}`;
 
       const curDaily = getDailyExpenses(`${year}-${mm}-01`, todayStr);
-      const compDaily = getDailyExpenses(`${lastYear}-${mm}-01`, `${lastYear}-${mm}-${String(daysInComp).padStart(2, '0')}`);
+      const compDaily = getDailyExpenses(
+        `${lastYear}-${mm}-01`,
+        `${lastYear}-${mm}-${String(daysInComp).padStart(2, '0')}`,
+      );
       currentSeries = buildCumulative(curDaily, dayOfMonth, todayDay);
       comparisonSeries = buildCumulative(compDaily, dayOfMonth, maxDays);
-      currentTotal = currentSeries.length > 0 ? currentSeries[currentSeries.length - 1].cumulative : 0;
+      currentTotal =
+        currentSeries.length > 0 ? currentSeries[currentSeries.length - 1].cumulative : 0;
       break;
     }
 
@@ -352,7 +393,8 @@ reportsRouter.get('/spending-comparison', (req, res) => {
       const daysInCur = new Date(year, month + 1, 0).getDate();
 
       const monthsInfo: { days: number }[] = [];
-      let rangeFrom = '', rangeTo = '';
+      let rangeFrom = '',
+        rangeTo = '';
       for (let i = 1; i <= 12; i++) {
         const d = new Date(year, month - i, 1);
         const y = d.getFullYear();
@@ -372,7 +414,7 @@ reportsRouter.get('/spending-comparison', (req, res) => {
         const day = dayOfMonth(dateStr);
         dayTotals.set(day, (dayTotals.get(day) || 0) + amount);
       }
-      const monthsWithDay = (day: number) => monthsInfo.filter(m => m.days >= day).length;
+      const monthsWithDay = (day: number) => monthsInfo.filter((m) => m.days >= day).length;
 
       maxDays = Math.max(daysInCur, 31);
       todayDay = today.getDate();
@@ -390,7 +432,8 @@ reportsRouter.get('/spending-comparison', (req, res) => {
 
       const curDaily = getDailyExpenses(`${year}-${mm}-01`, todayStr);
       currentSeries = buildCumulative(curDaily, dayOfMonth, todayDay);
-      currentTotal = currentSeries.length > 0 ? currentSeries[currentSeries.length - 1].cumulative : 0;
+      currentTotal =
+        currentSeries.length > 0 ? currentSeries[currentSeries.length - 1].cumulative : 0;
       break;
     }
 
@@ -411,7 +454,8 @@ reportsRouter.get('/spending-comparison', (req, res) => {
       const compDaily = getDailyExpenses(`${year - 1}-01-01`, `${year - 1}-12-31`);
       currentSeries = buildCumulative(curDaily, dayOfYear, todayDay);
       comparisonSeries = buildCumulative(compDaily, dayOfYear, maxDays);
-      currentTotal = currentSeries.length > 0 ? currentSeries[currentSeries.length - 1].cumulative : 0;
+      currentTotal =
+        currentSeries.length > 0 ? currentSeries[currentSeries.length - 1].cumulative : 0;
       break;
     }
 
@@ -433,10 +477,14 @@ reportsRouter.get('/spending-comparison', (req, res) => {
       comparisonLabel = 'Last month';
 
       const curDaily = getDailyExpenses(`${year}-${mm}-01`, todayStr);
-      const compDaily = getDailyExpenses(`${pY}-${pmm}-01`, `${pY}-${pmm}-${String(daysInPrev).padStart(2, '0')}`);
+      const compDaily = getDailyExpenses(
+        `${pY}-${pmm}-01`,
+        `${pY}-${pmm}-${String(daysInPrev).padStart(2, '0')}`,
+      );
       currentSeries = buildCumulative(curDaily, dayOfMonth, todayDay);
       comparisonSeries = buildCumulative(compDaily, dayOfMonth, maxDays);
-      currentTotal = currentSeries.length > 0 ? currentSeries[currentSeries.length - 1].cumulative : 0;
+      currentTotal =
+        currentSeries.length > 0 ? currentSeries[currentSeries.length - 1].cumulative : 0;
       break;
     }
   }
@@ -489,12 +537,32 @@ reportsRouter.get('/custom', (req, res) => {
   }
 
   const groupByCol = {
-    category: { name: categories.name, id: transactions.categoryId, groupCol: transactions.categoryId },
-    categoryGroup: { name: categoryGroups.name, id: categories.groupId, groupCol: categories.groupId },
-    payee: { name: sql<string>`coalesce(${payees.name}, ${transactions.payeeName}, 'Unknown')`, id: transactions.payeeId, groupCol: transactions.payeeId },
+    category: {
+      name: categories.name,
+      id: transactions.categoryId,
+      groupCol: transactions.categoryId,
+    },
+    categoryGroup: {
+      name: categoryGroups.name,
+      id: categories.groupId,
+      groupCol: categories.groupId,
+    },
+    payee: {
+      name: sql<string>`coalesce(${payees.name}, ${transactions.payeeName}, 'Unknown')`,
+      id: transactions.payeeId,
+      groupCol: transactions.payeeId,
+    },
     account: { name: accounts.name, id: transactions.accountId, groupCol: transactions.accountId },
-    month: { name: sql<string>`strftime('%Y-%m', ${transactions.date})`, id: sql<string>`strftime('%Y-%m', ${transactions.date})`, groupCol: sql`strftime('%Y-%m', ${transactions.date})` },
-  }[group_by] ?? { name: categories.name, id: transactions.categoryId, groupCol: transactions.categoryId };
+    month: {
+      name: sql<string>`strftime('%Y-%m', ${transactions.date})`,
+      id: sql<string>`strftime('%Y-%m', ${transactions.date})`,
+      groupCol: sql`strftime('%Y-%m', ${transactions.date})`,
+    },
+  }[group_by] ?? {
+    name: categories.name,
+    id: transactions.categoryId,
+    groupCol: transactions.categoryId,
+  };
 
   const baseQuery = db
     .select({
@@ -533,7 +601,7 @@ reportsRouter.get('/custom', (req, res) => {
       }
     }
 
-    const data = months.map(m => ({ month: m, ...dataMap.get(m)! }));
+    const data = months.map((m) => ({ month: m, ...dataMap.get(m)! }));
     res.json({ mode: 'time', groups, data });
   } else {
     const rows = baseQuery
@@ -542,8 +610,8 @@ reportsRouter.get('/custom', (req, res) => {
       .all() as { name: string | null; id: string | null; value: number }[];
 
     const data = rows
-      .filter(r => r.value !== 0)
-      .map(r => ({
+      .filter((r) => r.value !== 0)
+      .map((r) => ({
         name: r.name || 'Uncategorized',
         id: r.id,
         value: balance_type === 'expense' ? Math.abs(r.value) : r.value,

@@ -22,9 +22,24 @@ export default function RecurringSummaryBar({ summary, isLoading }: Props) {
   const net = income + expenses;
 
   const cards = [
-    { label: 'Expected Income', value: formatCurrency(income), color: 'text-positive', accent: 'positive' as const },
-    { label: 'Expected Expenses', value: formatCurrency(expenses), color: 'text-text', accent: 'negative' as const },
-    { label: 'Net', value: formatCurrency(net), color: net >= 0 ? 'text-positive' : 'text-negative', accent: undefined },
+    {
+      label: 'Expected Income',
+      value: formatCurrency(income),
+      color: 'text-positive',
+      accent: 'positive' as const,
+    },
+    {
+      label: 'Expected Expenses',
+      value: formatCurrency(expenses),
+      color: 'text-text',
+      accent: 'negative' as const,
+    },
+    {
+      label: 'Net',
+      value: formatCurrency(net),
+      color: net >= 0 ? 'text-positive' : 'text-negative',
+      accent: undefined,
+    },
   ];
 
   return (

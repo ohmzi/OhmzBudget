@@ -50,7 +50,9 @@ export function EditAccountModal({ account, onClose }: Props) {
       <Modal isOpen={!!account} onClose={onClose} title="Edit Account" size="sm">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-1">Account Name</label>
+            <label className="block text-sm font-medium text-text-secondary mb-1">
+              Account Name
+            </label>
             <input
               type="text"
               value={name}
@@ -61,20 +63,26 @@ export function EditAccountModal({ account, onClose }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-1">Account Type</label>
+            <label className="block text-sm font-medium text-text-secondary mb-1">
+              Account Type
+            </label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value as AccountType)}
               className="block w-full rounded-lg border border-border px-3 py-2 text-sm bg-surface text-text focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
             >
               {ACCOUNT_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-1">Starting Balance</label>
+            <label className="block text-sm font-medium text-text-secondary mb-1">
+              Starting Balance
+            </label>
             <CurrencyInput value={startingBalance} onChange={setStartingBalance} />
           </div>
 
@@ -85,7 +93,9 @@ export function EditAccountModal({ account, onClose }: Props) {
               onChange={(e) => setIsOffBudget(e.target.checked)}
               className="h-4 w-4 rounded border-border text-brand-600 focus:ring-brand-500"
             />
-            <span className="text-sm text-text-secondary">Off budget (excluded from budgeting)</span>
+            <span className="text-sm text-text-secondary">
+              Off budget (excluded from budgeting)
+            </span>
           </label>
 
           <div className="flex items-center justify-between pt-2 border-t border-border-light">

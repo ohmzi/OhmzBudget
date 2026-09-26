@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+.docusaurus
+*.min.js
+*.min.css
+package-lock.json
+server/budget.db
+electron/dist

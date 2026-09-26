@@ -11,24 +11,29 @@ function configToQueryString(c: CustomReportConfig): string {
   });
   if (c.filters.accountIds.length) p.set('account_ids', c.filters.accountIds.join(','));
   if (c.filters.categoryIds.length) p.set('category_ids', c.filters.categoryIds.join(','));
-  if (c.filters.categoryGroupIds.length) p.set('category_group_ids', c.filters.categoryGroupIds.join(','));
+  if (c.filters.categoryGroupIds.length)
+    p.set('category_group_ids', c.filters.categoryGroupIds.join(','));
   return p.toString();
 }
 
 export const getCustomReportData = (config: CustomReportConfig) =>
   apiFetch<CustomReportData>(`/reports/custom?${configToQueryString(config)}`);
 
-export const getSavedReports = () =>
-  apiFetch<SavedCustomReport[]>('/custom-reports');
+export const getSavedReports = () => apiFetch<SavedCustomReport[]>('/custom-reports');
 
-export const getSavedReport = (id: string) =>
-  apiFetch<SavedCustomReport>(`/custom-reports/${id}`);
+export const getSavedReport = (id: string) => apiFetch<SavedCustomReport>(`/custom-reports/${id}`);
 
 export const createSavedReport = (data: { name: string; config: CustomReportConfig }) =>
   apiFetch<SavedCustomReport>('/custom-reports', { method: 'POST', body: JSON.stringify(data) });
 
-export const updateSavedReport = (id: string, data: { name?: string; config?: CustomReportConfig }) =>
-  apiFetch<SavedCustomReport>(`/custom-reports/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const updateSavedReport = (
+  id: string,
+  data: { name?: string; config?: CustomReportConfig },
+) =>
+  apiFetch<SavedCustomReport>(`/custom-reports/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 
 export const deleteSavedReport = (id: string) =>
   apiFetch<void>(`/custom-reports/${id}`, { method: 'DELETE' });

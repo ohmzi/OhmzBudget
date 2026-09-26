@@ -14,7 +14,7 @@ export default function WelcomePage() {
   const { data: accounts = [], isLoading } = useAccounts();
   const { data: plaidStatus } = usePlaidStatus();
   const plaidConfigured = plaidStatus?.configured ?? false;
-  const setSetupSkipped = useAppStore(s => s.setSetupSkipped);
+  const setSetupSkipped = useAppStore((s) => s.setSetupSkipped);
   const navigate = useNavigate();
 
   const [showPlaid, setShowPlaid] = useState(false);
@@ -52,7 +52,9 @@ export default function WelcomePage() {
             }}
             className="group relative bg-surface border-2 border-brand-200 hover:border-brand-500 hover:shadow-hover rounded-xl p-6 text-left transition-all duration-200"
           >
-            <span className="absolute top-3 right-3 border border-brand-500 text-brand-700 text-[10px] font-medium px-2 py-0.5 rounded-md">Suggested</span>
+            <span className="absolute top-3 right-3 border border-brand-500 text-brand-700 text-[10px] font-medium px-2 py-0.5 rounded-md">
+              Suggested
+            </span>
             <div className="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center mb-4 group-hover:bg-brand-200 transition-colors duration-200">
               <Building2 size={20} className="text-brand-600" />
             </div>
@@ -90,14 +92,21 @@ export default function WelcomePage() {
         </div>
 
         <button
-          onClick={() => { setSetupSkipped(true); navigate('/dashboard'); }}
+          onClick={() => {
+            setSetupSkipped(true);
+            navigate('/dashboard');
+          }}
           className="mt-6 text-sm text-text-tertiary hover:text-text-secondary transition-colors"
         >
           Add Later
         </button>
 
         <ConnectBankModal isOpen={showPlaid} onClose={() => setShowPlaid(false)} />
-        <PlaidSetupModal isOpen={showPlaidSetup} onClose={() => setShowPlaidSetup(false)} onConfigured={() => setShowPlaid(true)} />
+        <PlaidSetupModal
+          isOpen={showPlaidSetup}
+          onClose={() => setShowPlaidSetup(false)}
+          onConfigured={() => setShowPlaid(true)}
+        />
         <SimplefinConnectModal isOpen={showSimplefin} onClose={() => setShowSimplefin(false)} />
         <AddAccountModal isOpen={showManual} onClose={() => setShowManual(false)} />
       </div>

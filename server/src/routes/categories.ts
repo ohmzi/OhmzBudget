@@ -33,8 +33,16 @@ categoriesRouter.post('/groups', (req, res) => {
   const parsed = groupSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const countRow = db.select({ count: sql<number>`count(*)` }).from(categoryGroups).get();
-  const group = { id: nanoid(), ...parsed.data, sortOrder: countRow?.count ?? 0, createdAt: new Date().toISOString() };
+  const countRow = db
+    .select({ count: sql<number>`count(*)` })
+    .from(categoryGroups)
+    .get();
+  const group = {
+    id: nanoid(),
+    ...parsed.data,
+    sortOrder: countRow?.count ?? 0,
+    createdAt: new Date().toISOString(),
+  };
   db.insert(categoryGroups).values(group).run();
   res.status(201).json({ ...group, categories: [] });
 });
@@ -44,7 +52,10 @@ categoriesRouter.put('/groups/reorder', (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   for (let i = 0; i < parsed.data.ids.length; i++) {
-    db.update(categoryGroups).set({ sortOrder: i }).where(eq(categoryGroups.id, parsed.data.ids[i])).run();
+    db.update(categoryGroups)
+      .set({ sortOrder: i })
+      .where(eq(categoryGroups.id, parsed.data.ids[i]))
+      .run();
   }
   res.json({ ok: true });
 });
@@ -54,7 +65,11 @@ categoriesRouter.put('/groups/:id', (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   db.update(categoryGroups).set(parsed.data).where(eq(categoryGroups.id, req.params.id)).run();
-  const updated = db.select().from(categoryGroups).where(eq(categoryGroups.id, req.params.id)).get();
+  const updated = db
+    .select()
+    .from(categoryGroups)
+    .where(eq(categoryGroups.id, req.params.id))
+    .get();
   if (!updated) return res.status(404).json({ error: 'Not found' });
   res.json(updated);
 });
@@ -68,8 +83,17 @@ categoriesRouter.post('/', (req, res) => {
   const parsed = categorySchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const countRow = db.select({ count: sql<number>`count(*)` }).from(categories).where(eq(categories.groupId, parsed.data.groupId)).get();
-  const category = { id: nanoid(), ...parsed.data, sortOrder: countRow?.count ?? 0, createdAt: new Date().toISOString() };
+  const countRow = db
+    .select({ count: sql<number>`count(*)` })
+    .from(categories)
+    .where(eq(categories.groupId, parsed.data.groupId))
+    .get();
+  const category = {
+    id: nanoid(),
+    ...parsed.data,
+    sortOrder: countRow?.count ?? 0,
+    createdAt: new Date().toISOString(),
+  };
   db.insert(categories).values(category).run();
   res.status(201).json(category);
 });
@@ -111,9 +135,7 @@ categoriesRouter.delete('/:id', (req, res) => {
       .set({ categoryId: reassignTo })
       .where(eq(transactions.categoryId, req.params.id))
       .run();
-    db.delete(budgetMonths)
-      .where(eq(budgetMonths.categoryId, req.params.id))
-      .run();
+    db.delete(budgetMonths).where(eq(budgetMonths.categoryId, req.params.id)).run();
   }
 
   db.delete(categories).where(eq(categories.id, req.params.id)).run();

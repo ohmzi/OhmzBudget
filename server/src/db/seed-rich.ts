@@ -1,7 +1,15 @@
 import { db } from './index.js';
 import {
-  accounts, categories, categoryGroups, payees, transactions,
-  budgetMonths, schedules, rules, customReports, goals,
+  accounts,
+  categories,
+  categoryGroups,
+  payees,
+  transactions,
+  budgetMonths,
+  schedules,
+  rules,
+  customReports,
+  goals,
 } from './schema.js';
 import { nanoid } from 'nanoid';
 import { buildRecurrenceRule, type RecurrenceType } from '../utils/recurrence.js';
@@ -45,13 +53,29 @@ function getCR(mi: number): { reconciled: number } {
 }
 
 const NOTES = [
-  'Weekly grocery run', 'Stocked up for the week', 'Quick stop after work',
-  'Date night', 'Family dinner out', 'Team lunch', 'Celebratory dinner',
-  'Regular fill-up', 'Road trip gas', 'Used rewards points',
-  'Sale item', 'Clearance find', 'Online order', 'In-store pickup',
-  'Needed for work', 'Rewards applied', 'Used coupon',
-  'Emergency purchase', 'Planned purchase', 'Monthly bill',
-  'Paid in full', 'Auto-pay', 'Recurring charge',
+  'Weekly grocery run',
+  'Stocked up for the week',
+  'Quick stop after work',
+  'Date night',
+  'Family dinner out',
+  'Team lunch',
+  'Celebratory dinner',
+  'Regular fill-up',
+  'Road trip gas',
+  'Used rewards points',
+  'Sale item',
+  'Clearance find',
+  'Online order',
+  'In-store pickup',
+  'Needed for work',
+  'Rewards applied',
+  'Used coupon',
+  'Emergency purchase',
+  'Planned purchase',
+  'Monthly bill',
+  'Paid in full',
+  'Auto-pay',
+  'Recurring charge',
 ];
 
 function maybeNote(): string | null {
@@ -66,7 +90,9 @@ console.log('Rich seed: Checking prerequisites...');
 
 const existingAccounts = db.select().from(accounts).all();
 if (existingAccounts.length > 0) {
-  console.log('Rich seed data already exists (accounts found). Delete budget.db and re-run db:seed + db:seed-rich to start fresh.');
+  console.log(
+    'Rich seed data already exists (accounts found). Delete budget.db and re-run db:seed + db:seed-rich to start fresh.',
+  );
   process.exit(0);
 }
 
@@ -77,8 +103,8 @@ if (allGroups.length === 0) {
 }
 
 const allCats = db.select().from(categories).all();
-const catMap = new Map(allCats.map(c => [c.name, c.id]));
-const groupMap = new Map(allGroups.map(g => [g.name, g.id]));
+const catMap = new Map(allCats.map((c) => [c.name, c.id]));
+const groupMap = new Map(allGroups.map((g) => [g.name, g.id]));
 
 function catId(name: string): string {
   const id = catMap.get(name);
@@ -95,24 +121,67 @@ const now = new Date().toISOString();
 console.log('Rich seed: Inserting accounts...');
 
 const ACCOUNT_DEFS = [
-  { name: 'Primary Checking', type: 'checking', startingBalance: 250000, isOffBudget: 0, closedAt: null },
-  { name: 'Savings Account', type: 'savings', startingBalance: 500000, isOffBudget: 0, closedAt: null },
-  { name: 'Chase Credit Card', type: 'credit', startingBalance: -120000, isOffBudget: 0, closedAt: null },
+  {
+    name: 'Primary Checking',
+    type: 'checking',
+    startingBalance: 250000,
+    isOffBudget: 0,
+    closedAt: null,
+  },
+  {
+    name: 'Savings Account',
+    type: 'savings',
+    startingBalance: 500000,
+    isOffBudget: 0,
+    closedAt: null,
+  },
+  {
+    name: 'Chase Credit Card',
+    type: 'credit',
+    startingBalance: -120000,
+    isOffBudget: 0,
+    closedAt: null,
+  },
   { name: 'Cash Wallet', type: 'cash', startingBalance: 20000, isOffBudget: 0, closedAt: null },
-  { name: 'Vanguard 401k', type: 'investment', startingBalance: 4500000, isOffBudget: 1, closedAt: null },
-  { name: 'Emergency Fund', type: 'savings', startingBalance: 300000, isOffBudget: 0, closedAt: null },
-  { name: 'Old Checking', type: 'checking', startingBalance: 100000, isOffBudget: 0, closedAt: '2025-03-15T00:00:00.000Z' },
+  {
+    name: 'Vanguard 401k',
+    type: 'investment',
+    startingBalance: 4500000,
+    isOffBudget: 1,
+    closedAt: null,
+  },
+  {
+    name: 'Emergency Fund',
+    type: 'savings',
+    startingBalance: 300000,
+    isOffBudget: 0,
+    closedAt: null,
+  },
+  {
+    name: 'Old Checking',
+    type: 'checking',
+    startingBalance: 100000,
+    isOffBudget: 0,
+    closedAt: '2025-03-15T00:00:00.000Z',
+  },
 ];
 
 const acct: Record<string, string> = {};
 ACCOUNT_DEFS.forEach((a, i) => {
   const id = nanoid();
   acct[a.name] = id;
-  db.insert(accounts).values({
-    id, name: a.name, type: a.type, startingBalance: a.startingBalance,
-    isOffBudget: a.isOffBudget, sortOrder: i, closedAt: a.closedAt,
-    createdAt: '2024-09-15T00:00:00.000Z',
-  }).run();
+  db.insert(accounts)
+    .values({
+      id,
+      name: a.name,
+      type: a.type,
+      startingBalance: a.startingBalance,
+      isOffBudget: a.isOffBudget,
+      sortOrder: i,
+      closedAt: a.closedAt,
+      createdAt: '2024-09-15T00:00:00.000Z',
+    })
+    .run();
 });
 
 // ═══════════════════════════════════════════════════════
@@ -171,14 +240,17 @@ const PAYEE_DEFS: { name: string; cat: string | null }[] = [
 ];
 
 const pay: Record<string, string> = {};
-PAYEE_DEFS.forEach(p => {
+PAYEE_DEFS.forEach((p) => {
   const id = nanoid();
   pay[p.name] = id;
-  db.insert(payees).values({
-    id, name: p.name,
-    defaultCategoryId: p.cat ? catId(p.cat) : null,
-    createdAt: '2024-09-15T00:00:00.000Z',
-  }).run();
+  db.insert(payees)
+    .values({
+      id,
+      name: p.name,
+      defaultCategoryId: p.cat ? catId(p.cat) : null,
+      createdAt: '2024-09-15T00:00:00.000Z',
+    })
+    .run();
 });
 
 // ═══════════════════════════════════════════════════════
@@ -188,48 +260,300 @@ PAYEE_DEFS.forEach(p => {
 console.log('Rich seed: Inserting schedules...');
 
 const REC_DEFS: {
-  name: string; amount: number; recurrenceType: RecurrenceType; startDate: string;
-  endDate: string | null; accountName: string; categoryName: string;
-  payeeName: string | null; status: string; autoCreate: number; amountType: string;
+  name: string;
+  amount: number;
+  recurrenceType: RecurrenceType;
+  startDate: string;
+  endDate: string | null;
+  accountName: string;
+  categoryName: string;
+  payeeName: string | null;
+  status: string;
+  autoCreate: number;
+  amountType: string;
   notes: string | null;
 }[] = [
-  { name: 'Salary', amount: 450000, recurrenceType: 'semimonthly', startDate: '2024-10-01', endDate: null, accountName: 'Primary Checking', categoryName: 'Paychecks', payeeName: 'Acme Corp', status: 'active', autoCreate: 1, amountType: 'exact', notes: null },
-  { name: 'Rent', amount: -180000, recurrenceType: 'monthly', startDate: '2024-10-01', endDate: null, accountName: 'Primary Checking', categoryName: 'Rent / Mortgage', payeeName: 'Greenfield Properties', status: 'active', autoCreate: 0, amountType: 'exact', notes: null },
-  { name: 'Electric Bill', amount: -12000, recurrenceType: 'monthly', startDate: '2024-10-05', endDate: null, accountName: 'Primary Checking', categoryName: 'Electric', payeeName: 'Duke Energy', status: 'active', autoCreate: 0, amountType: 'approximate', notes: null },
-  { name: 'Water Bill', amount: -5000, recurrenceType: 'monthly', startDate: '2024-10-10', endDate: null, accountName: 'Primary Checking', categoryName: 'Water', payeeName: 'City Water Dept', status: 'active', autoCreate: 0, amountType: 'approximate', notes: null },
-  { name: 'Internet', amount: -7000, recurrenceType: 'monthly', startDate: '2024-10-12', endDate: null, accountName: 'Primary Checking', categoryName: 'Internet', payeeName: 'Spectrum Internet', status: 'active', autoCreate: 1, amountType: 'exact', notes: null },
-  { name: 'Phone Bill', amount: -8500, recurrenceType: 'monthly', startDate: '2024-10-15', endDate: null, accountName: 'Primary Checking', categoryName: 'Phone', payeeName: 'AT&T Wireless', status: 'active', autoCreate: 1, amountType: 'exact', notes: null },
-  { name: 'Natural Gas', amount: -5500, recurrenceType: 'monthly', startDate: '2024-10-18', endDate: null, accountName: 'Primary Checking', categoryName: 'Gas (Natural)', payeeName: 'Piedmont Natural Gas', status: 'active', autoCreate: 0, amountType: 'approximate', notes: null },
-  { name: 'Netflix', amount: -1599, recurrenceType: 'monthly', startDate: '2024-10-03', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Streaming Services', payeeName: 'Netflix', status: 'active', autoCreate: 1, amountType: 'exact', notes: null },
-  { name: 'Spotify', amount: -1099, recurrenceType: 'monthly', startDate: '2024-10-05', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Streaming Services', payeeName: 'Spotify', status: 'active', autoCreate: 1, amountType: 'exact', notes: null },
-  { name: 'Hulu', amount: -1799, recurrenceType: 'monthly', startDate: '2024-10-08', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Streaming Services', payeeName: 'Hulu', status: 'active', autoCreate: 1, amountType: 'exact', notes: null },
-  { name: 'Planet Fitness', amount: -4500, recurrenceType: 'monthly', startDate: '2024-10-01', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Gym / Fitness', payeeName: 'Planet Fitness', status: 'active', autoCreate: 0, amountType: 'exact', notes: null },
-  { name: 'Car Insurance', amount: -42000, recurrenceType: 'quarterly', startDate: '2024-10-15', endDate: null, accountName: 'Primary Checking', categoryName: 'Car Insurance', payeeName: 'State Farm', status: 'active', autoCreate: 0, amountType: 'exact', notes: 'Quarterly premium' },
-  { name: 'Amazon Prime', amount: -13900, recurrenceType: 'yearly', startDate: '2024-11-20', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Electronics', payeeName: 'Amazon', status: 'active', autoCreate: 1, amountType: 'exact', notes: 'Annual membership' },
-  { name: 'Old Phone Plan', amount: -6500, recurrenceType: 'monthly', startDate: '2024-10-01', endDate: '2025-06-30', accountName: 'Primary Checking', categoryName: 'Phone', payeeName: 'T-Mobile', status: 'canceled', autoCreate: 0, amountType: 'exact', notes: 'Canceled - switched to AT&T' },
-  { name: 'Freelance Income', amount: 200000, recurrenceType: 'monthly', startDate: '2025-01-15', endDate: null, accountName: 'Primary Checking', categoryName: 'Business Income', payeeName: null, status: 'paused', autoCreate: 0, amountType: 'approximate', notes: 'On hold' },
-  { name: 'Weekly Coffee', amount: -2500, recurrenceType: 'weekly', startDate: '2024-10-07', endDate: null, accountName: 'Chase Credit Card', categoryName: 'Coffee Shops', payeeName: 'Starbucks', status: 'active', autoCreate: 1, amountType: 'exact', notes: null },
-  { name: 'House Cleaner', amount: -15000, recurrenceType: 'biweekly', startDate: '2024-10-14', endDate: null, accountName: 'Primary Checking', categoryName: 'Home Maintenance', payeeName: 'Merry Maids', status: 'active', autoCreate: 0, amountType: 'exact', notes: null },
-  { name: 'Savings Transfer', amount: -50000, recurrenceType: 'monthly', startDate: '2024-10-25', endDate: null, accountName: 'Primary Checking', categoryName: 'Savings', payeeName: null, status: 'active', autoCreate: 0, amountType: 'exact', notes: 'Monthly savings goal' },
+  {
+    name: 'Salary',
+    amount: 450000,
+    recurrenceType: 'semimonthly',
+    startDate: '2024-10-01',
+    endDate: null,
+    accountName: 'Primary Checking',
+    categoryName: 'Paychecks',
+    payeeName: 'Acme Corp',
+    status: 'active',
+    autoCreate: 1,
+    amountType: 'exact',
+    notes: null,
+  },
+  {
+    name: 'Rent',
+    amount: -180000,
+    recurrenceType: 'monthly',
+    startDate: '2024-10-01',
+    endDate: null,
+    accountName: 'Primary Checking',
+    categoryName: 'Rent / Mortgage',
+    payeeName: 'Greenfield Properties',
+    status: 'active',
+    autoCreate: 0,
+    amountType: 'exact',
+    notes: null,
+  },
+  {
+    name: 'Electric Bill',
+    amount: -12000,
+    recurrenceType: 'monthly',
+    startDate: '2024-10-05',
+    endDate: null,
+    accountName: 'Primary Checking',
+    categoryName: 'Electric',
+    payeeName: 'Duke Energy',
+    status: 'active',
+    autoCreate: 0,
+    amountType: 'approximate',
+    notes: null,
+  },
+  {
+    name: 'Water Bill',
+    amount: -5000,
+    recurrenceType: 'monthly',
+    startDate: '2024-10-10',
+    endDate: null,
+    accountName: 'Primary Checking',
+    categoryName: 'Water',
+    payeeName: 'City Water Dept',
+    status: 'active',
+    autoCreate: 0,
+    amountType: 'approximate',
+    notes: null,
+  },
+  {
+    name: 'Internet',
+    amount: -7000,
+    recurrenceType: 'monthly',
+    startDate: '2024-10-12',
+    endDate: null,
+    accountName: 'Primary Checking',
+    categoryName: 'Internet',
+    payeeName: 'Spectrum Internet',
+    status: 'active',
+    autoCreate: 1,
+    amountType: 'exact',
+    notes: null,
+  },
+  {
+    name: 'Phone Bill',
+    amount: -8500,
+    recurrenceType: 'monthly',
+    startDate: '2024-10-15',
+    endDate: null,
+    accountName: 'Primary Checking',
+    categoryName: 'Phone',
+    payeeName: 'AT&T Wireless',
+    status: 'active',
+    autoCreate: 1,
+    amountType: 'exact',
+    notes: null,
+  },
+  {
+    name: 'Natural Gas',
+    amount: -5500,
+    recurrenceType: 'monthly',
+    startDate: '2024-10-18',
+    endDate: null,
+    accountName: 'Primary Checking',
+    categoryName: 'Gas (Natural)',
+    payeeName: 'Piedmont Natural Gas',
+    status: 'active',
+    autoCreate: 0,
+    amountType: 'approximate',
+    notes: null,
+  },
+  {
+    name: 'Netflix',
+    amount: -1599,
+    recurrenceType: 'monthly',
+    startDate: '2024-10-03',
+    endDate: null,
+    accountName: 'Chase Credit Card',
+    categoryName: 'Streaming Services',
+    payeeName: 'Netflix',
+    status: 'active',
+    autoCreate: 1,
+    amountType: 'exact',
+    notes: null,
+  },
+  {
+    name: 'Spotify',
+    amount: -1099,
+    recurrenceType: 'monthly',
+    startDate: '2024-10-05',
+    endDate: null,
+    accountName: 'Chase Credit Card',
+    categoryName: 'Streaming Services',
+    payeeName: 'Spotify',
+    status: 'active',
+    autoCreate: 1,
+    amountType: 'exact',
+    notes: null,
+  },
+  {
+    name: 'Hulu',
+    amount: -1799,
+    recurrenceType: 'monthly',
+    startDate: '2024-10-08',
+    endDate: null,
+    accountName: 'Chase Credit Card',
+    categoryName: 'Streaming Services',
+    payeeName: 'Hulu',
+    status: 'active',
+    autoCreate: 1,
+    amountType: 'exact',
+    notes: null,
+  },
+  {
+    name: 'Planet Fitness',
+    amount: -4500,
+    recurrenceType: 'monthly',
+    startDate: '2024-10-01',
+    endDate: null,
+    accountName: 'Chase Credit Card',
+    categoryName: 'Gym / Fitness',
+    payeeName: 'Planet Fitness',
+    status: 'active',
+    autoCreate: 0,
+    amountType: 'exact',
+    notes: null,
+  },
+  {
+    name: 'Car Insurance',
+    amount: -42000,
+    recurrenceType: 'quarterly',
+    startDate: '2024-10-15',
+    endDate: null,
+    accountName: 'Primary Checking',
+    categoryName: 'Car Insurance',
+    payeeName: 'State Farm',
+    status: 'active',
+    autoCreate: 0,
+    amountType: 'exact',
+    notes: 'Quarterly premium',
+  },
+  {
+    name: 'Amazon Prime',
+    amount: -13900,
+    recurrenceType: 'yearly',
+    startDate: '2024-11-20',
+    endDate: null,
+    accountName: 'Chase Credit Card',
+    categoryName: 'Electronics',
+    payeeName: 'Amazon',
+    status: 'active',
+    autoCreate: 1,
+    amountType: 'exact',
+    notes: 'Annual membership',
+  },
+  {
+    name: 'Old Phone Plan',
+    amount: -6500,
+    recurrenceType: 'monthly',
+    startDate: '2024-10-01',
+    endDate: '2025-06-30',
+    accountName: 'Primary Checking',
+    categoryName: 'Phone',
+    payeeName: 'T-Mobile',
+    status: 'canceled',
+    autoCreate: 0,
+    amountType: 'exact',
+    notes: 'Canceled - switched to AT&T',
+  },
+  {
+    name: 'Freelance Income',
+    amount: 200000,
+    recurrenceType: 'monthly',
+    startDate: '2025-01-15',
+    endDate: null,
+    accountName: 'Primary Checking',
+    categoryName: 'Business Income',
+    payeeName: null,
+    status: 'paused',
+    autoCreate: 0,
+    amountType: 'approximate',
+    notes: 'On hold',
+  },
+  {
+    name: 'Weekly Coffee',
+    amount: -2500,
+    recurrenceType: 'weekly',
+    startDate: '2024-10-07',
+    endDate: null,
+    accountName: 'Chase Credit Card',
+    categoryName: 'Coffee Shops',
+    payeeName: 'Starbucks',
+    status: 'active',
+    autoCreate: 1,
+    amountType: 'exact',
+    notes: null,
+  },
+  {
+    name: 'House Cleaner',
+    amount: -15000,
+    recurrenceType: 'biweekly',
+    startDate: '2024-10-14',
+    endDate: null,
+    accountName: 'Primary Checking',
+    categoryName: 'Home Maintenance',
+    payeeName: 'Merry Maids',
+    status: 'active',
+    autoCreate: 0,
+    amountType: 'exact',
+    notes: null,
+  },
+  {
+    name: 'Savings Transfer',
+    amount: -50000,
+    recurrenceType: 'monthly',
+    startDate: '2024-10-25',
+    endDate: null,
+    accountName: 'Primary Checking',
+    categoryName: 'Savings',
+    payeeName: null,
+    status: 'active',
+    autoCreate: 0,
+    amountType: 'exact',
+    notes: 'Monthly savings goal',
+  },
 ];
 
 const rec: Record<string, string> = {};
-REC_DEFS.forEach(r => {
+REC_DEFS.forEach((r) => {
   const id = nanoid();
   rec[r.name] = id;
-  db.insert(schedules).values({
-    id, name: r.name, amount: r.amount, amountType: r.amountType,
-    recurrenceType: r.recurrenceType,
-    recurrenceRule: JSON.stringify(buildRecurrenceRule(r.recurrenceType, r.startDate)),
-    startDate: r.startDate, endDate: r.endDate,
-    weekendAdjust: 'none', dateFlexibility: 3,
-    accountId: acct[r.accountName] ?? null,
-    categoryId: catId(r.categoryName),
-    payeeId: r.payeeName ? (pay[r.payeeName] ?? null) : null,
-    notes: r.notes, status: r.status, autoCreate: r.autoCreate,
-    source: 'manual',
-    createdAt: now, updatedAt: now,
-  }).run();
+  db.insert(schedules)
+    .values({
+      id,
+      name: r.name,
+      amount: r.amount,
+      amountType: r.amountType,
+      recurrenceType: r.recurrenceType,
+      recurrenceRule: JSON.stringify(buildRecurrenceRule(r.recurrenceType, r.startDate)),
+      startDate: r.startDate,
+      endDate: r.endDate,
+      weekendAdjust: 'none',
+      dateFlexibility: 3,
+      accountId: acct[r.accountName] ?? null,
+      categoryId: catId(r.categoryName),
+      payeeId: r.payeeName ? (pay[r.payeeName] ?? null) : null,
+      notes: r.notes,
+      status: r.status,
+      autoCreate: r.autoCreate,
+      source: 'manual',
+      createdAt: now,
+      updatedAt: now,
+    })
+    .run();
 });
 
 // ═══════════════════════════════════════════════════════
@@ -241,82 +565,143 @@ console.log('Rich seed: Generating transactions...');
 let txCount = 0;
 
 function insertTx(vals: {
-  accountId: string; date: string; amount: number;
-  payeeId?: string | null; payeeName?: string | null;
-  categoryId?: string | null; notes?: string | null;
+  accountId: string;
+  date: string;
+  amount: number;
+  payeeId?: string | null;
+  payeeName?: string | null;
+  categoryId?: string | null;
+  notes?: string | null;
   reconciled?: number;
   scheduleId?: string | null;
-  isParent?: number; parentTransactionId?: string | null;
+  isParent?: number;
+  parentTransactionId?: string | null;
   transferTransactionId?: string | null;
 }): string {
   const id = nanoid();
-  db.insert(transactions).values({
-    id,
-    accountId: vals.accountId,
-    date: vals.date,
-    amount: vals.amount,
-    payeeId: vals.payeeId ?? null,
-    payeeName: vals.payeeName ?? null,
-    categoryId: vals.categoryId ?? null,
-    notes: vals.notes ?? null,
-    reconciled: vals.reconciled ?? 0,
-    transferTransactionId: vals.transferTransactionId ?? null,
-    isParent: vals.isParent ?? 0,
-    parentTransactionId: vals.parentTransactionId ?? null,
-    importedId: null,
-    scheduleId: vals.scheduleId ?? null,
-    createdAt: now,
-  }).run();
+  db.insert(transactions)
+    .values({
+      id,
+      accountId: vals.accountId,
+      date: vals.date,
+      amount: vals.amount,
+      payeeId: vals.payeeId ?? null,
+      payeeName: vals.payeeName ?? null,
+      categoryId: vals.categoryId ?? null,
+      notes: vals.notes ?? null,
+      reconciled: vals.reconciled ?? 0,
+      transferTransactionId: vals.transferTransactionId ?? null,
+      isParent: vals.isParent ?? 0,
+      parentTransactionId: vals.parentTransactionId ?? null,
+      importedId: null,
+      scheduleId: vals.scheduleId ?? null,
+      createdAt: now,
+    })
+    .run();
   txCount++;
   return id;
 }
 
 function insertTransfer(
-  fromAcctName: string, toAcctName: string,
-  date: string, amount: number, reconciled: number,
+  fromAcctName: string,
+  toAcctName: string,
+  date: string,
+  amount: number,
+  reconciled: number,
 ) {
   const fromId = nanoid();
   const toId = nanoid();
-  db.insert(transactions).values({
-    id: fromId, accountId: acct[fromAcctName], date, amount: -amount,
-    payeeId: null, payeeName: `Transfer: ${toAcctName}`,
-    categoryId: null, notes: null, reconciled,
-    isParent: 0, parentTransactionId: null, transferTransactionId: toId,
-    importedId: null, scheduleId: null, createdAt: now,
-  }).run();
-  db.insert(transactions).values({
-    id: toId, accountId: acct[toAcctName], date, amount,
-    payeeId: null, payeeName: `Transfer: ${fromAcctName}`,
-    categoryId: null, notes: null, reconciled,
-    isParent: 0, parentTransactionId: null, transferTransactionId: fromId,
-    importedId: null, scheduleId: null, createdAt: now,
-  }).run();
+  db.insert(transactions)
+    .values({
+      id: fromId,
+      accountId: acct[fromAcctName],
+      date,
+      amount: -amount,
+      payeeId: null,
+      payeeName: `Transfer: ${toAcctName}`,
+      categoryId: null,
+      notes: null,
+      reconciled,
+      isParent: 0,
+      parentTransactionId: null,
+      transferTransactionId: toId,
+      importedId: null,
+      scheduleId: null,
+      createdAt: now,
+    })
+    .run();
+  db.insert(transactions)
+    .values({
+      id: toId,
+      accountId: acct[toAcctName],
+      date,
+      amount,
+      payeeId: null,
+      payeeName: `Transfer: ${fromAcctName}`,
+      categoryId: null,
+      notes: null,
+      reconciled,
+      isParent: 0,
+      parentTransactionId: null,
+      transferTransactionId: fromId,
+      importedId: null,
+      scheduleId: null,
+      createdAt: now,
+    })
+    .run();
   txCount += 2;
 }
 
 function insertSplit(
-  accountId: string, date: string, totalAmount: number,
-  payeeId: string | null, payeeName: string | null,
+  accountId: string,
+  date: string,
+  totalAmount: number,
+  payeeId: string | null,
+  payeeName: string | null,
   children: { categoryId: string | null; amount: number; notes: string | null }[],
   reconciled: number,
 ) {
   const parentId = nanoid();
-  db.insert(transactions).values({
-    id: parentId, accountId, date, amount: totalAmount,
-    payeeId, payeeName, categoryId: null, notes: null,
-    reconciled, isParent: 1, parentTransactionId: null,
-    transferTransactionId: null, importedId: null,
-    scheduleId: null, createdAt: now,
-  }).run();
+  db.insert(transactions)
+    .values({
+      id: parentId,
+      accountId,
+      date,
+      amount: totalAmount,
+      payeeId,
+      payeeName,
+      categoryId: null,
+      notes: null,
+      reconciled,
+      isParent: 1,
+      parentTransactionId: null,
+      transferTransactionId: null,
+      importedId: null,
+      scheduleId: null,
+      createdAt: now,
+    })
+    .run();
   txCount++;
   for (const ch of children) {
-    db.insert(transactions).values({
-      id: nanoid(), accountId, date, amount: ch.amount,
-      payeeId, payeeName, categoryId: ch.categoryId,
-      notes: ch.notes, reconciled, isParent: 0,
-      parentTransactionId: parentId, transferTransactionId: null,
-      importedId: null, scheduleId: null, createdAt: now,
-    }).run();
+    db.insert(transactions)
+      .values({
+        id: nanoid(),
+        accountId,
+        date,
+        amount: ch.amount,
+        payeeId,
+        payeeName,
+        categoryId: ch.categoryId,
+        notes: ch.notes,
+        reconciled,
+        isParent: 0,
+        parentTransactionId: parentId,
+        transferTransactionId: null,
+        importedId: null,
+        scheduleId: null,
+        createdAt: now,
+      })
+      .run();
     txCount++;
   }
 }
@@ -339,9 +724,22 @@ const oldPhoneMonths = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 const freelanceMonths = [3, 4, 5];
 
 // Months for large occasional expenses
-const LARGE_EXPENSES: Record<number, { payee: string; cat: string; amount: number; notes: string }> = {
-  2: { payee: 'Home Depot', cat: 'Car Maintenance', amount: -85000, notes: 'Car repair - transmission issue' },
-  5: { payee: 'Dr. Sarah Johnson', cat: 'Doctor / Medical', amount: -45000, notes: 'Annual physical + lab work' },
+const LARGE_EXPENSES: Record<
+  number,
+  { payee: string; cat: string; amount: number; notes: string }
+> = {
+  2: {
+    payee: 'Home Depot',
+    cat: 'Car Maintenance',
+    amount: -85000,
+    notes: 'Car repair - transmission issue',
+  },
+  5: {
+    payee: 'Dr. Sarah Johnson',
+    cat: 'Doctor / Medical',
+    amount: -45000,
+    notes: 'Annual physical + lab work',
+  },
   8: { payee: 'Marriott', cat: 'Vacation', amount: -220000, notes: 'Beach vacation - 5 nights' },
   11: { payee: 'Amazon', cat: 'Electronics', amount: -110000, notes: 'New monitor + keyboard' },
   14: { payee: 'Target', cat: 'Gifts', amount: -60000, notes: 'Holiday gift shopping' },
@@ -368,23 +766,35 @@ for (let mi = 0; mi < 24; mi++) {
 
   // ── SALARY (semimonthly, linked) ──
   insertTx({
-    accountId: acct['Primary Checking'], date: d(1), amount: randCents(4400, 4600),
-    payeeId: pay['Acme Corp'], payeeName: 'Acme Corp',
-    categoryId: catId('Paychecks'), scheduleId: rec['Salary'],
+    accountId: acct['Primary Checking'],
+    date: d(1),
+    amount: randCents(4400, 4600),
+    payeeId: pay['Acme Corp'],
+    payeeName: 'Acme Corp',
+    categoryId: catId('Paychecks'),
+    scheduleId: rec['Salary'],
     ...cr(),
   });
   insertTx({
-    accountId: acct['Primary Checking'], date: d(15), amount: randCents(4400, 4600),
-    payeeId: pay['Acme Corp'], payeeName: 'Acme Corp',
-    categoryId: catId('Paychecks'), scheduleId: rec['Salary'],
+    accountId: acct['Primary Checking'],
+    date: d(15),
+    amount: randCents(4400, 4600),
+    payeeId: pay['Acme Corp'],
+    payeeName: 'Acme Corp',
+    categoryId: catId('Paychecks'),
+    scheduleId: rec['Salary'],
     ...cr(),
   });
 
   // ── RENT (monthly, linked) ──
   insertTx({
-    accountId: acct['Primary Checking'], date: d(1), amount: -180000,
-    payeeId: pay['Greenfield Properties'], payeeName: 'Greenfield Properties',
-    categoryId: catId('Rent / Mortgage'), scheduleId: rec['Rent'],
+    accountId: acct['Primary Checking'],
+    date: d(1),
+    amount: -180000,
+    payeeId: pay['Greenfield Properties'],
+    payeeName: 'Greenfield Properties',
+    categoryId: catId('Rent / Mortgage'),
+    scheduleId: rec['Rent'],
     ...cr(),
   });
 
@@ -394,96 +804,143 @@ for (let mi = 0; mi < 24; mi++) {
   const isWinterOrSummer = [1, 2, 6, 7, 8, 12].includes(m);
   const electricAmt = isWinterOrSummer ? randCents(120, 155) : randCents(80, 115);
   insertTx({
-    accountId: acct['Primary Checking'], date: d(5), amount: -electricAmt,
-    payeeId: pay['Duke Energy'], payeeName: 'Duke Energy',
-    categoryId: catId('Electric'), scheduleId: rec['Electric Bill'],
+    accountId: acct['Primary Checking'],
+    date: d(5),
+    amount: -electricAmt,
+    payeeId: pay['Duke Energy'],
+    payeeName: 'Duke Energy',
+    categoryId: catId('Electric'),
+    scheduleId: rec['Electric Bill'],
     ...cr(),
   });
 
   // Water
   insertTx({
-    accountId: acct['Primary Checking'], date: d(10), amount: -randCents(40, 62),
-    payeeId: pay['City Water Dept'], payeeName: 'City Water Dept',
-    categoryId: catId('Water'), scheduleId: rec['Water Bill'],
+    accountId: acct['Primary Checking'],
+    date: d(10),
+    amount: -randCents(40, 62),
+    payeeId: pay['City Water Dept'],
+    payeeName: 'City Water Dept',
+    categoryId: catId('Water'),
+    scheduleId: rec['Water Bill'],
     ...cr(),
   });
 
   // Internet
   insertTx({
-    accountId: acct['Primary Checking'], date: d(12), amount: -7000,
-    payeeId: pay['Spectrum Internet'], payeeName: 'Spectrum Internet',
-    categoryId: catId('Internet'), scheduleId: rec['Internet'],
+    accountId: acct['Primary Checking'],
+    date: d(12),
+    amount: -7000,
+    payeeId: pay['Spectrum Internet'],
+    payeeName: 'Spectrum Internet',
+    categoryId: catId('Internet'),
+    scheduleId: rec['Internet'],
     ...cr(),
   });
 
   // Phone
   insertTx({
-    accountId: acct['Primary Checking'], date: d(15), amount: -8500,
-    payeeId: pay['AT&T Wireless'], payeeName: 'AT&T Wireless',
-    categoryId: catId('Phone'), scheduleId: rec['Phone Bill'],
+    accountId: acct['Primary Checking'],
+    date: d(15),
+    amount: -8500,
+    payeeId: pay['AT&T Wireless'],
+    payeeName: 'AT&T Wireless',
+    categoryId: catId('Phone'),
+    scheduleId: rec['Phone Bill'],
     ...cr(),
   });
 
   // Natural Gas - seasonal variation, skip in current month for "upcoming" test
   const isHeating = [11, 12, 1, 2].includes(m);
   const gasNatAmt = isHeating ? randCents(60, 85) : randCents(30, 50);
-  if (!(isCurrentMonth)) {
+  if (!isCurrentMonth) {
     insertTx({
-      accountId: acct['Primary Checking'], date: d(18), amount: -gasNatAmt,
-      payeeId: pay['Piedmont Natural Gas'], payeeName: 'Piedmont Natural Gas',
-      categoryId: catId('Gas (Natural)'), scheduleId: rec['Natural Gas'],
+      accountId: acct['Primary Checking'],
+      date: d(18),
+      amount: -gasNatAmt,
+      payeeId: pay['Piedmont Natural Gas'],
+      payeeName: 'Piedmont Natural Gas',
+      categoryId: catId('Gas (Natural)'),
+      scheduleId: rec['Natural Gas'],
       ...cr(),
     });
   }
 
   // Trash
   insertTx({
-    accountId: acct['Primary Checking'], date: d(20), amount: -randCents(25, 35),
-    payeeId: pay['Republic Services'], payeeName: 'Republic Services',
+    accountId: acct['Primary Checking'],
+    date: d(20),
+    amount: -randCents(25, 35),
+    payeeId: pay['Republic Services'],
+    payeeName: 'Republic Services',
     categoryId: catId('Trash / Recycling'),
     ...cr(),
   });
 
   // ── SUBSCRIPTIONS (monthly on credit card, linked) ──
   insertTx({
-    accountId: acct['Chase Credit Card'], date: d(3), amount: -1599,
-    payeeId: pay['Netflix'], payeeName: 'Netflix',
-    categoryId: catId('Streaming Services'), scheduleId: rec['Netflix'],
+    accountId: acct['Chase Credit Card'],
+    date: d(3),
+    amount: -1599,
+    payeeId: pay['Netflix'],
+    payeeName: 'Netflix',
+    categoryId: catId('Streaming Services'),
+    scheduleId: rec['Netflix'],
     ...cr(),
   });
   insertTx({
-    accountId: acct['Chase Credit Card'], date: d(5), amount: -1099,
-    payeeId: pay['Spotify'], payeeName: 'Spotify',
-    categoryId: catId('Streaming Services'), scheduleId: rec['Spotify'],
+    accountId: acct['Chase Credit Card'],
+    date: d(5),
+    amount: -1099,
+    payeeId: pay['Spotify'],
+    payeeName: 'Spotify',
+    categoryId: catId('Streaming Services'),
+    scheduleId: rec['Spotify'],
     ...cr(),
   });
   insertTx({
-    accountId: acct['Chase Credit Card'], date: d(8), amount: -1799,
-    payeeId: pay['Hulu'], payeeName: 'Hulu',
-    categoryId: catId('Streaming Services'), scheduleId: rec['Hulu'],
+    accountId: acct['Chase Credit Card'],
+    date: d(8),
+    amount: -1799,
+    payeeId: pay['Hulu'],
+    payeeName: 'Hulu',
+    categoryId: catId('Streaming Services'),
+    scheduleId: rec['Hulu'],
     ...cr(),
   });
 
   // Gym
   insertTx({
-    accountId: acct['Chase Credit Card'], date: d(1), amount: -4500,
-    payeeId: pay['Planet Fitness'], payeeName: 'Planet Fitness',
-    categoryId: catId('Gym / Fitness'), scheduleId: rec['Planet Fitness'],
+    accountId: acct['Chase Credit Card'],
+    date: d(1),
+    amount: -4500,
+    payeeId: pay['Planet Fitness'],
+    payeeName: 'Planet Fitness',
+    categoryId: catId('Gym / Fitness'),
+    scheduleId: rec['Planet Fitness'],
     ...cr(),
   });
 
   // ── HOUSE CLEANER (biweekly, linked) ──
   insertTx({
-    accountId: acct['Primary Checking'], date: d(10), amount: -15000,
-    payeeId: pay['Merry Maids'], payeeName: 'Merry Maids',
-    categoryId: catId('Home Maintenance'), scheduleId: rec['House Cleaner'],
+    accountId: acct['Primary Checking'],
+    date: d(10),
+    amount: -15000,
+    payeeId: pay['Merry Maids'],
+    payeeName: 'Merry Maids',
+    categoryId: catId('Home Maintenance'),
+    scheduleId: rec['House Cleaner'],
     ...cr(),
   });
   if (!isCurrentMonth || true) {
     insertTx({
-      accountId: acct['Primary Checking'], date: d(24), amount: -15000,
-      payeeId: pay['Merry Maids'], payeeName: 'Merry Maids',
-      categoryId: catId('Home Maintenance'), scheduleId: rec['House Cleaner'],
+      accountId: acct['Primary Checking'],
+      date: d(24),
+      amount: -15000,
+      payeeId: pay['Merry Maids'],
+      payeeName: 'Merry Maids',
+      categoryId: catId('Home Maintenance'),
+      scheduleId: rec['House Cleaner'],
       ...cr(),
     });
   }
@@ -492,9 +949,13 @@ for (let mi = 0; mi < 24; mi++) {
   for (const coffeeDay of [5, 12, 19, 26]) {
     if (isCurrentMonth && coffeeDay > 15) continue;
     insertTx({
-      accountId: acct['Chase Credit Card'], date: d(coffeeDay), amount: -randCents(4, 8),
-      payeeId: pay['Starbucks'], payeeName: 'Starbucks',
-      categoryId: catId('Coffee Shops'), scheduleId: rec['Weekly Coffee'],
+      accountId: acct['Chase Credit Card'],
+      date: d(coffeeDay),
+      amount: -randCents(4, 8),
+      payeeId: pay['Starbucks'],
+      payeeName: 'Starbucks',
+      categoryId: catId('Coffee Shops'),
+      scheduleId: rec['Weekly Coffee'],
       ...cr(),
     });
   }
@@ -502,9 +963,13 @@ for (let mi = 0; mi < 24; mi++) {
   // ── CAR INSURANCE (quarterly, linked) ──
   if (carInsuranceMonths.includes(mi)) {
     insertTx({
-      accountId: acct['Primary Checking'], date: d(15), amount: -42000,
-      payeeId: pay['State Farm'], payeeName: 'State Farm',
-      categoryId: catId('Car Insurance'), scheduleId: rec['Car Insurance'],
+      accountId: acct['Primary Checking'],
+      date: d(15),
+      amount: -42000,
+      payeeId: pay['State Farm'],
+      payeeName: 'State Farm',
+      categoryId: catId('Car Insurance'),
+      scheduleId: rec['Car Insurance'],
       ...cr(),
     });
   }
@@ -512,9 +977,13 @@ for (let mi = 0; mi < 24; mi++) {
   // ── AMAZON PRIME (yearly, linked) ──
   if (amazonPrimeMonths.includes(mi)) {
     insertTx({
-      accountId: acct['Chase Credit Card'], date: d(20), amount: -13900,
-      payeeId: pay['Amazon'], payeeName: 'Amazon',
-      categoryId: catId('Electronics'), scheduleId: rec['Amazon Prime'],
+      accountId: acct['Chase Credit Card'],
+      date: d(20),
+      amount: -13900,
+      payeeId: pay['Amazon'],
+      payeeName: 'Amazon',
+      categoryId: catId('Electronics'),
+      scheduleId: rec['Amazon Prime'],
       ...cr(),
     });
   }
@@ -522,9 +991,13 @@ for (let mi = 0; mi < 24; mi++) {
   // ── OLD PHONE PLAN (canceled, linked) ──
   if (oldPhoneMonths.includes(mi)) {
     insertTx({
-      accountId: acct['Primary Checking'], date: d(20), amount: -6500,
-      payeeId: pay['T-Mobile'], payeeName: 'T-Mobile',
-      categoryId: catId('Phone'), scheduleId: rec['Old Phone Plan'],
+      accountId: acct['Primary Checking'],
+      date: d(20),
+      amount: -6500,
+      payeeId: pay['T-Mobile'],
+      payeeName: 'T-Mobile',
+      categoryId: catId('Phone'),
+      scheduleId: rec['Old Phone Plan'],
       ...cr(),
     });
   }
@@ -532,9 +1005,13 @@ for (let mi = 0; mi < 24; mi++) {
   // ── FREELANCE INCOME (paused, linked for early months) ──
   if (freelanceMonths.includes(mi)) {
     insertTx({
-      accountId: acct['Primary Checking'], date: d(15), amount: randCents(1800, 2200),
-      payeeId: null, payeeName: 'Freelance Client',
-      categoryId: catId('Business Income'), scheduleId: rec['Freelance Income'],
+      accountId: acct['Primary Checking'],
+      date: d(15),
+      amount: randCents(1800, 2200),
+      payeeId: null,
+      payeeName: 'Freelance Client',
+      categoryId: catId('Business Income'),
+      scheduleId: rec['Freelance Income'],
       ...cr(),
     });
   }
@@ -547,10 +1024,13 @@ for (let mi = 0; mi < 24; mi++) {
     const onCredit = Math.random() < 0.4;
     insertTx({
       accountId: onCredit ? acct['Chase Credit Card'] : acct['Primary Checking'],
-      date: d(day), amount: -randCents(35, 155),
-      payeeId: pay[payeeName], payeeName,
+      date: d(day),
+      amount: -randCents(35, 155),
+      payeeId: pay[payeeName],
+      payeeName,
       categoryId: uncategorizedMonths.includes(mi) && i === 0 ? null : catId('Groceries'),
-      notes: maybeNote(), ...cr(),
+      notes: maybeNote(),
+      ...cr(),
     });
   }
 
@@ -561,9 +1041,13 @@ for (let mi = 0; mi < 24; mi++) {
     const payeeName = pick(restaurantPayees);
     insertTx({
       accountId: Math.random() < 0.8 ? acct['Chase Credit Card'] : acct['Primary Checking'],
-      date: d(day), amount: -randCents(15, 82),
-      payeeId: pay[payeeName], payeeName,
-      categoryId: catId('Restaurants'), notes: maybeNote(), ...cr(),
+      date: d(day),
+      amount: -randCents(15, 82),
+      payeeId: pay[payeeName],
+      payeeName,
+      categoryId: catId('Restaurants'),
+      notes: maybeNote(),
+      ...cr(),
     });
   }
 
@@ -573,9 +1057,14 @@ for (let mi = 0; mi < 24; mi++) {
     const day = randInt(1, isCurrentMonth ? 20 : ld);
     const payeeName = pick(fastFoodPayees);
     insertTx({
-      accountId: acct['Chase Credit Card'], date: d(day), amount: -randCents(8, 26),
-      payeeId: pay[payeeName], payeeName,
-      categoryId: catId('Fast Food'), notes: maybeNote(), ...cr(),
+      accountId: acct['Chase Credit Card'],
+      date: d(day),
+      amount: -randCents(8, 26),
+      payeeId: pay[payeeName],
+      payeeName,
+      categoryId: catId('Fast Food'),
+      notes: maybeNote(),
+      ...cr(),
     });
   }
 
@@ -585,9 +1074,14 @@ for (let mi = 0; mi < 24; mi++) {
     const day = randInt(1, isCurrentMonth ? 20 : ld);
     const payeeName = pick(["Dunkin'", 'Local Coffee Co']);
     insertTx({
-      accountId: acct['Chase Credit Card'], date: d(day), amount: -randCents(4, 8),
-      payeeId: pay[payeeName], payeeName,
-      categoryId: catId('Coffee Shops'), notes: maybeNote(), ...cr(),
+      accountId: acct['Chase Credit Card'],
+      date: d(day),
+      amount: -randCents(4, 8),
+      payeeId: pay[payeeName],
+      payeeName,
+      categoryId: catId('Coffee Shops'),
+      notes: maybeNote(),
+      ...cr(),
     });
   }
 
@@ -597,9 +1091,14 @@ for (let mi = 0; mi < 24; mi++) {
     const day = randInt(1, isCurrentMonth ? 20 : ld);
     const payeeName = pick(gasPayees);
     insertTx({
-      accountId: acct['Primary Checking'], date: d(day), amount: -randCents(35, 58),
-      payeeId: pay[payeeName], payeeName,
-      categoryId: catId('Gas / Fuel'), notes: maybeNote(), ...cr(),
+      accountId: acct['Primary Checking'],
+      date: d(day),
+      amount: -randCents(35, 58),
+      payeeId: pay[payeeName],
+      payeeName,
+      categoryId: catId('Gas / Fuel'),
+      notes: maybeNote(),
+      ...cr(),
     });
   }
 
@@ -608,13 +1107,21 @@ for (let mi = 0; mi < 24; mi++) {
   for (let i = 0; i < shopCount; i++) {
     const day = randInt(1, isCurrentMonth ? 20 : ld);
     const payeeName = pick(shoppingPayees);
-    const catName = payeeName === 'TJ Maxx' || payeeName === 'Nike' ? 'Clothing'
-      : payeeName === 'Amazon' ? 'Electronics' : 'Home Goods';
+    const catName =
+      payeeName === 'TJ Maxx' || payeeName === 'Nike'
+        ? 'Clothing'
+        : payeeName === 'Amazon'
+          ? 'Electronics'
+          : 'Home Goods';
     insertTx({
       accountId: Math.random() < 0.5 ? acct['Chase Credit Card'] : acct['Primary Checking'],
-      date: d(day), amount: -randCents(18, 195),
-      payeeId: pay[payeeName], payeeName,
-      categoryId: catId(catName), notes: maybeNote(), ...cr(),
+      date: d(day),
+      amount: -randCents(18, 195),
+      payeeId: pay[payeeName],
+      payeeName,
+      categoryId: catId(catName),
+      notes: maybeNote(),
+      ...cr(),
     });
   }
 
@@ -624,8 +1131,11 @@ for (let mi = 0; mi < 24; mi++) {
     const day = randInt(1, isCurrentMonth ? 20 : ld);
     const hasPayee = Math.random() > 0.5;
     insertTx({
-      accountId: acct['Cash Wallet'], date: d(day), amount: -randCents(5, 40),
-      payeeId: null, payeeName: hasPayee ? 'Cash Purchase' : null,
+      accountId: acct['Cash Wallet'],
+      date: d(day),
+      amount: -randCents(5, 40),
+      payeeId: null,
+      payeeName: hasPayee ? 'Cash Purchase' : null,
       categoryId: pick([catId('Cash / ATM'), catId('Coffee Shops'), catId('Fast Food')]),
       ...cr(),
     });
@@ -635,9 +1145,13 @@ for (let mi = 0; mi < 24; mi++) {
   if (birthdayMonths.includes(mi)) {
     const day = randInt(10, 25);
     insertTx({
-      accountId: acct['Primary Checking'], date: d(day), amount: -randCents(30, 80),
-      payeeId: pay['Target'], payeeName: 'Target',
-      categoryId: null, notes: 'Birthday gift for mom',
+      accountId: acct['Primary Checking'],
+      date: d(day),
+      amount: -randCents(30, 80),
+      payeeId: pay['Target'],
+      payeeName: 'Target',
+      categoryId: null,
+      notes: 'Birthday gift for mom',
       ...cr(),
     });
   }
@@ -647,9 +1161,14 @@ for (let mi = 0; mi < 24; mi++) {
     const le = LARGE_EXPENSES[mi];
     const day = randInt(8, 22);
     insertTx({
-      accountId: acct['Primary Checking'], date: d(day), amount: le.amount,
-      payeeId: pay[le.payee], payeeName: le.payee,
-      categoryId: catId(le.cat), notes: le.notes, ...cr(),
+      accountId: acct['Primary Checking'],
+      date: d(day),
+      amount: le.amount,
+      payeeId: pay[le.payee],
+      payeeName: le.payee,
+      categoryId: catId(le.cat),
+      notes: le.notes,
+      ...cr(),
     });
   }
 
@@ -657,9 +1176,14 @@ for (let mi = 0; mi < 24; mi++) {
   if (Math.random() < 0.7) {
     const day = randInt(1, isCurrentMonth ? 20 : ld);
     insertTx({
-      accountId: acct['Chase Credit Card'], date: d(day), amount: -randCents(12, 45),
-      payeeId: pay['AMC Theaters'], payeeName: 'AMC Theaters',
-      categoryId: catId('Entertainment'), notes: maybeNote(), ...cr(),
+      accountId: acct['Chase Credit Card'],
+      date: d(day),
+      amount: -randCents(12, 45),
+      payeeId: pay['AMC Theaters'],
+      payeeName: 'AMC Theaters',
+      categoryId: catId('Entertainment'),
+      notes: maybeNote(),
+      ...cr(),
     });
   }
 
@@ -667,9 +1191,14 @@ for (let mi = 0; mi < 24; mi++) {
   if (mi % 4 === 2) {
     const day = randInt(5, 20);
     insertTx({
-      accountId: acct['Chase Credit Card'], date: d(day), amount: -randCents(10, 50),
-      payeeId: pay['Udemy'], payeeName: 'Udemy',
-      categoryId: catId('Online Courses'), notes: 'Course purchase', ...cr(),
+      accountId: acct['Chase Credit Card'],
+      date: d(day),
+      amount: -randCents(10, 50),
+      payeeId: pay['Udemy'],
+      payeeName: 'Udemy',
+      categoryId: catId('Online Courses'),
+      notes: 'Course purchase',
+      ...cr(),
     });
   }
 
@@ -677,9 +1206,13 @@ for (let mi = 0; mi < 24; mi++) {
   if (mi % 2 === 0) {
     const day = randInt(3, 25);
     insertTx({
-      accountId: acct['Primary Checking'], date: d(day), amount: -randCents(10, 55),
-      payeeId: pay['CVS Pharmacy'], payeeName: 'CVS Pharmacy',
-      categoryId: catId('Pharmacy'), ...cr(),
+      accountId: acct['Primary Checking'],
+      date: d(day),
+      amount: -randCents(10, 55),
+      payeeId: pay['CVS Pharmacy'],
+      payeeName: 'CVS Pharmacy',
+      categoryId: catId('Pharmacy'),
+      ...cr(),
     });
   }
 
@@ -688,9 +1221,12 @@ for (let mi = 0; mi < 24; mi++) {
     const day = randInt(1, isCurrentMonth ? 20 : ld);
     insertTx({
       accountId: Math.random() < 0.5 ? acct['Chase Credit Card'] : acct['Primary Checking'],
-      date: d(day), amount: -randCents(8, 35),
-      payeeId: pay['Target'], payeeName: 'Target',
-      categoryId: catId('Personal Care'), ...cr(),
+      date: d(day),
+      amount: -randCents(8, 35),
+      payeeId: pay['Target'],
+      payeeName: 'Target',
+      categoryId: catId('Personal Care'),
+      ...cr(),
     });
   }
 
@@ -700,7 +1236,13 @@ for (let mi = 0; mi < 24; mi++) {
   insertTransfer('Primary Checking', 'Savings Account', d(25), 50000, cr().reconciled);
 
   // Checking → Credit Card payment
-  insertTransfer('Primary Checking', 'Chase Credit Card', d(22), randCents(700, 1100), cr().reconciled);
+  insertTransfer(
+    'Primary Checking',
+    'Chase Credit Card',
+    d(22),
+    randCents(700, 1100),
+    cr().reconciled,
+  );
 
   // Checking → 401k ($500, off-budget)
   insertTransfer('Primary Checking', 'Vanguard 401k', d(1), 50000, cr().reconciled);
@@ -716,8 +1258,11 @@ for (let mi = 0; mi < 24; mi++) {
     for (let i = 0; i < txns; i++) {
       const day = randInt(1, ld);
       insertTx({
-        accountId: acct['Old Checking'], date: d(day), amount: -randCents(10, 50),
-        payeeId: null, payeeName: pick(['Corner Store', 'ATM Withdrawal', 'Misc Purchase']),
+        accountId: acct['Old Checking'],
+        date: d(day),
+        amount: -randCents(10, 50),
+        payeeId: null,
+        payeeName: pick(['Corner Store', 'ATM Withdrawal', 'Misc Purchase']),
         categoryId: pick([catId('Cash / ATM'), catId('Miscellaneous')]),
         ...cr(),
       });
@@ -733,8 +1278,11 @@ for (let mi = 0; mi < 24; mi++) {
 {
   const { reconciled } = getCR(4);
   insertSplit(
-    acct['Primary Checking'], fmtDate(2025, 2, 14), -32000,
-    pay['Costco'], 'Costco',
+    acct['Primary Checking'],
+    fmtDate(2025, 2, 14),
+    -32000,
+    pay['Costco'],
+    'Costco',
     [
       { categoryId: catId('Groceries'), amount: -18000, notes: 'Bulk groceries' },
       { categoryId: catId('Home Goods'), amount: -9000, notes: 'Paper towels & cleaning' },
@@ -748,8 +1296,11 @@ for (let mi = 0; mi < 24; mi++) {
 {
   const { reconciled } = getCR(10);
   insertSplit(
-    acct['Primary Checking'], fmtDate(2025, 8, 8), -21500,
-    pay['Target'], 'Target',
+    acct['Primary Checking'],
+    fmtDate(2025, 8, 8),
+    -21500,
+    pay['Target'],
+    'Target',
     [
       { categoryId: catId('Clothing'), amount: -12000, notes: 'Back to school clothes' },
       { categoryId: catId('Home Goods'), amount: -9500, notes: 'Bedding set' },
@@ -762,8 +1313,11 @@ for (let mi = 0; mi < 24; mi++) {
 {
   const { reconciled } = getCR(16);
   insertSplit(
-    acct['Chase Credit Card'], fmtDate(2026, 2, 20), -17500,
-    pay['Amazon'], 'Amazon',
+    acct['Chase Credit Card'],
+    fmtDate(2026, 2, 20),
+    -17500,
+    pay['Amazon'],
+    'Amazon',
     [
       { categoryId: catId('Electronics'), amount: -12500, notes: 'Wireless mouse + stand' },
       { categoryId: catId('Home Goods'), amount: -5000, notes: 'Desk organizer' },
@@ -776,8 +1330,11 @@ for (let mi = 0; mi < 24; mi++) {
 {
   const { reconciled } = getCR(21);
   insertSplit(
-    acct['Primary Checking'], fmtDate(2026, 7, 10), -180000,
-    pay['United Airlines'], 'United Airlines',
+    acct['Primary Checking'],
+    fmtDate(2026, 7, 10),
+    -180000,
+    pay['United Airlines'],
+    'United Airlines',
     [
       { categoryId: catId('Flights'), amount: -90000, notes: 'Round trip flights' },
       { categoryId: catId('Hotels'), amount: -65000, notes: '4 nights hotel' },
@@ -797,38 +1354,47 @@ console.log('Rich seed: Inserting budget months...');
 
 const BUDGET_TEMPLATE: Record<string, number> = {
   'Rent / Mortgage': 180000,
-  'Groceries': 60000,
-  'Restaurants': 30000,
+  Groceries: 60000,
+  Restaurants: 30000,
   'Fast Food': 10000,
   'Coffee Shops': 8000,
   'Gas / Fuel': 15000,
-  'Electric': 12000,
-  'Water': 5000,
+  Electric: 12000,
+  Water: 5000,
   'Gas (Natural)': 6000,
-  'Internet': 7000,
-  'Phone': 8500,
+  Internet: 7000,
+  Phone: 8500,
   'Trash / Recycling': 3000,
   'Streaming Services': 5000,
   'Car Insurance': 14000,
   'Gym / Fitness': 4500,
-  'Clothing': 10000,
-  'Electronics': 10000,
+  Clothing: 10000,
+  Electronics: 10000,
   'Home Goods': 5000,
   'Home Maintenance': 15000,
   'Doctor / Medical': 5000,
-  'Pharmacy': 3000,
-  'Entertainment': 5000,
+  Pharmacy: 3000,
+  Entertainment: 5000,
   'Personal Care': 3000,
-  'Savings': 50000,
-  'Gifts': 5000,
+  Savings: 50000,
+  Gifts: 5000,
   'Online Courses': 2000,
 };
 
 // Which categories to budget in current month (subset for edge case)
 const currentMonthBudgeted = new Set([
-  'Rent / Mortgage', 'Groceries', 'Restaurants', 'Gas / Fuel',
-  'Electric', 'Water', 'Internet', 'Phone', 'Streaming Services',
-  'Gym / Fitness', 'Savings', 'Car Insurance',
+  'Rent / Mortgage',
+  'Groceries',
+  'Restaurants',
+  'Gas / Fuel',
+  'Electric',
+  'Water',
+  'Internet',
+  'Phone',
+  'Streaming Services',
+  'Gym / Fitness',
+  'Savings',
+  'Car Insurance',
 ]);
 
 // Months where restaurant budget is halved (tests overspent)
@@ -868,13 +1434,15 @@ for (let mi = 0; mi < 24; mi++) {
       budgeted += randInt(-2000, 2000);
     }
 
-    db.insert(budgetMonths).values({
-      id: nanoid(),
-      month: monthStr,
-      categoryId: catId(catName),
-      budgeted,
-      notes,
-    }).run();
+    db.insert(budgetMonths)
+      .values({
+        id: nanoid(),
+        month: monthStr,
+        categoryId: catId(catName),
+        budgeted,
+        notes,
+      })
+      .run();
     budgetCount++;
   }
 }
@@ -888,26 +1456,58 @@ console.log(`Rich seed: ${budgetCount} budget entries created.`);
 console.log('Rich seed: Inserting rules...');
 
 const RULE_DEFS = [
-  { conditions: [{ field: 'payee_name', op: 'contains', value: 'Kroger' }], actions: [{ field: 'category_id', value: catId('Groceries') }] },
-  { conditions: [{ field: 'payee_name', op: 'contains', value: 'Trader Joe' }], actions: [{ field: 'category_id', value: catId('Groceries') }] },
-  { conditions: [{ field: 'payee_name', op: 'contains', value: 'Netflix' }], actions: [{ field: 'category_id', value: catId('Streaming Services') }] },
-  { conditions: [{ field: 'payee_name', op: 'contains', value: 'Spotify' }], actions: [{ field: 'category_id', value: catId('Streaming Services') }] },
-  { conditions: [{ field: 'payee_name', op: 'contains', value: 'Shell' }], actions: [{ field: 'category_id', value: catId('Gas / Fuel') }] },
-  { conditions: [{ field: 'payee_name', op: 'contains', value: 'Exxon' }], actions: [{ field: 'category_id', value: catId('Gas / Fuel') }] },
-  { conditions: [{ field: 'payee_name', op: 'starts_with', value: 'Amazon' }], actions: [{ field: 'category_id', value: catId('Electronics') }] },
-  { conditions: [{ field: 'payee_name', op: 'contains', value: 'Starbucks' }], actions: [{ field: 'category_id', value: catId('Coffee Shops') }] },
-  { conditions: [{ field: 'notes', op: 'contains', value: 'birthday' }], actions: [{ field: 'category_id', value: catId('Gifts') }] },
-  { conditions: [{ field: 'payee_name', op: 'exact', value: 'Chipotle' }], actions: [{ field: 'category_id', value: catId('Restaurants') }] },
+  {
+    conditions: [{ field: 'payee_name', op: 'contains', value: 'Kroger' }],
+    actions: [{ field: 'category_id', value: catId('Groceries') }],
+  },
+  {
+    conditions: [{ field: 'payee_name', op: 'contains', value: 'Trader Joe' }],
+    actions: [{ field: 'category_id', value: catId('Groceries') }],
+  },
+  {
+    conditions: [{ field: 'payee_name', op: 'contains', value: 'Netflix' }],
+    actions: [{ field: 'category_id', value: catId('Streaming Services') }],
+  },
+  {
+    conditions: [{ field: 'payee_name', op: 'contains', value: 'Spotify' }],
+    actions: [{ field: 'category_id', value: catId('Streaming Services') }],
+  },
+  {
+    conditions: [{ field: 'payee_name', op: 'contains', value: 'Shell' }],
+    actions: [{ field: 'category_id', value: catId('Gas / Fuel') }],
+  },
+  {
+    conditions: [{ field: 'payee_name', op: 'contains', value: 'Exxon' }],
+    actions: [{ field: 'category_id', value: catId('Gas / Fuel') }],
+  },
+  {
+    conditions: [{ field: 'payee_name', op: 'starts_with', value: 'Amazon' }],
+    actions: [{ field: 'category_id', value: catId('Electronics') }],
+  },
+  {
+    conditions: [{ field: 'payee_name', op: 'contains', value: 'Starbucks' }],
+    actions: [{ field: 'category_id', value: catId('Coffee Shops') }],
+  },
+  {
+    conditions: [{ field: 'notes', op: 'contains', value: 'birthday' }],
+    actions: [{ field: 'category_id', value: catId('Gifts') }],
+  },
+  {
+    conditions: [{ field: 'payee_name', op: 'exact', value: 'Chipotle' }],
+    actions: [{ field: 'category_id', value: catId('Restaurants') }],
+  },
 ];
 
 RULE_DEFS.forEach((r, i) => {
-  db.insert(rules).values({
-    id: nanoid(),
-    conditions: JSON.stringify(r.conditions),
-    actions: JSON.stringify(r.actions),
-    sortOrder: i,
-    createdAt: now,
-  }).run();
+  db.insert(rules)
+    .values({
+      id: nanoid(),
+      conditions: JSON.stringify(r.conditions),
+      actions: JSON.stringify(r.actions),
+      sortOrder: i,
+      createdAt: now,
+    })
+    .run();
 });
 
 // ═══════════════════════════════════════════════════════
@@ -919,51 +1519,109 @@ console.log('Rich seed: Inserting custom reports...');
 const REPORT_DEFS = [
   {
     name: 'Monthly Spending by Category',
-    config: { chartType: 'donut', mode: 'total', groupBy: 'category', balanceType: 'expense', dateRange: { preset: '3m', from: '2026-07', to: '2026-09' }, filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] } },
+    config: {
+      chartType: 'donut',
+      mode: 'total',
+      groupBy: 'category',
+      balanceType: 'expense',
+      dateRange: { preset: '3m', from: '2026-07', to: '2026-09' },
+      filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] },
+    },
   },
   {
     name: 'Income vs Expenses Trend',
-    config: { chartType: 'stacked-bar', mode: 'time', groupBy: 'categoryGroup', balanceType: 'net', dateRange: { preset: '12m', from: '2025-10', to: '2026-09' }, filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] } },
+    config: {
+      chartType: 'stacked-bar',
+      mode: 'time',
+      groupBy: 'categoryGroup',
+      balanceType: 'net',
+      dateRange: { preset: '12m', from: '2025-10', to: '2026-09' },
+      filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] },
+    },
   },
   {
     name: 'Top Payees This Year',
-    config: { chartType: 'bar', mode: 'total', groupBy: 'payee', balanceType: 'expense', dateRange: { preset: 'ytd', from: '2026-01', to: '2026-09' }, filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] } },
+    config: {
+      chartType: 'bar',
+      mode: 'total',
+      groupBy: 'payee',
+      balanceType: 'expense',
+      dateRange: { preset: 'ytd', from: '2026-01', to: '2026-09' },
+      filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] },
+    },
   },
   {
     name: 'Spending Trends',
     config: {
-      chartType: 'line', mode: 'time', groupBy: 'category', balanceType: 'expense',
+      chartType: 'line',
+      mode: 'time',
+      groupBy: 'category',
+      balanceType: 'expense',
       dateRange: { preset: '6m', from: '2026-04', to: '2026-09' },
-      filters: { accountIds: [], categoryIds: [catId('Groceries'), catId('Restaurants'), catId('Gas / Fuel')], categoryGroupIds: [] },
+      filters: {
+        accountIds: [],
+        categoryIds: [catId('Groceries'), catId('Restaurants'), catId('Gas / Fuel')],
+        categoryGroupIds: [],
+      },
     },
   },
   {
     name: 'Account Activity',
-    config: { chartType: 'area', mode: 'time', groupBy: 'account', balanceType: 'net', dateRange: { preset: 'last-year', from: '2025-01', to: '2025-12' }, filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] } },
+    config: {
+      chartType: 'area',
+      mode: 'time',
+      groupBy: 'account',
+      balanceType: 'net',
+      dateRange: { preset: 'last-year', from: '2025-01', to: '2025-12' },
+      filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] },
+    },
   },
   {
     name: 'Category Group Summary',
-    config: { chartType: 'table', mode: 'total', groupBy: 'categoryGroup', balanceType: 'expense', dateRange: { preset: 'all', from: '2024-10', to: '2026-09' }, filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] } },
+    config: {
+      chartType: 'table',
+      mode: 'total',
+      groupBy: 'categoryGroup',
+      balanceType: 'expense',
+      dateRange: { preset: 'all', from: '2024-10', to: '2026-09' },
+      filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] },
+    },
   },
   {
     name: 'Monthly Expense Totals',
-    config: { chartType: 'bar', mode: 'total', groupBy: 'month', balanceType: 'expense', dateRange: { preset: 'custom', from: '2025-01', to: '2025-12' }, filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] } },
+    config: {
+      chartType: 'bar',
+      mode: 'total',
+      groupBy: 'month',
+      balanceType: 'expense',
+      dateRange: { preset: 'custom', from: '2025-01', to: '2025-12' },
+      filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] },
+    },
   },
   {
     name: 'Income Sources',
-    config: { chartType: 'donut', mode: 'total', groupBy: 'category', balanceType: 'income', dateRange: { preset: 'ytd', from: '2026-01', to: '2026-09' }, filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] } },
+    config: {
+      chartType: 'donut',
+      mode: 'total',
+      groupBy: 'category',
+      balanceType: 'income',
+      dateRange: { preset: 'ytd', from: '2026-01', to: '2026-09' },
+      filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] },
+    },
   },
 ];
 
 REPORT_DEFS.forEach((r, i) => {
-  db.insert(customReports).values({
-    id: nanoid(),
-    name: r.name,
-    config: JSON.stringify(r.config),
-    sortOrder: i,
-    createdAt: now,
-    updatedAt: now,
-  }).run();
+  db.insert(customReports)
+    .values({
+      id: nanoid(),
+      name: r.name,
+      config: JSON.stringify(r.config),
+      sortOrder: i,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .run();
 });
 
 // ═══════════════════════════════════════════════════════
@@ -973,27 +1631,69 @@ REPORT_DEFS.forEach((r, i) => {
 console.log('Rich seed: Inserting goals...');
 
 const GOAL_DEFS = [
-  { name: 'Emergency Fund', targetAmount: 1000000, currentAmount: 750000, targetDate: '2027-03-21', accountId: acct['Emergency Fund'], icon: '🛡️', color: '#059669' },
-  { name: 'Vacation Fund', targetAmount: 300000, currentAmount: 120000, targetDate: '2026-12-21', accountId: null, icon: '✈️', color: '#7C3AED' },
-  { name: 'New Laptop', targetAmount: 200000, currentAmount: 200000, targetDate: '2026-06-01', accountId: null, icon: '💻', color: '#2563EB' },
-  { name: 'Holiday Gifts', targetAmount: 50000, currentAmount: 0, targetDate: '2026-12-25', accountId: null, icon: '🎁', color: '#DC2626' },
-  { name: 'Car Down Payment', targetAmount: 500000, currentAmount: 80000, targetDate: '2026-06-01', accountId: null, icon: '🚗', color: '#D97706' },
+  {
+    name: 'Emergency Fund',
+    targetAmount: 1000000,
+    currentAmount: 750000,
+    targetDate: '2027-03-21',
+    accountId: acct['Emergency Fund'],
+    icon: '🛡️',
+    color: '#059669',
+  },
+  {
+    name: 'Vacation Fund',
+    targetAmount: 300000,
+    currentAmount: 120000,
+    targetDate: '2026-12-21',
+    accountId: null,
+    icon: '✈️',
+    color: '#7C3AED',
+  },
+  {
+    name: 'New Laptop',
+    targetAmount: 200000,
+    currentAmount: 200000,
+    targetDate: '2026-06-01',
+    accountId: null,
+    icon: '💻',
+    color: '#2563EB',
+  },
+  {
+    name: 'Holiday Gifts',
+    targetAmount: 50000,
+    currentAmount: 0,
+    targetDate: '2026-12-25',
+    accountId: null,
+    icon: '🎁',
+    color: '#DC2626',
+  },
+  {
+    name: 'Car Down Payment',
+    targetAmount: 500000,
+    currentAmount: 80000,
+    targetDate: '2026-06-01',
+    accountId: null,
+    icon: '🚗',
+    color: '#D97706',
+  },
 ];
 
 GOAL_DEFS.forEach((g, i) => {
-  db.insert(goals).values({
-    id: nanoid(),
-    name: g.name,
-    targetAmount: g.targetAmount,
-    currentAmount: g.currentAmount,
-    targetDate: g.targetDate,
-    accountId: g.accountId,
-    icon: g.icon,
-    color: g.color,
-    sortOrder: i,
-    createdAt: now,
-    updatedAt: now,
-  }).run();
+  db.insert(goals)
+    .values({
+      id: nanoid(),
+      name: g.name,
+      targetAmount: g.targetAmount,
+      currentAmount: g.currentAmount,
+      targetDate: g.targetDate,
+      accountId: g.accountId,
+      icon: g.icon,
+      color: g.color,
+      sortOrder: i,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .run();
 });
 
 // ═══════════════════════════════════════════════════════

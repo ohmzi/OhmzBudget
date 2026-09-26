@@ -38,14 +38,16 @@ export function ensureOccurrences(scheduleId: string, throughDate: string): numb
 
   for (const pair of pairs) {
     try {
-      db.insert(scheduleOccurrences).values({
-        id: nanoid(),
-        scheduleId,
-        scheduledDate: pair.scheduledDate,
-        expectedDate: pair.expectedDate,
-        expectedAmount: schedule.amount,
-        status: 'pending',
-      }).run();
+      db.insert(scheduleOccurrences)
+        .values({
+          id: nanoid(),
+          scheduleId,
+          scheduledDate: pair.scheduledDate,
+          expectedDate: pair.expectedDate,
+          expectedAmount: schedule.amount,
+          status: 'pending',
+        })
+        .run();
       created++;
     } catch (e: any) {
       if (e.message?.includes('UNIQUE constraint failed')) continue;
@@ -62,7 +64,8 @@ export function ensureOccurrences(scheduleId: string, throughDate: string): numb
 }
 
 export function ensureOccurrencesForAll(throughDate: string): number {
-  const activeSchedules = db.select({ id: schedules.id })
+  const activeSchedules = db
+    .select({ id: schedules.id })
     .from(schedules)
     .where(eq(schedules.status, 'active'))
     .all();
@@ -81,7 +84,8 @@ export function regenerateFutureOccurrences(scheduleId: string): void {
   const today = format(new Date(), 'yyyy-MM-dd');
   const previousHorizon = schedule.occurrenceHorizon || today;
 
-  const futureOccs = db.select()
+  const futureOccs = db
+    .select()
     .from(scheduleOccurrences)
     .where(
       and(
@@ -90,30 +94,23 @@ export function regenerateFutureOccurrences(scheduleId: string): void {
       ),
     )
     .all()
-    .filter(o => o.scheduledDate > today);
+    .filter((o) => o.scheduledDate > today);
 
   for (const occ of futureOccs) {
     db.delete(scheduleOccurrences).where(eq(scheduleOccurrences.id, occ.id)).run();
   }
 
-  db.update(schedules)
-    .set({ occurrenceHorizon: today })
-    .where(eq(schedules.id, scheduleId))
-    .run();
+  db.update(schedules).set({ occurrenceHorizon: today }).where(eq(schedules.id, scheduleId)).run();
 
   ensureOccurrences(scheduleId, previousHorizon);
 }
 
 export function autoCreateDueScheduled(): number {
   const today = format(new Date(), 'yyyy-MM-dd');
-  const activeSchedules = db.select()
+  const activeSchedules = db
+    .select()
     .from(schedules)
-    .where(
-      and(
-        eq(schedules.status, 'active'),
-        eq(schedules.autoCreate, 1),
-      ),
-    )
+    .where(and(eq(schedules.status, 'active'), eq(schedules.autoCreate, 1)))
     .all();
 
   let created = 0;
@@ -121,7 +118,8 @@ export function autoCreateDueScheduled(): number {
   for (const schedule of activeSchedules) {
     if (!schedule.accountId) continue;
 
-    const pendingOccs = db.select()
+    const pendingOccs = db
+      .select()
       .from(scheduleOccurrences)
       .where(
         and(
@@ -130,7 +128,7 @@ export function autoCreateDueScheduled(): number {
         ),
       )
       .all()
-      .filter(o => {
+      .filter((o) => {
         if (o.expectedDate > today) return false;
         if (schedule.autoCreateFrom && o.expectedDate < schedule.autoCreateFrom) return false;
         return true;
@@ -146,23 +144,25 @@ export function autoCreateDueScheduled(): number {
       const txId = nanoid();
       const importedId = `schedule:${schedule.id}:${occ.id}`;
 
-      db.insert(transactions).values({
-        id: txId,
-        accountId: schedule.accountId,
-        date: occ.expectedDate,
-        amount: occ.expectedAmount,
-        payeeId: schedule.payeeId,
-        payeeName,
-        categoryId: schedule.categoryId,
-        notes: schedule.notes,
-        reconciled: 0,
-        transferTransactionId: null,
-        isParent: 0,
-        parentTransactionId: null,
-        importedId,
-        scheduleId: schedule.id,
-        createdAt: new Date().toISOString(),
-      }).run();
+      db.insert(transactions)
+        .values({
+          id: txId,
+          accountId: schedule.accountId,
+          date: occ.expectedDate,
+          amount: occ.expectedAmount,
+          payeeId: schedule.payeeId,
+          payeeName,
+          categoryId: schedule.categoryId,
+          notes: schedule.notes,
+          reconciled: 0,
+          transferTransactionId: null,
+          isParent: 0,
+          parentTransactionId: null,
+          importedId,
+          scheduleId: schedule.id,
+          createdAt: new Date().toISOString(),
+        })
+        .run();
 
       linkOccurrenceToTransaction(occ.id, txId, 'automatic', 100);
       created++;
@@ -173,10 +173,7 @@ export function autoCreateDueScheduled(): number {
 }
 
 export function migrateRecurrenceRules(): number {
-  const toMigrate = db.select()
-    .from(schedules)
-    .where(eq(schedules.recurrenceRule, '{}'))
-    .all();
+  const toMigrate = db.select().from(schedules).where(eq(schedules.recurrenceRule, '{}')).all();
 
   if (toMigrate.length === 0) return 0;
 
@@ -194,10 +191,7 @@ export function migrateRecurrenceRules(): number {
 }
 
 export function migrateOccurrencesFromLegacy(): number {
-  const toMigrate = db.select()
-    .from(schedules)
-    .where(isNull(schedules.occurrenceHorizon))
-    .all();
+  const toMigrate = db.select().from(schedules).where(isNull(schedules.occurrenceHorizon)).all();
 
   if (toMigrate.length === 0) return 0;
 
@@ -217,7 +211,8 @@ export function migrateOccurrencesFromLegacy(): number {
 
     const pairs = computeOccurrenceDates(def, schedule.startDate, horizon);
 
-    const linkedTxns = db.select()
+    const linkedTxns = db
+      .select()
       .from(transactions)
       .where(eq(transactions.scheduleId, schedule.id))
       .all()
@@ -227,7 +222,7 @@ export function migrateOccurrencesFromLegacy(): number {
     const flexibility = schedule.dateFlexibility || 3;
 
     for (const pair of pairs) {
-      let bestTx: typeof linkedTxns[0] | null = null;
+      let bestTx: (typeof linkedTxns)[0] | null = null;
       let bestDist = Infinity;
 
       for (const tx of linkedTxns) {
@@ -244,27 +239,31 @@ export function migrateOccurrencesFromLegacy(): number {
       const occId = nanoid();
       if (bestTx) {
         usedTxnIds.add(bestTx.id);
-        db.insert(scheduleOccurrences).values({
-          id: occId,
-          scheduleId: schedule.id,
-          scheduledDate: pair.scheduledDate,
-          expectedDate: pair.expectedDate,
-          expectedAmount: schedule.amount,
-          status: 'paid',
-          matchedTransactionId: bestTx.id,
-          matchType: 'automatic',
-          matchConfidence: 100,
-          paidAt: bestTx.date,
-        }).run();
+        db.insert(scheduleOccurrences)
+          .values({
+            id: occId,
+            scheduleId: schedule.id,
+            scheduledDate: pair.scheduledDate,
+            expectedDate: pair.expectedDate,
+            expectedAmount: schedule.amount,
+            status: 'paid',
+            matchedTransactionId: bestTx.id,
+            matchType: 'automatic',
+            matchConfidence: 100,
+            paidAt: bestTx.date,
+          })
+          .run();
       } else {
-        db.insert(scheduleOccurrences).values({
-          id: occId,
-          scheduleId: schedule.id,
-          scheduledDate: pair.scheduledDate,
-          expectedDate: pair.expectedDate,
-          expectedAmount: schedule.amount,
-          status: 'pending',
-        }).run();
+        db.insert(scheduleOccurrences)
+          .values({
+            id: occId,
+            scheduleId: schedule.id,
+            scheduledDate: pair.scheduledDate,
+            expectedDate: pair.expectedDate,
+            expectedAmount: schedule.amount,
+            status: 'pending',
+          })
+          .run();
       }
       totalCreated++;
     }

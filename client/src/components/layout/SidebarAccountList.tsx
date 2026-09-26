@@ -24,7 +24,9 @@ function AccountRow({ account }: { account: Account }) {
       }
     >
       <span className="truncate">{account.name}</span>
-      <span className={`ml-2 tabular-nums text-[11px] shrink-0 ${isNegative ? 'text-negative/80' : 'text-sidebar-text/50'}`}>
+      <span
+        className={`ml-2 tabular-nums text-[11px] shrink-0 ${isNegative ? 'text-negative/80' : 'text-sidebar-text/50'}`}
+      >
         {formatCurrency(account.balance)}
       </span>
     </NavLink>
@@ -74,7 +76,10 @@ export function SidebarAccountList() {
       {/* Scrollable account list */}
       <div className="flex-1 overflow-y-auto px-3 mt-3">
         {/* All accounts */}
-        <NavLink to="/accounts" className="flex items-center justify-between py-1.5 text-[13px] font-bold text-sidebar-text-hi hover:text-sidebar-text-hi transition-colors">
+        <NavLink
+          to="/accounts"
+          className="flex items-center justify-between py-1.5 text-[13px] font-bold text-sidebar-text-hi hover:text-sidebar-text-hi transition-colors"
+        >
           <span>All accounts</span>
           <span className="tabular-nums ml-2">{formatCurrency(allTotal)}</span>
         </NavLink>
@@ -93,7 +98,9 @@ export function SidebarAccountList() {
           </button>
           {forBudgetOpen && (
             <div className="mt-0.5 space-y-0">
-              {onBudget.map((a) => <AccountRow key={a.id} account={a} />)}
+              {onBudget.map((a) => (
+                <AccountRow key={a.id} account={a} />
+              ))}
               {onBudget.length === 0 && (
                 <p className="pl-5 py-1 text-xs text-sidebar-text/50">No accounts yet</p>
               )}
@@ -116,7 +123,9 @@ export function SidebarAccountList() {
             </button>
             {offBudgetOpen && (
               <div className="mt-0.5 space-y-0">
-                {offBudget.map((a) => <AccountRow key={a.id} account={a} />)}
+                {offBudget.map((a) => (
+                  <AccountRow key={a.id} account={a} />
+                ))}
               </div>
             )}
           </div>
@@ -135,7 +144,10 @@ export function SidebarAccountList() {
           {menuOpen && (
             <div className="absolute left-0 bottom-full mb-1 w-48 bg-surface rounded-md border border-border shadow-hover z-30 py-1">
               <button
-                onClick={() => { setMenuOpen(false); setAddOpen(true); }}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setAddOpen(true);
+                }}
                 className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm text-text-secondary hover:bg-hover hover:text-text transition-colors"
               >
                 <Plus size={14} className="shrink-0" />
@@ -153,7 +165,10 @@ export function SidebarAccountList() {
                 Connect via Plaid
               </button>
               <button
-                onClick={() => { setMenuOpen(false); setSimplefinOpen(true); }}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setSimplefinOpen(true);
+                }}
                 className="flex items-center gap-2 w-full px-3 py-2 text-left text-sm text-text-secondary hover:bg-hover hover:text-text transition-colors"
               >
                 <Link2 size={14} className="shrink-0" />
@@ -166,7 +181,11 @@ export function SidebarAccountList() {
 
       <AddAccountModal isOpen={addOpen} onClose={() => setAddOpen(false)} />
       <ConnectBankModal isOpen={connectOpen} onClose={() => setConnectOpen(false)} />
-      <PlaidSetupModal isOpen={plaidSetupOpen} onClose={() => setPlaidSetupOpen(false)} onConfigured={() => setConnectOpen(true)} />
+      <PlaidSetupModal
+        isOpen={plaidSetupOpen}
+        onClose={() => setPlaidSetupOpen(false)}
+        onConfigured={() => setConnectOpen(true)}
+      />
       <SimplefinConnectModal isOpen={simplefinOpen} onClose={() => setSimplefinOpen(false)} />
     </>
   );

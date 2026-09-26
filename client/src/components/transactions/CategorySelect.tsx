@@ -9,8 +9,15 @@ interface Props {
   className?: string;
 }
 
-export function CategorySelect({ value, onChange, groups, accounts, currentAccountId, className = '' }: Props) {
-  const transferAccounts = accounts?.filter(a => a.id !== currentAccountId && !a.closedAt) ?? [];
+export function CategorySelect({
+  value,
+  onChange,
+  groups,
+  accounts,
+  currentAccountId,
+  className = '',
+}: Props) {
+  const transferAccounts = accounts?.filter((a) => a.id !== currentAccountId && !a.closedAt) ?? [];
 
   return (
     <select
@@ -22,14 +29,19 @@ export function CategorySelect({ value, onChange, groups, accounts, currentAccou
       {groups.map((g) => (
         <optgroup key={g.id} label={g.name}>
           {g.categories.map((c) => (
-            <option key={c.id} value={c.id}>{c.icon ? `${c.icon} ` : ''}{c.name}</option>
+            <option key={c.id} value={c.id}>
+              {c.icon ? `${c.icon} ` : ''}
+              {c.name}
+            </option>
           ))}
         </optgroup>
       ))}
       {transferAccounts.length > 0 && (
         <optgroup label="Transfer">
           {transferAccounts.map((a) => (
-            <option key={a.id} value={`transfer:${a.id}`}>Transfer: {a.name}</option>
+            <option key={a.id} value={`transfer:${a.id}`}>
+              Transfer: {a.name}
+            </option>
           ))}
         </optgroup>
       )}

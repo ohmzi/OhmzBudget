@@ -26,7 +26,12 @@ function withBalance(account: typeof accounts.$inferSelect) {
 }
 
 accountsRouter.get('/', (_req, res) => {
-  const rows = db.select().from(accounts).where(isNull(accounts.closedAt)).orderBy(accounts.sortOrder).all();
+  const rows = db
+    .select()
+    .from(accounts)
+    .where(isNull(accounts.closedAt))
+    .orderBy(accounts.sortOrder)
+    .all();
   if (!rows.length) return res.json([]);
 
   const sums = db
@@ -70,7 +75,13 @@ accountsRouter.post('/', (req, res) => {
   const parsed = createSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const account = { id: nanoid(), ...parsed.data, sortOrder: 0, closedAt: null, createdAt: new Date().toISOString() };
+  const account = {
+    id: nanoid(),
+    ...parsed.data,
+    sortOrder: 0,
+    closedAt: null,
+    createdAt: new Date().toISOString(),
+  };
   db.insert(accounts).values(account).run();
   res.status(201).json(withBalance(account as typeof accounts.$inferSelect));
 });

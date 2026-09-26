@@ -24,7 +24,7 @@ export function SimplefinConnectionCard({ connection }: Props) {
   const isSyncing = syncConnection.isPending || connection.syncStatus === 'syncing';
   const initial = connection.connectionName.charAt(0).toUpperCase();
   const statusCfg = statusConfig[connection.syncStatus];
-  const enabledAccounts = connection.accounts.filter(a => a.isEnabled);
+  const enabledAccounts = connection.accounts.filter((a) => a.isEnabled);
 
   return (
     <>
@@ -37,7 +37,9 @@ export function SimplefinConnectionCard({ connection }: Props) {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-semibold text-text">{connection.connectionName}</h3>
-                <span className="text-[10px] font-medium text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">SimpleFIN</span>
+                <span className="text-[10px] font-medium text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">
+                  SimpleFIN
+                </span>
               </div>
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-text-secondary mt-0.5">
                 {connection.syncStatus === 'syncing' ? (
@@ -51,7 +53,8 @@ export function SimplefinConnectionCard({ connection }: Props) {
           </div>
           {connection.lastSyncedAt && (
             <span className="text-xs text-text-tertiary">
-              Last synced {formatDistanceToNow(new Date(connection.lastSyncedAt), { addSuffix: true })}
+              Last synced{' '}
+              {formatDistanceToNow(new Date(connection.lastSyncedAt), { addSuffix: true })}
             </span>
           )}
         </div>
@@ -65,8 +68,11 @@ export function SimplefinConnectionCard({ connection }: Props) {
 
         {enabledAccounts.length > 0 && (
           <div className="space-y-1.5">
-            {enabledAccounts.map(acct => (
-              <div key={acct.simplefinAccountId} className="flex items-center justify-between text-xs text-text-secondary">
+            {enabledAccounts.map((acct) => (
+              <div
+                key={acct.simplefinAccountId}
+                className="flex items-center justify-between text-xs text-text-secondary"
+              >
                 <span>{acct.simplefinAccountName}</span>
                 <span className="text-text-tertiary">
                   {acct.accountName ? `→ ${acct.accountName}` : 'Not linked'}
@@ -77,11 +83,20 @@ export function SimplefinConnectionCard({ connection }: Props) {
         )}
 
         <div className="flex items-center gap-2 pt-1">
-          <Button variant="secondary" size="sm" onClick={() => syncConnection.mutate(connection.id)} disabled={isSyncing}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => syncConnection.mutate(connection.id)}
+            disabled={isSyncing}
+          >
             {isSyncing ? (
-              <><Loader2 size={12} className="animate-spin" /> Syncing...</>
+              <>
+                <Loader2 size={12} className="animate-spin" /> Syncing...
+              </>
             ) : (
-              <><RefreshCw size={12} /> Sync Now</>
+              <>
+                <RefreshCw size={12} /> Sync Now
+              </>
             )}
           </Button>
 

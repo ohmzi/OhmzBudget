@@ -3,10 +3,20 @@ import { Loader2, CheckCircle2, Building2 } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { PlaidLinkButton } from './PlaidLinkButton';
-import { useCreateLinkToken, useExchangePublicToken, useMapAccounts, useSyncItem } from '../../hooks/usePlaid';
+import {
+  useCreateLinkToken,
+  useExchangePublicToken,
+  useMapAccounts,
+  useSyncItem,
+} from '../../hooks/usePlaid';
 import { useAccounts } from '../../hooks/useAccounts';
 import { formatCurrency } from '../../utils/currency';
-import type { PlaidDiscoveredAccount, PlaidExchangeResult, AccountType, Account } from '../../types';
+import type {
+  PlaidDiscoveredAccount,
+  PlaidExchangeResult,
+  AccountType,
+  Account,
+} from '../../types';
 import type { AccountMappingAction } from '../../api/plaid';
 
 interface Props {
@@ -38,7 +48,7 @@ export function ConnectBankModal({ isOpen, onClose }: Props) {
   const { data: existingAccounts = [] } = useAccounts();
 
   const linkedAccountIds = new Set(
-    mappings.filter(m => m.action === 'link').map(m => m.accountId)
+    mappings.filter((m) => m.action === 'link').map((m) => m.accountId),
   );
 
   async function handleOpen() {
@@ -65,7 +75,7 @@ export function ConnectBankModal({ isOpen, onClose }: Props) {
           action: 'create' as const,
           accountName: a.name,
           accountType: a.suggestedType,
-        }))
+        })),
       );
       setStep('mapping');
     } catch {
@@ -74,17 +84,15 @@ export function ConnectBankModal({ isOpen, onClose }: Props) {
   }
 
   function updateMapping(plaidAccountId: string, updates: Partial<MappingChoice>) {
-    setMappings(prev =>
-      prev.map(m =>
-        m.plaidAccountId === plaidAccountId ? { ...m, ...updates } : m
-      )
+    setMappings((prev) =>
+      prev.map((m) => (m.plaidAccountId === plaidAccountId ? { ...m, ...updates } : m)),
     );
   }
 
   async function handleSaveAndSync() {
     if (!exchangeResult) return;
 
-    const actions: AccountMappingAction[] = mappings.map(m => ({
+    const actions: AccountMappingAction[] = mappings.map((m) => ({
       plaidAccountId: m.plaidAccountId,
       action: m.action,
       accountId: m.action === 'link' ? m.accountId : undefined,
@@ -97,7 +105,7 @@ export function ConnectBankModal({ isOpen, onClose }: Props) {
     try {
       await mapAccounts.mutateAsync({ itemId: exchangeResult.itemId, mappings: actions });
       const syncResult = await syncItem.mutateAsync(exchangeResult.itemId);
-      const activeCount = mappings.filter(m => m.action !== 'skip').length;
+      const activeCount = mappings.filter((m) => m.action !== 'skip').length;
       setSyncSummary({ added: syncResult.added, accounts: activeCount });
       setStep('done');
     } catch {
@@ -125,8 +133,8 @@ export function ConnectBankModal({ isOpen, onClose }: Props) {
             </div>
             <h3 className="text-sm font-semibold text-text">Connect Your Financial Institution</h3>
             <p className="text-xs text-text-secondary mt-2 max-w-sm mx-auto leading-relaxed">
-              Securely link your bank accounts to automatically import transactions
-              and keep your balances up to date.
+              Securely link your bank accounts to automatically import transactions and keep your
+              balances up to date.
             </p>
           </div>
 
@@ -134,9 +142,13 @@ export function ConnectBankModal({ isOpen, onClose }: Props) {
             <div className="flex justify-center">
               <Button onClick={handleOpen} disabled={createLinkToken.isPending}>
                 {createLinkToken.isPending ? (
-                  <><Loader2 size={16} className="animate-spin" /> Preparing...</>
+                  <>
+                    <Loader2 size={16} className="animate-spin" /> Preparing...
+                  </>
                 ) : (
-                  <><Building2 size={16} /> Connect Bank</>
+                  <>
+                    <Building2 size={16} /> Connect Bank
+                  </>
                 )}
               </Button>
             </div>
@@ -157,17 +169,15 @@ export function ConnectBankModal({ isOpen, onClose }: Props) {
       {step === 'mapping' && exchangeResult && (
         <div className="space-y-4">
           <div>
-            <h3 className="text-sm font-semibold text-text">
-              {exchangeResult.institutionName}
-            </h3>
+            <h3 className="text-sm font-semibold text-text">{exchangeResult.institutionName}</h3>
             <p className="text-xs text-text-secondary mt-0.5">
               Choose how to set up each discovered account.
             </p>
           </div>
 
           <div className="space-y-3 max-h-80 overflow-y-auto">
-            {exchangeResult.accounts.map(account => {
-              const mapping = mappings.find(m => m.plaidAccountId === account.plaidAccountId)!;
+            {exchangeResult.accounts.map((account) => {
+              const mapping = mappings.find((m) => m.plaidAccountId === account.plaidAccountId)!;
               return (
                 <AccountMappingCard
                   key={account.plaidAccountId}
@@ -175,15 +185,20 @@ export function ConnectBankModal({ isOpen, onClose }: Props) {
                   mapping={mapping}
                   existingAccounts={existingAccounts}
                   linkedAccountIds={linkedAccountIds}
-                  onChange={updates => updateMapping(account.plaidAccountId, updates)}
+                  onChange={(updates) => updateMapping(account.plaidAccountId, updates)}
                 />
               );
             })}
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
-            <Button variant="secondary" onClick={handleClose}>Cancel</Button>
-            <Button onClick={handleSaveAndSync} disabled={mappings.every(m => m.action === 'skip')}>
+            <Button variant="secondary" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveAndSync}
+              disabled={mappings.every((m) => m.action === 'skip')}
+            >
               Save & Sync
             </Button>
           </div>
@@ -229,9 +244,15 @@ interface AccountMappingCardProps {
   onChange: (updates: Partial<MappingChoice>) => void;
 }
 
-function AccountMappingCard({ account, mapping, existingAccounts, linkedAccountIds, onChange }: AccountMappingCardProps) {
+function AccountMappingCard({
+  account,
+  mapping,
+  existingAccounts,
+  linkedAccountIds,
+  onChange,
+}: AccountMappingCardProps) {
   const availableAccounts = existingAccounts.filter(
-    a => !a.closedAt && (!linkedAccountIds.has(a.id) || mapping.accountId === a.id)
+    (a) => !a.closedAt && (!linkedAccountIds.has(a.id) || mapping.accountId === a.id),
   );
 
   return (
@@ -249,12 +270,21 @@ function AccountMappingCard({ account, mapping, existingAccounts, linkedAccountI
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-xs text-text-tertiary capitalize">{account.type}{account.subtype ? ` · ${account.subtype}` : ''}</span>
+        <span className="text-xs text-text-tertiary capitalize">
+          {account.type}
+          {account.subtype ? ` · ${account.subtype}` : ''}
+        </span>
       </div>
 
       <div className="flex gap-2">
         <button
-          onClick={() => onChange({ action: 'create', accountName: account.name, accountType: account.suggestedType })}
+          onClick={() =>
+            onChange({
+              action: 'create',
+              accountName: account.name,
+              accountType: account.suggestedType,
+            })
+          }
           className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
             mapping.action === 'create'
               ? 'bg-brand-600 text-white'
@@ -289,11 +319,11 @@ function AccountMappingCard({ account, mapping, existingAccounts, linkedAccountI
       {mapping.action === 'link' && (
         <select
           value={mapping.accountId ?? ''}
-          onChange={e => onChange({ accountId: e.target.value })}
+          onChange={(e) => onChange({ accountId: e.target.value })}
           className="w-full text-sm border border-border rounded-md px-3 py-1.5 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
         >
           <option value="">Select an account...</option>
-          {availableAccounts.map(a => (
+          {availableAccounts.map((a) => (
             <option key={a.id} value={a.id}>
               {a.name} ({formatCurrency(a.balance)})
             </option>
@@ -305,7 +335,7 @@ function AccountMappingCard({ account, mapping, existingAccounts, linkedAccountI
         <input
           type="text"
           value={mapping.accountName}
-          onChange={e => onChange({ accountName: e.target.value })}
+          onChange={(e) => onChange({ accountName: e.target.value })}
           placeholder="Account name"
           className="w-full text-sm border border-border rounded-md px-3 py-1.5 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
         />

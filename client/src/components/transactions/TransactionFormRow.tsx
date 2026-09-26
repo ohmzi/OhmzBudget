@@ -18,16 +18,36 @@ interface Props {
   onDelete?: () => void;
 }
 
-interface SplitRow { categoryId: string | null; amount: string; notes: string; }
+interface SplitRow {
+  categoryId: string | null;
+  amount: string;
+  notes: string;
+}
 
-export function TransactionFormRow({ initial, accountId, groups, payees, accounts, onSave, onCancel, onDelete }: Props) {
+export function TransactionFormRow({
+  initial,
+  accountId,
+  groups,
+  payees,
+  accounts,
+  onSave,
+  onCancel,
+  onDelete,
+}: Props) {
   const today = format(new Date(), 'yyyy-MM-dd');
   const [date, setDate] = useState(initial?.date ?? today);
-  const [payee, setPayee] = useState({ id: initial?.payeeId ?? null, name: initial?.payeeName ?? '' });
+  const [payee, setPayee] = useState({
+    id: initial?.payeeId ?? null,
+    name: initial?.payeeName ?? '',
+  });
   const [categoryId, setCategoryId] = useState<string | null>(initial?.categoryId ?? null);
   const [notes, setNotes] = useState(initial?.notes ?? '');
-  const [outflow, setOutflow] = useState(initial?.amount !== undefined && initial.amount < 0 ? centsToInput(initial.amount) : '');
-  const [inflow, setInflow] = useState(initial?.amount !== undefined && initial.amount > 0 ? centsToInput(initial.amount) : '');
+  const [outflow, setOutflow] = useState(
+    initial?.amount !== undefined && initial.amount < 0 ? centsToInput(initial.amount) : '',
+  );
+  const [inflow, setInflow] = useState(
+    initial?.amount !== undefined && initial.amount > 0 ? centsToInput(initial.amount) : '',
+  );
   const [splitMode, setSplitMode] = useState(false);
   const [splits, setSplits] = useState<SplitRow[]>([
     { categoryId: null, amount: '', notes: '' },
@@ -47,8 +67,8 @@ export function TransactionFormRow({ initial, accountId, groups, payees, account
 
     if (splitMode) {
       const splitItems: SplitItem[] = splits
-        .filter(s => parseCents(s.amount) > 0)
-        .map(s => ({
+        .filter((s) => parseCents(s.amount) > 0)
+        .map((s) => ({
           categoryId: s.categoryId,
           amount: amount < 0 ? -parseCents(s.amount) : parseCents(s.amount),
           notes: s.notes || null,
@@ -57,7 +77,8 @@ export function TransactionFormRow({ initial, accountId, groups, payees, account
       if (splitItems.length < 2) return;
 
       onSave({
-        accountId, date,
+        accountId,
+        date,
         payeeId: payee.id,
         payeeName: payee.name || null,
         categoryId: null,
@@ -69,7 +90,8 @@ export function TransactionFormRow({ initial, accountId, groups, payees, account
     }
 
     onSave({
-      accountId, date,
+      accountId,
+      date,
       payeeId: payee.id,
       payeeName: payee.name || null,
       categoryId,
@@ -79,7 +101,7 @@ export function TransactionFormRow({ initial, accountId, groups, payees, account
   }
 
   function updateSplit(idx: number, field: keyof SplitRow, value: string | null) {
-    setSplits(prev => {
+    setSplits((prev) => {
       const next = [...prev];
       next[idx] = { ...next[idx], [field]: value };
       return next;
@@ -87,25 +109,31 @@ export function TransactionFormRow({ initial, accountId, groups, payees, account
   }
 
   function addSplitRow() {
-    setSplits(prev => [...prev, { categoryId: null, amount: '', notes: '' }]);
+    setSplits((prev) => [...prev, { categoryId: null, amount: '', notes: '' }]);
   }
 
   function removeSplitRow(idx: number) {
-    setSplits(prev => prev.filter((_, i) => i !== idx));
+    setSplits((prev) => prev.filter((_, i) => i !== idx));
   }
 
   const splitTotal = splits.reduce((sum, s) => sum + parseCents(s.amount), 0);
   const totalCents = Math.abs(getTotalCents());
   const splitRemaining = totalCents - splitTotal;
 
-  const inputCls = 'w-full bg-surface text-sm text-text placeholder-text-disabled border border-border rounded px-2 py-1.5 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600';
+  const inputCls =
+    'w-full bg-surface text-sm text-text placeholder-text-disabled border border-border rounded px-2 py-1.5 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600';
 
   return (
     <div className="bg-brand-50 border-b border-brand-100 px-4 py-3">
       <div className="grid grid-cols-4 gap-3 mb-3">
         <div>
           <label className="text-xs text-text-tertiary mb-1 block">Date</label>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className={inputCls}
+          />
         </div>
         <div>
           <label className="text-xs text-text-tertiary mb-1 block">Payee</label>
@@ -116,12 +144,24 @@ export function TransactionFormRow({ initial, accountId, groups, payees, account
           {splitMode ? (
             <span className="text-sm text-brand-600 font-medium leading-8">Split</span>
           ) : (
-            <CategorySelect value={categoryId} onChange={setCategoryId} groups={groups} accounts={accounts} currentAccountId={accountId} />
+            <CategorySelect
+              value={categoryId}
+              onChange={setCategoryId}
+              groups={groups}
+              accounts={accounts}
+              currentAccountId={accountId}
+            />
           )}
         </div>
         <div>
           <label className="text-xs text-text-tertiary mb-1 block">Notes</label>
-          <input type="text" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes" className={inputCls} />
+          <input
+            type="text"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Notes"
+            className={inputCls}
+          />
         </div>
       </div>
 
@@ -129,22 +169,36 @@ export function TransactionFormRow({ initial, accountId, groups, payees, account
         <div className="w-28">
           <label className="text-xs text-text-tertiary mb-1 block">Outflow</label>
           <input
-            type="number" value={outflow} onChange={(e) => setOutflow(e.target.value)}
-            onFocus={() => setInflow('')} placeholder="0.00" min="0" step="0.01"
+            type="number"
+            value={outflow}
+            onChange={(e) => setOutflow(e.target.value)}
+            onFocus={() => setInflow('')}
+            placeholder="0.00"
+            min="0"
+            step="0.01"
             className={`${inputCls} text-right tabular-nums`}
           />
         </div>
         <div className="w-28">
           <label className="text-xs text-text-tertiary mb-1 block">Inflow</label>
           <input
-            type="number" value={inflow} onChange={(e) => setInflow(e.target.value)}
-            onFocus={() => setOutflow('')} placeholder="0.00" min="0" step="0.01"
+            type="number"
+            value={inflow}
+            onChange={(e) => setInflow(e.target.value)}
+            onFocus={() => setOutflow('')}
+            placeholder="0.00"
+            min="0"
+            step="0.01"
             className={`${inputCls} text-right tabular-nums`}
           />
         </div>
         <div className="flex-1" />
         <div className="flex items-center gap-1 pb-0.5">
-          <button onClick={handleSave} className="p-1.5 rounded text-brand-600 hover:text-brand-700 hover:bg-brand-100" title="Save">
+          <button
+            onClick={handleSave}
+            className="p-1.5 rounded text-brand-600 hover:text-brand-700 hover:bg-brand-100"
+            title="Save"
+          >
             <Check size={16} />
           </button>
           {!isEditingParent && !isTransfer && (
@@ -156,11 +210,19 @@ export function TransactionFormRow({ initial, accountId, groups, payees, account
               <Split size={16} />
             </button>
           )}
-          <button onClick={onCancel} className="p-1.5 rounded text-text-tertiary hover:text-text-secondary hover:bg-surface-alt" title="Cancel">
+          <button
+            onClick={onCancel}
+            className="p-1.5 rounded text-text-tertiary hover:text-text-secondary hover:bg-surface-alt"
+            title="Cancel"
+          >
             <X size={16} />
           </button>
           {onDelete && (
-            <button onClick={onDelete} className="p-1.5 rounded text-text-tertiary hover:text-negative hover:bg-red-50 ml-1" title="Delete">
+            <button
+              onClick={onDelete}
+              className="p-1.5 rounded text-text-tertiary hover:text-negative hover:bg-red-50 ml-1"
+              title="Delete"
+            >
               <Trash2 size={16} />
             </button>
           )}
@@ -171,16 +233,34 @@ export function TransactionFormRow({ initial, accountId, groups, payees, account
         <div className="mt-3 pt-3 border-t border-brand-100">
           {splits.map((s, i) => (
             <div key={i} className="grid grid-cols-[1fr_1fr_120px_auto] gap-2 mb-2 items-center">
-              <CategorySelect value={s.categoryId} onChange={(v) => updateSplit(i, 'categoryId', v)} groups={groups} className="text-xs" />
-              <input type="text" value={s.notes} onChange={(e) => updateSplit(i, 'notes', e.target.value)} placeholder="Notes" className={`${inputCls} text-xs`} />
+              <CategorySelect
+                value={s.categoryId}
+                onChange={(v) => updateSplit(i, 'categoryId', v)}
+                groups={groups}
+                className="text-xs"
+              />
               <input
-                type="number" value={s.amount} onChange={(e) => updateSplit(i, 'amount', e.target.value)}
-                placeholder="0.00" min="0" step="0.01"
+                type="text"
+                value={s.notes}
+                onChange={(e) => updateSplit(i, 'notes', e.target.value)}
+                placeholder="Notes"
+                className={`${inputCls} text-xs`}
+              />
+              <input
+                type="number"
+                value={s.amount}
+                onChange={(e) => updateSplit(i, 'amount', e.target.value)}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
                 className={`${inputCls} text-right tabular-nums text-xs`}
               />
               <div className="w-6">
                 {splits.length > 2 && (
-                  <button onClick={() => removeSplitRow(i)} className="p-0.5 rounded text-text-tertiary hover:text-negative">
+                  <button
+                    onClick={() => removeSplitRow(i)}
+                    className="p-0.5 rounded text-text-tertiary hover:text-negative"
+                  >
                     <Trash2 size={14} />
                   </button>
                 )}
@@ -188,10 +268,15 @@ export function TransactionFormRow({ initial, accountId, groups, payees, account
             </div>
           ))}
           <div className="flex items-center justify-between mt-2">
-            <button onClick={addSplitRow} className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700">
+            <button
+              onClick={addSplitRow}
+              className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700"
+            >
               <Plus size={12} /> Add split
             </button>
-            <span className={`text-xs tabular-nums ${splitRemaining === 0 ? 'text-positive' : 'text-negative'}`}>
+            <span
+              className={`text-xs tabular-nums ${splitRemaining === 0 ? 'text-positive' : 'text-negative'}`}
+            >
               {splitRemaining === 0 ? 'Balanced' : `${formatCurrency(splitRemaining)} remaining`}
             </span>
           </div>

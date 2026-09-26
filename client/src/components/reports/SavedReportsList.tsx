@@ -24,7 +24,7 @@ export default function SavedReportsList({ activeId }: Props) {
 
   if (reports.length === 0) return null;
 
-  const activeReport = reports.find(r => r.id === activeId);
+  const activeReport = reports.find((r) => r.id === activeId);
 
   return (
     <div className="relative" ref={ref}>
@@ -38,19 +38,25 @@ export default function SavedReportsList({ activeId }: Props) {
 
       {open && (
         <div className="absolute top-full left-0 mt-1 w-64 bg-surface rounded-md border border-border shadow-hover z-20 py-1">
-          {reports.map(r => (
+          {reports.map((r) => (
             <div
               key={r.id}
               className={`flex items-center justify-between px-3 py-2 hover:bg-hover cursor-pointer group ${r.id === activeId ? 'bg-brand-50' : ''}`}
             >
               <button
-                onClick={() => { navigate(`/reports/custom/${r.id}`); setOpen(false); }}
+                onClick={() => {
+                  navigate(`/reports/custom/${r.id}`);
+                  setOpen(false);
+                }}
                 className="flex-1 text-left text-sm text-text-secondary truncate"
               >
                 {r.name}
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(r.id); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteMutation.mutate(r.id);
+                }}
                 className="opacity-0 group-hover:opacity-100 p-1 text-text-tertiary hover:text-negative transition-all"
               >
                 <Trash2 className="w-3.5 h-3.5" />

@@ -22,9 +22,11 @@ interface BudgetSummaryWidgetProps {
 
 function getHeroStyle(tbb: number, incomePlanned: number) {
   if (tbb < 0) return { bg: 'bg-negative-subtle', text: 'text-negative', label: 'Over budget' };
-  if (tbb === 0) return { bg: 'bg-positive-subtle', text: 'text-positive', label: 'Fully budgeted' };
+  if (tbb === 0)
+    return { bg: 'bg-positive-subtle', text: 'text-positive', label: 'Fully budgeted' };
   const threshold = Math.max(incomePlanned * 0.02, 500);
-  if (tbb <= threshold) return { bg: 'bg-caution-subtle', text: 'text-caution', label: 'Almost budgeted' };
+  if (tbb <= threshold)
+    return { bg: 'bg-caution-subtle', text: 'text-caution', label: 'Almost budgeted' };
   return { bg: 'bg-positive-subtle', text: 'text-positive', label: 'Left to budget' };
 }
 
@@ -45,13 +47,17 @@ interface SummarySectionProps {
 function SummarySection({ label, planned, actual, actualLabel, type }: SummarySectionProps) {
   const rawRemaining = planned - actual;
   const displayRemaining = type === 'income' ? Math.max(rawRemaining, 0) : rawRemaining;
-  const ratio = type === 'income'
-    ? (actual > 0 ? 1 : 0)
-    : (planned > 0 ? Math.min(actual / planned, 1) : 0);
+  const ratio =
+    type === 'income' ? (actual > 0 ? 1 : 0) : planned > 0 ? Math.min(actual / planned, 1) : 0;
   const barColor = getBarColor(actual, planned, type);
-  const remainingColor = type === 'income'
-    ? (displayRemaining === 0 ? 'text-text-tertiary' : 'text-positive')
-    : displayRemaining >= 0 ? 'text-positive' : 'text-negative';
+  const remainingColor =
+    type === 'income'
+      ? displayRemaining === 0
+        ? 'text-text-tertiary'
+        : 'text-positive'
+      : displayRemaining >= 0
+        ? 'text-positive'
+        : 'text-negative';
 
   return (
     <div className="py-3">
@@ -118,14 +124,12 @@ export function BudgetSummaryWidget({
           <p className={`text-lg font-semibold tabular-nums ${hero.text}`}>
             {formatCurrency(toBeBudgeted)}
           </p>
-          <p className={`text-xs ${hero.text} mt-0.5 opacity-75`}>
-            {hero.label}
-          </p>
+          <p className={`text-xs ${hero.text} mt-0.5 opacity-75`}>{hero.label}</p>
         </div>
       </div>
 
       <div className="flex justify-center gap-4 px-4 pb-2">
-        {TABS.map(tab => (
+        {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
@@ -206,18 +210,19 @@ export function BudgetSummaryWidget({
                 />
               </>
             )}
-            {nonMonthlyExpenses && (nonMonthlyExpenses.planned > 0 || nonMonthlyExpenses.spent > 0) && (
-              <>
-                <div className="border-t border-border-light" />
-                <SummarySection
-                  label="Non-Monthly"
-                  planned={nonMonthlyExpenses.planned}
-                  actual={nonMonthlyExpenses.spent}
-                  actualLabel="spent"
-                  type="expenses"
-                />
-              </>
-            )}
+            {nonMonthlyExpenses &&
+              (nonMonthlyExpenses.planned > 0 || nonMonthlyExpenses.spent > 0) && (
+                <>
+                  <div className="border-t border-border-light" />
+                  <SummarySection
+                    label="Non-Monthly"
+                    planned={nonMonthlyExpenses.planned}
+                    actual={nonMonthlyExpenses.spent}
+                    actualLabel="spent"
+                    type="expenses"
+                  />
+                </>
+              )}
           </div>
         )}
       </div>

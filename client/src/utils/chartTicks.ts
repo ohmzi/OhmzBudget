@@ -1,7 +1,14 @@
 import { useState, useEffect, type RefObject } from 'react';
 import {
-  parseISO, format, differenceInDays, differenceInMonths,
-  addDays, addMonths, addYears, startOfMonth, startOfYear,
+  parseISO,
+  format,
+  differenceInDays,
+  differenceInMonths,
+  addDays,
+  addMonths,
+  addYears,
+  startOfMonth,
+  startOfYear,
 } from 'date-fns';
 
 // --- Public types ---
@@ -23,7 +30,10 @@ interface TickResult {
 // --- Interval definitions ---
 
 type IntervalKind = 'day' | 'month' | 'year';
-interface Interval { kind: IntervalKind; count: number }
+interface Interval {
+  kind: IntervalKind;
+  count: number;
+}
 
 const INTERVALS: Interval[] = [
   { kind: 'day', count: 1 },
@@ -74,7 +84,14 @@ function intervalDays(iv: Interval): number {
 // --- Core function ---
 
 export function computeChartTicks(config: TickConfig): TickResult {
-  const { dates, rawStrings, chartWidth, labelSpacingPx = 150, minTicks = 3, maxTicks = 12 } = config;
+  const {
+    dates,
+    rawStrings,
+    chartWidth,
+    labelSpacingPx = 150,
+    minTicks = 3,
+    maxTicks = 12,
+  } = config;
 
   if (dates.length === 0) return { ticks: [], formatTick: () => '' };
   if (dates.length === 1) {
@@ -117,7 +134,7 @@ export function computeChartTicks(config: TickConfig): TickResult {
     tickDates.push(last);
   }
 
-  const ticks = tickDates.map(td => findClosest(td, dates, rawStrings));
+  const ticks = tickDates.map((td) => findClosest(td, dates, rawStrings));
   const unique = [...new Set(ticks)];
 
   const crossesYear = first.getFullYear() !== last.getFullYear();
@@ -180,7 +197,10 @@ function findClosest(target: Date, dates: Date[], strs: string[]): string {
   let bestDist = Math.abs(differenceInDays(target, dates[0]));
   for (let i = 1; i < dates.length; i++) {
     const dist = Math.abs(differenceInDays(target, dates[i]));
-    if (dist < bestDist) { best = i; bestDist = dist; }
+    if (dist < bestDist) {
+      best = i;
+      bestDist = dist;
+    }
   }
   return strs[best];
 }
@@ -194,7 +214,7 @@ export function useChartWidth(ref: RefObject<HTMLDivElement | null>): number {
     const el = ref.current;
     if (!el) return;
 
-    const ro = new ResizeObserver(entries => {
+    const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
         setWidth(entry.contentRect.width);
       }

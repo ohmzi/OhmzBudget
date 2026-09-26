@@ -9,7 +9,7 @@ import { Sidebar } from './Sidebar';
 export function AppShell() {
   useUndoKeyboard();
   const { data: accounts = [], isLoading } = useAccounts();
-  const setupSkipped = useAppStore(s => s.setupSkipped);
+  const setupSkipped = useAppStore((s) => s.setupSkipped);
 
   if (isLoading) {
     return (

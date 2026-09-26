@@ -1,67 +1,67 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
   /* Brand — blue replaces Monarch's orange */
-  --color-brand-50:  #EFF6FF;
-  --color-brand-100: #DBEAFE;
-  --color-brand-200: #BFDBFE;
-  --color-brand-300: #93C5FD;
-  --color-brand-500: #3B82F6;
-  --color-brand-600: #2563EB;
-  --color-brand-700: #1D4ED8;
-  --color-brand-800: #1E40AF;
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
 
   /* Surfaces — warm neutral, NOT cool slate */
-  --color-page:        #F9FAFB;
-  --color-surface:     #FFFFFF;
-  --color-surface-alt: #F3F4F6;
-  --color-hover:       #F9FAFB;
+  --color-page: #f9fafb;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f3f4f6;
+  --color-hover: #f9fafb;
 
   /* Borders */
-  --color-border:       #E5E7EB;
-  --color-border-light: #F3F4F6;
+  --color-border: #e5e7eb;
+  --color-border-light: #f3f4f6;
 
   /* Text */
-  --color-text:           #111827;
-  --color-text-secondary: #6B7280;
-  --color-text-tertiary:  #9CA3AF;
-  --color-text-disabled:  #D1D5DB;
+  --color-text: #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+  --color-text-disabled: #d1d5db;
 
   /* Semantic */
-  --color-positive:    #059669;
-  --color-positive-subtle: #ECFDF5;
-  --color-negative:    #DC2626;
-  --color-negative-subtle: #FEF2F2;
-  --color-caution:     #CA8A04;
-  --color-caution-subtle:  #FFFBEB;
+  --color-positive: #059669;
+  --color-positive-subtle: #ecfdf5;
+  --color-negative: #dc2626;
+  --color-negative-subtle: #fef2f2;
+  --color-caution: #ca8a04;
+  --color-caution-subtle: #fffbeb;
 
   /* Sidebar */
-  --color-sidebar-bg:      #1F2937;
-  --color-sidebar-deep:    #111827;
-  --color-sidebar-hover:   rgba(255,255,255,0.06);
-  --color-sidebar-active:  rgba(37,99,235,0.15);
-  --color-sidebar-border:  rgba(255,255,255,0.06);
-  --color-sidebar-text:    #9CA3AF;
-  --color-sidebar-text-hi: #F9FAFB;
+  --color-sidebar-bg: #1f2937;
+  --color-sidebar-deep: #111827;
+  --color-sidebar-hover: rgba(255, 255, 255, 0.06);
+  --color-sidebar-active: rgba(37, 99, 235, 0.15);
+  --color-sidebar-border: rgba(255, 255, 255, 0.06);
+  --color-sidebar-text: #9ca3af;
+  --color-sidebar-text-hi: #f9fafb;
 
   /* Shadows */
-  --shadow-xs:    0 1px 2px rgba(0,0,0,0.04);
-  --shadow-card:  0 1px 3px rgba(0,0,0,0.04), 0 1px 2px -1px rgba(0,0,0,0.03);
-  --shadow-hover: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.03);
-  --shadow-modal: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.06);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+  --shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
 
   /* Chart */
-  --color-chart-grid: #F3F4F6;
-  --color-chart-axis: #9CA3AF;
-  --color-chart-tooltip-bg: #FFFFFF;
-  --color-chart-tooltip-border: #E5E7EB;
+  --color-chart-grid: #f3f4f6;
+  --color-chart-axis: #9ca3af;
+  --color-chart-tooltip-bg: #ffffff;
+  --color-chart-tooltip-border: #e5e7eb;
   --color-chart-label: #374151;
 
   /* Investment badge */
-  --color-invest-bg: #EDE9FE;
-  --color-invest-text: #6D28D9;
+  --color-invest-bg: #ede9fe;
+  --color-invest-text: #6d28d9;
 
   /* Radii */
   --radius-sm: 6px;
@@ -71,56 +71,56 @@
 }
 
 .dark {
-  --color-page:        #0F1117;
-  --color-surface:     #1A1F2E;
+  --color-page: #0f1117;
+  --color-surface: #1a1f2e;
   --color-surface-alt: #232836;
-  --color-hover:       #282D3E;
+  --color-hover: #282d3e;
 
-  --color-border:       #333A4A;
-  --color-border-light: #282D3E;
+  --color-border: #333a4a;
+  --color-border-light: #282d3e;
 
-  --color-text:           #F1F3F5;
-  --color-text-secondary: #9CA3AF;
-  --color-text-tertiary:  #6B7280;
-  --color-text-disabled:  #4B5563;
+  --color-text: #f1f3f5;
+  --color-text-secondary: #9ca3af;
+  --color-text-tertiary: #6b7280;
+  --color-text-disabled: #4b5563;
 
-  --color-brand-50:  #172554;
-  --color-brand-100: #1E3A5F;
-  --color-brand-200: #1E40AF;
-  --color-brand-300: #2563EB;
-  --color-brand-500: #3B82F6;
-  --color-brand-600: #60A5FA;
-  --color-brand-700: #93BBFD;
-  --color-brand-800: #BFDBFE;
+  --color-brand-50: #172554;
+  --color-brand-100: #1e3a5f;
+  --color-brand-200: #1e40af;
+  --color-brand-300: #2563eb;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #60a5fa;
+  --color-brand-700: #93bbfd;
+  --color-brand-800: #bfdbfe;
 
-  --color-positive:        #34D399;
+  --color-positive: #34d399;
   --color-positive-subtle: rgba(16, 185, 129, 0.15);
-  --color-negative:        #F87171;
+  --color-negative: #f87171;
   --color-negative-subtle: rgba(239, 68, 68, 0.15);
-  --color-caution:         #FBBF24;
-  --color-caution-subtle:  rgba(245, 158, 11, 0.15);
+  --color-caution: #fbbf24;
+  --color-caution-subtle: rgba(245, 158, 11, 0.15);
 
-  --color-sidebar-bg:      #0D1017;
-  --color-sidebar-deep:    #080A0F;
-  --color-sidebar-hover:   rgba(255,255,255,0.06);
-  --color-sidebar-active:  rgba(96,165,250,0.15);
-  --color-sidebar-border:  rgba(255,255,255,0.06);
-  --color-sidebar-text:    #9CA3AF;
-  --color-sidebar-text-hi: #F1F3F5;
+  --color-sidebar-bg: #0d1017;
+  --color-sidebar-deep: #080a0f;
+  --color-sidebar-hover: rgba(255, 255, 255, 0.06);
+  --color-sidebar-active: rgba(96, 165, 250, 0.15);
+  --color-sidebar-border: rgba(255, 255, 255, 0.06);
+  --color-sidebar-text: #9ca3af;
+  --color-sidebar-text-hi: #f1f3f5;
 
-  --color-chart-grid: #282D3E;
-  --color-chart-axis: #6B7280;
+  --color-chart-grid: #282d3e;
+  --color-chart-axis: #6b7280;
   --color-chart-tooltip-bg: #232836;
-  --color-chart-tooltip-border: #333A4A;
-  --color-chart-label: #D1D5DB;
+  --color-chart-tooltip-border: #333a4a;
+  --color-chart-label: #d1d5db;
 
   --color-invest-bg: rgba(109, 40, 217, 0.2);
-  --color-invest-text: #A78BFA;
+  --color-invest-text: #a78bfa;
 
-  --shadow-xs:    0 1px 2px rgba(0,0,0,0.3);
-  --shadow-card:  0 1px 3px rgba(0,0,0,0.4);
-  --shadow-hover: 0 4px 12px rgba(0,0,0,0.4);
-  --shadow-modal: 0 20px 60px rgba(0,0,0,0.6);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
 body {

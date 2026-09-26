@@ -46,8 +46,13 @@ export function useCreateSavedReport() {
 export function useUpdateSavedReport() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { name?: string; config?: CustomReportConfig } }) =>
-      api.updateSavedReport(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { name?: string; config?: CustomReportConfig };
+    }) => api.updateSavedReport(id, data),
     onMutate: async ({ id }) => {
       const reports = qc.getQueryData<SavedCustomReport[]>(['custom-reports']);
       return { old: reports?.find((r) => r.id === id) };

@@ -35,12 +35,12 @@ export function BudgetEditPopover({
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const chartData = (data?.history ?? []).map(h => ({
+  const chartData = (data?.history ?? []).map((h) => ({
     month: format(parseISO(`${h.month}-01`), 'MMM'),
     amount: h.amount / 100,
   }));
 
-  const hasData = chartData.some(d => d.amount > 0);
+  const hasData = chartData.some((d) => d.amount > 0);
   const barColor = isIncome ? chartColors.positive : chartColors.negative;
 
   return (
@@ -56,9 +56,7 @@ export function BudgetEditPopover({
           <p className="text-sm font-semibold tabular-nums text-text">
             {formatCurrency(data?.lastMonth ?? 0)}
           </p>
-          <p className="text-xs text-text-tertiary">
-            {isIncome ? 'Earned' : 'Spent'} last month
-          </p>
+          <p className="text-xs text-text-tertiary">{isIncome ? 'Earned' : 'Spent'} last month</p>
         </div>
         <div className="bg-surface-alt rounded-lg p-2.5">
           <p className="text-sm font-semibold tabular-nums text-text">
@@ -84,7 +82,7 @@ export function BudgetEditPopover({
                 tickLine={false}
                 width={40}
                 domain={[0, 'auto']}
-                tickFormatter={(v: number) => v >= 1000 ? `$${(v / 1000).toFixed(1)}k` : `$${v}`}
+                tickFormatter={(v: number) => (v >= 1000 ? `$${(v / 1000).toFixed(1)}k` : `$${v}`)}
               />
               <Bar dataKey="amount" fill={barColor} radius={[3, 3, 0, 0]}>
                 <LabelList
@@ -110,8 +108,20 @@ export function BudgetEditPopover({
           if (next) onApplyBulk(currentAmount);
         }}
       >
-        <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${checked ? 'bg-brand-600 border-brand-600' : 'border-border'}`}>
-          {checked && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+        <span
+          className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${checked ? 'bg-brand-600 border-brand-600' : 'border-border'}`}
+        >
+          {checked && (
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <path
+                d="M1 4L3.5 6.5L9 1"
+                stroke="white"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
         </span>
         Apply {formatCurrency(currentAmount)} to all future months
       </button>

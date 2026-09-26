@@ -1,7 +1,24 @@
-import { addWeeks, addDays, parseISO, format, isBefore, isAfter, min as minDate, lastDayOfMonth, getDay } from 'date-fns';
+import {
+  addWeeks,
+  addDays,
+  parseISO,
+  format,
+  isBefore,
+  isAfter,
+  min as minDate,
+  lastDayOfMonth,
+  getDay,
+} from 'date-fns';
 
-
-export type RecurrenceType = 'once' | 'weekly' | 'biweekly' | 'semimonthly' | 'monthly' | 'quarterly' | 'semiannually' | 'yearly';
+export type RecurrenceType =
+  | 'once'
+  | 'weekly'
+  | 'biweekly'
+  | 'semimonthly'
+  | 'monthly'
+  | 'quarterly'
+  | 'semiannually'
+  | 'yearly';
 export type WeekendAdjust = 'none' | 'before' | 'after' | 'closest';
 export type AmountType = 'exact' | 'approximate' | 'variable';
 
@@ -28,7 +45,10 @@ export interface OccurrenceDatePair {
   expectedDate: string;
 }
 
-export function buildRecurrenceRule(recurrenceType: RecurrenceType, startDate: string): RecurrenceRule {
+export function buildRecurrenceRule(
+  recurrenceType: RecurrenceType,
+  startDate: string,
+): RecurrenceRule {
   const d = parseISO(startDate);
   const dayOfMonth = d.getDate();
   const dayOfWeek = getDay(d);
@@ -42,7 +62,11 @@ export function buildRecurrenceRule(recurrenceType: RecurrenceType, startDate: s
     case 'biweekly':
       return { type: 'biweekly', anchorDay: dayOfWeek };
     case 'semimonthly':
-      return { type: 'semimonthly', day1: dayOfMonth, day2: dayOfMonth <= 15 ? 15 : Math.min(dayOfMonth + 15, 28) };
+      return {
+        type: 'semimonthly',
+        day1: dayOfMonth,
+        day2: dayOfMonth <= 15 ? 15 : Math.min(dayOfMonth + 15, 28),
+      };
     case 'monthly':
       return { type: 'monthly', interval: 1, anchorDay: dayOfMonth };
     case 'quarterly':
@@ -123,7 +147,11 @@ function stepMonthlyAnchored(
   return results;
 }
 
-export function computeOccurrenceDates(def: RecurrenceDefinition, rangeStart: string, rangeEnd: string): OccurrenceDatePair[] {
+export function computeOccurrenceDates(
+  def: RecurrenceDefinition,
+  rangeStart: string,
+  rangeEnd: string,
+): OccurrenceDatePair[] {
   const start = parseISO(def.startDate);
   const rStart = parseISO(rangeStart);
   const rEnd = parseISO(rangeEnd);
@@ -150,7 +178,10 @@ export function computeOccurrenceDates(def: RecurrenceDefinition, rangeStart: st
 
     case 'weekly':
     case 'biweekly': {
-      const step = rule.type === 'weekly' ? (rule as { type: 'weekly'; interval: number; anchorDay: number }).interval : 2;
+      const step =
+        rule.type === 'weekly'
+          ? (rule as { type: 'weekly'; interval: number; anchorDay: number }).interval
+          : 2;
       const results: OccurrenceDatePair[] = [];
       let current = start;
       if (isBefore(current, rStart)) {
@@ -202,13 +233,24 @@ export function computeOccurrenceDates(def: RecurrenceDefinition, rangeStart: st
         }
         if (allPast && isAfter(d1, effectiveEnd)) break;
         month++;
-        if (month > 11) { month = 0; year++; }
+        if (month > 11) {
+          month = 0;
+          year++;
+        }
       }
       return results;
     }
 
     case 'monthly':
-      return stepMonthlyAnchored(start, rule.anchorDay, rule.interval, rStart, rEnd, end, def.weekendAdjust);
+      return stepMonthlyAnchored(
+        start,
+        rule.anchorDay,
+        rule.interval,
+        rStart,
+        rEnd,
+        end,
+        def.weekendAdjust,
+      );
     case 'quarterly':
       return stepMonthlyAnchored(start, rule.anchorDay, 3, rStart, rEnd, end, def.weekendAdjust);
     case 'semiannually':
@@ -217,4 +259,3 @@ export function computeOccurrenceDates(def: RecurrenceDefinition, rangeStart: st
       return stepMonthlyAnchored(start, rule.anchorDay, 12, rStart, rEnd, end, def.weekendAdjust);
   }
 }
-

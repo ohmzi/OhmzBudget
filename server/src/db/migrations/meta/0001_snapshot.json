@@ -117,10 +117,7 @@
       "indexes": {
         "budget_months_month_category_idx": {
           "name": "budget_months_month_category_idx",
-          "columns": [
-            "month",
-            "category_id"
-          ],
+          "columns": ["month", "category_id"],
           "isUnique": true
         }
       },
@@ -129,12 +126,8 @@
           "name": "budget_months_category_id_categories_id_fk",
           "tableFrom": "budget_months",
           "tableTo": "categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -190,12 +183,8 @@
           "name": "categories_group_id_category_groups_id_fk",
           "tableFrom": "categories",
           "tableTo": "category_groups",
-          "columnsFrom": [
-            "group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["group_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -291,12 +280,8 @@
           "name": "payees_default_category_id_categories_id_fk",
           "tableFrom": "payees",
           "tableTo": "categories",
-          "columnsFrom": [
-            "default_category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["default_category_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -468,24 +453,17 @@
       "indexes": {
         "transactions_account_date_idx": {
           "name": "transactions_account_date_idx",
-          "columns": [
-            "account_id",
-            "date"
-          ],
+          "columns": ["account_id", "date"],
           "isUnique": false
         },
         "transactions_category_idx": {
           "name": "transactions_category_idx",
-          "columns": [
-            "category_id"
-          ],
+          "columns": ["category_id"],
           "isUnique": false
         },
         "transactions_date_idx": {
           "name": "transactions_date_idx",
-          "columns": [
-            "date"
-          ],
+          "columns": ["date"],
           "isUnique": false
         }
       },
@@ -494,12 +472,8 @@
           "name": "transactions_account_id_accounts_id_fk",
           "tableFrom": "transactions",
           "tableTo": "accounts",
-          "columnsFrom": [
-            "account_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["account_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -507,12 +481,8 @@
           "name": "transactions_payee_id_payees_id_fk",
           "tableFrom": "transactions",
           "tableTo": "payees",
-          "columnsFrom": [
-            "payee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["payee_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -520,12 +490,8 @@
           "name": "transactions_category_id_categories_id_fk",
           "tableFrom": "transactions",
           "tableTo": "categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }

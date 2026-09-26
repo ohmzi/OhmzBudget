@@ -22,13 +22,22 @@ interface Props {
   onClose: () => void;
 }
 
-export function TransactionDetailPanel({ transaction: tx, categoryMap, groups, payees, accounts, accountName, accountType, onClose }: Props) {
+export function TransactionDetailPanel({
+  transaction: tx,
+  categoryMap,
+  groups,
+  payees,
+  accounts,
+  accountName,
+  accountType,
+  onClose,
+}: Props) {
   const updateTx = useUpdateTransaction();
   const deleteTx = useDeleteTransaction();
   const { data: schedules = [] } = useSchedules();
   const unmatchByTx = useUnmatchByTransaction();
-  const linkedSchedule = tx.scheduleId ? schedules.find(s => s.id === tx.scheduleId) : null;
-  const freqMap = new Map(RECURRENCE_TYPE_LABELS.map(f => [f.value, f.label]));
+  const linkedSchedule = tx.scheduleId ? schedules.find((s) => s.id === tx.scheduleId) : null;
+  const freqMap = new Map(RECURRENCE_TYPE_LABELS.map((f) => [f.value, f.label]));
 
   const [localDate, setLocalDate] = useState(tx.date);
   const [localNotes, setLocalNotes] = useState(tx.notes ?? '');
@@ -60,7 +69,7 @@ export function TransactionDetailPanel({ transaction: tx, categoryMap, groups, p
   const initial = payeeName.charAt(0).toUpperCase();
   const bgColor = payeeColor(payeeName);
   const acctColor = ACCOUNT_TYPE_COLORS[accountType || ''] || '#6B7280';
-  const categoryEntry = tx.categoryId ? categoryMap.get(tx.categoryId) ?? null : null;
+  const categoryEntry = tx.categoryId ? (categoryMap.get(tx.categoryId) ?? null) : null;
 
   function saveDate() {
     if (localDate !== tx.date) {
@@ -84,7 +93,10 @@ export function TransactionDetailPanel({ transaction: tx, categoryMap, groups, p
 
   function savePayeeOnBlur() {
     if (localPayee.id !== tx.payeeId || localPayee.name !== (tx.payeeName ?? '')) {
-      updateTx.mutate({ id: tx.id, data: { payeeId: localPayee.id, payeeName: localPayee.name || null } });
+      updateTx.mutate({
+        id: tx.id,
+        data: { payeeId: localPayee.id, payeeName: localPayee.name || null },
+      });
     }
   }
 
@@ -97,13 +109,17 @@ export function TransactionDetailPanel({ transaction: tx, categoryMap, groups, p
     deleteTx.mutate(tx.id, { onSuccess: onClose });
   }
 
-  const inputCls = 'w-full text-sm border border-border rounded-lg px-3 py-2 bg-surface text-text focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 disabled:opacity-60 disabled:cursor-not-allowed';
+  const inputCls =
+    'w-full text-sm border border-border rounded-lg px-3 py-2 bg-surface text-text focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 disabled:opacity-60 disabled:cursor-not-allowed';
 
   return (
     <div className="w-96 shrink-0 border-l border-border bg-surface flex flex-col h-full">
       <div className="px-5 py-3 border-b border-border flex items-center justify-between">
         <span className="text-sm font-medium text-text-secondary">Transaction Details</span>
-        <button onClick={onClose} className="p-1 rounded hover:bg-hover text-text-tertiary hover:text-text-secondary">
+        <button
+          onClick={onClose}
+          className="p-1 rounded hover:bg-hover text-text-tertiary hover:text-text-secondary"
+        >
           <X size={16} />
         </button>
       </div>
@@ -132,7 +148,9 @@ export function TransactionDetailPanel({ transaction: tx, categoryMap, groups, p
               )}
             </div>
           </div>
-          <span className={`text-lg font-semibold tabular-nums ${tx.amount > 0 ? 'text-positive' : 'text-text'}`}>
+          <span
+            className={`text-lg font-semibold tabular-nums ${tx.amount > 0 ? 'text-positive' : 'text-text'}`}
+          >
             {formatCurrency(Math.abs(tx.amount))}
           </span>
         </div>
@@ -149,7 +167,7 @@ export function TransactionDetailPanel({ transaction: tx, categoryMap, groups, p
           <input
             type="date"
             value={localDate}
-            onChange={e => setLocalDate(e.target.value)}
+            onChange={(e) => setLocalDate(e.target.value)}
             onBlur={saveDate}
             disabled={isReconciled}
             className={inputCls}
@@ -160,22 +178,30 @@ export function TransactionDetailPanel({ transaction: tx, categoryMap, groups, p
           <label className="text-xs font-medium text-text-secondary mb-1.5 block">Category</label>
           {isSplitParent ? (
             <div className="space-y-2">
-              <div className="text-sm text-brand-600 font-medium">Split ({tx.children!.length})</div>
-              {tx.children!.map(child => {
+              <div className="text-sm text-brand-600 font-medium">
+                Split ({tx.children!.length})
+              </div>
+              {tx.children!.map((child) => {
                 const childCat = child.categoryId ? categoryMap.get(child.categoryId) : null;
                 return (
                   <div key={child.id} className="flex items-center justify-between text-sm pl-2">
                     <div className="flex items-center gap-1.5">
                       {childCat?.icon && <span className="text-sm">{childCat.icon}</span>}
-                      <span className="text-text-secondary">{childCat?.name ?? 'Uncategorized'}</span>
+                      <span className="text-text-secondary">
+                        {childCat?.name ?? 'Uncategorized'}
+                      </span>
                     </div>
-                    <span className="tabular-nums text-text-tertiary">{formatCurrency(Math.abs(child.amount))}</span>
+                    <span className="tabular-nums text-text-tertiary">
+                      {formatCurrency(Math.abs(child.amount))}
+                    </span>
                   </div>
                 );
               })}
             </div>
           ) : isTransfer ? (
-            <div className="text-sm text-brand-500 px-3 py-2 border border-border rounded-lg bg-surface-alt">Transfer</div>
+            <div className="text-sm text-brand-500 px-3 py-2 border border-border rounded-lg bg-surface-alt">
+              Transfer
+            </div>
           ) : (
             <div className="relative">
               <button
@@ -218,7 +244,7 @@ export function TransactionDetailPanel({ transaction: tx, categoryMap, groups, p
           <label className="text-xs font-medium text-text-secondary mb-1.5 block">Notes</label>
           <textarea
             value={localNotes}
-            onChange={e => setLocalNotes(e.target.value)}
+            onChange={(e) => setLocalNotes(e.target.value)}
             onBlur={saveNotes}
             disabled={isReconciled}
             placeholder="Add notes to this transaction..."
@@ -229,12 +255,16 @@ export function TransactionDetailPanel({ transaction: tx, categoryMap, groups, p
 
         {linkedSchedule && (
           <div>
-            <label className="text-xs font-medium text-text-secondary mb-1.5 block">Recurring</label>
+            <label className="text-xs font-medium text-text-secondary mb-1.5 block">
+              Recurring
+            </label>
             <div className="flex items-center gap-3 px-3 py-2.5 bg-surface-alt rounded-lg border border-border-light">
               <Repeat size={14} className="text-brand-600 shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-text truncate">{linkedSchedule.name}</p>
-                <p className="text-xs text-text-tertiary">{freqMap.get(linkedSchedule.recurrenceType) || linkedSchedule.recurrenceType}</p>
+                <p className="text-xs text-text-tertiary">
+                  {freqMap.get(linkedSchedule.recurrenceType) || linkedSchedule.recurrenceType}
+                </p>
               </div>
               {!isReconciled && (
                 <button

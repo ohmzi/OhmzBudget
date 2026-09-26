@@ -63,14 +63,19 @@ function AccountGroup({ label, accounts, balancesAgo }: AccountGroupProps) {
           </span>
           <span className="text-base font-semibold text-text">{label}</span>
           {change !== 0 && (
-            <span className={`flex items-center gap-1 text-xs tabular-nums ${change >= 0 ? 'text-positive' : 'text-negative'}`}>
+            <span
+              className={`flex items-center gap-1 text-xs tabular-nums ${change >= 0 ? 'text-positive' : 'text-negative'}`}
+            >
               {change >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-              {change >= 0 ? '+' : ''}{formatCurrency(change)} ({Math.abs(changePct).toFixed(1)}%)
+              {change >= 0 ? '+' : ''}
+              {formatCurrency(change)} ({Math.abs(changePct).toFixed(1)}%)
             </span>
           )}
           <span className="text-xs text-text-tertiary">past month</span>
         </div>
-        <span className={`text-base font-semibold tabular-nums ${label === 'Credit Cards' ? 'text-negative' : 'text-text'}`}>
+        <span
+          className={`text-base font-semibold tabular-nums ${label === 'Credit Cards' ? 'text-negative' : 'text-text'}`}
+        >
           {formatCurrency(groupTotal)}
         </span>
       </button>

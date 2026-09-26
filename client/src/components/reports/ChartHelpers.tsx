@@ -38,14 +38,21 @@ export function EmptyState({ message = 'No data for this period.' }: { message?:
   );
 }
 
-export interface StatCard { label: string; value: string; sub?: string }
+export interface StatCard {
+  label: string;
+  value: string;
+  sub?: string;
+}
 
 export function StatCardRow({ cards }: { cards: StatCard[] }) {
   if (!cards.length) return null;
   return (
     <div className="flex gap-3 mb-5 flex-wrap">
-      {cards.map(c => (
-        <div key={c.label} className="rounded-lg bg-surface-alt border border-border-light px-4 py-3 min-w-[110px]">
+      {cards.map((c) => (
+        <div
+          key={c.label}
+          className="rounded-lg bg-surface-alt border border-border-light px-4 py-3 min-w-[110px]"
+        >
           <p className="text-xs text-text-tertiary">{c.label}</p>
           <p className="text-lg font-semibold text-text mt-0.5 tabular-nums">{c.value}</p>
           {c.sub && <p className="text-xs text-text-tertiary mt-0.5">{c.sub}</p>}

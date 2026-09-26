@@ -36,22 +36,28 @@ export async function syncPlaidItem(plaidItemId: string): Promise<SyncResult> {
   try {
     const syncData = await syncTransactions(item.accessToken, item.cursor);
 
-    const mappings = db.select().from(plaidAccountMappings)
+    const mappings = db
+      .select()
+      .from(plaidAccountMappings)
       .where(eq(plaidAccountMappings.plaidItemId, plaidItemId))
       .all();
 
-    const mappingByPlaidId = new Map(
-      mappings.map(m => [m.plaidAccountId, m])
-    );
+    const mappingByPlaidId = new Map(mappings.map((m) => [m.plaidAccountId, m]));
 
     for (const tx of syncData.added) {
       const mapping = mappingByPlaidId.get(tx.accountId);
       if (!mapping || !mapping.accountId || !mapping.isEnabled) continue;
 
       const importedId = `plaid:${tx.transactionId}`;
-      const existing = db.select({ id: transactions.id })
+      const existing = db
+        .select({ id: transactions.id })
         .from(transactions)
-        .where(and(eq(transactions.accountId, mapping.accountId), eq(transactions.importedId, importedId)))
+        .where(
+          and(
+            eq(transactions.accountId, mapping.accountId),
+            eq(transactions.importedId, importedId),
+          ),
+        )
         .get();
       if (existing) continue;
 
@@ -60,22 +66,24 @@ export async function syncPlaidItem(plaidItemId: string): Promise<SyncResult> {
       const payee = resolvePayee(payeeName, null);
       const auto = inferCategory(payee.payeeId, payee.payeeName, amount, null);
 
-      db.insert(transactions).values({
-        id: nanoid(),
-        accountId: mapping.accountId,
-        date: tx.date,
-        amount,
-        payeeId: auto.payeeId,
-        payeeName: payee.payeeName,
-        categoryId: auto.categoryId,
-        notes: null,
-        reconciled: 0,
-        isParent: 0,
-        transferTransactionId: null,
-        parentTransactionId: null,
-        importedId,
-        createdAt: new Date().toISOString(),
-      }).run();
+      db.insert(transactions)
+        .values({
+          id: nanoid(),
+          accountId: mapping.accountId,
+          date: tx.date,
+          amount,
+          payeeId: auto.payeeId,
+          payeeName: payee.payeeName,
+          categoryId: auto.categoryId,
+          notes: null,
+          reconciled: 0,
+          isParent: 0,
+          transferTransactionId: null,
+          parentTransactionId: null,
+          importedId,
+          createdAt: new Date().toISOString(),
+        })
+        .run();
 
       result.added++;
     }
@@ -85,26 +93,38 @@ export async function syncPlaidItem(plaidItemId: string): Promise<SyncResult> {
       if (!mapping || !mapping.accountId || !mapping.isEnabled) continue;
 
       const importedId = `plaid:${tx.transactionId}`;
-      const existing = db.select().from(transactions)
-        .where(and(eq(transactions.accountId, mapping.accountId), eq(transactions.importedId, importedId)))
+      const existing = db
+        .select()
+        .from(transactions)
+        .where(
+          and(
+            eq(transactions.accountId, mapping.accountId),
+            eq(transactions.importedId, importedId),
+          ),
+        )
         .get();
       if (!existing || existing.reconciled === 1) continue;
 
       const amount = plaidAmountToCents(tx.amount);
       const payeeName = tx.merchantName || tx.name;
 
-      db.update(transactions).set({
-        date: tx.date,
-        amount,
-        payeeName,
-      }).where(eq(transactions.id, existing.id)).run();
+      db.update(transactions)
+        .set({
+          date: tx.date,
+          amount,
+          payeeName,
+        })
+        .where(eq(transactions.id, existing.id))
+        .run();
 
       result.modified++;
     }
 
     for (const tx of syncData.removed) {
       const importedId = `plaid:${tx.transactionId}`;
-      const existing = db.select().from(transactions)
+      const existing = db
+        .select()
+        .from(transactions)
         .where(eq(transactions.importedId, importedId))
         .get();
       if (!existing || existing.reconciled === 1) continue;
@@ -119,7 +139,8 @@ export async function syncPlaidItem(plaidItemId: string): Promise<SyncResult> {
 
       const targetBalance = plaidBalanceToCents(bal.current, mapping.plaidAccountType);
 
-      const txSum = db.select({ total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)` })
+      const txSum = db
+        .select({ total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)` })
         .from(transactions)
         .where(eq(transactions.accountId, mapping.accountId))
         .get();
@@ -133,23 +154,28 @@ export async function syncPlaidItem(plaidItemId: string): Promise<SyncResult> {
         .run();
     }
 
-    db.update(plaidItems).set({
-      cursor: syncData.nextCursor,
-      lastSyncedAt: new Date().toISOString(),
-      syncStatus: 'good',
-      syncError: null,
-    }).where(eq(plaidItems.id, plaidItemId)).run();
-
+    db.update(plaidItems)
+      .set({
+        cursor: syncData.nextCursor,
+        lastSyncedAt: new Date().toISOString(),
+        syncStatus: 'good',
+        syncError: null,
+      })
+      .where(eq(plaidItems.id, plaidItemId))
+      .run();
   } catch (err: any) {
     const errorMessage = err?.response?.data?.error_message ?? err?.message ?? 'Unknown error';
     const errorCode = err?.response?.data?.error_code ?? '';
 
     const syncStatus = errorCode === 'ITEM_LOGIN_REQUIRED' ? 'login_required' : 'error';
 
-    db.update(plaidItems).set({
-      syncStatus,
-      syncError: errorMessage,
-    }).where(eq(plaidItems.id, plaidItemId)).run();
+    db.update(plaidItems)
+      .set({
+        syncStatus,
+        syncError: errorMessage,
+      })
+      .where(eq(plaidItems.id, plaidItemId))
+      .run();
 
     result.errors.push(errorMessage);
   }

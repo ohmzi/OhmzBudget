@@ -42,21 +42,23 @@ export function CategoryPicker({ value, onChange, groups, onClose }: Props) {
   }, [onClose]);
 
   const filtered = groups
-    .map(g => ({
+    .map((g) => ({
       ...g,
-      categories: g.categories.filter(c =>
-        c.name.toLowerCase().includes(query.toLowerCase()),
-      ),
+      categories: g.categories.filter((c) => c.name.toLowerCase().includes(query.toLowerCase())),
     }))
-    .filter(g => g.categories.length > 0);
+    .filter((g) => g.categories.length > 0);
 
-  const selectedGroup = groups.find(g => g.id === newGroupId);
+  const selectedGroup = groups.find((g) => g.id === newGroupId);
   const isIncomeGroup = selectedGroup?.isIncome === 1;
 
   function handleCreate() {
     if (!newName.trim() || !newGroupId) return;
     createCategory.mutate(
-      { groupId: newGroupId, name: newName.trim(), budgetType: isIncomeGroup ? null : newBudgetType },
+      {
+        groupId: newGroupId,
+        name: newName.trim(),
+        budgetType: isIncomeGroup ? null : newBudgetType,
+      },
       {
         onSuccess: (created: { id: string }) => {
           onChange(created.id);
@@ -69,16 +71,19 @@ export function CategoryPicker({ value, onChange, groups, onClose }: Props) {
     <div
       ref={containerRef}
       className="absolute top-full left-0 z-50 mt-1 w-64 bg-surface border border-border rounded-lg shadow-lg"
-      onClick={e => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
     >
       <div className="p-2 border-b border-border-light">
         <div className="relative">
-          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
+          <Search
+            size={14}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none"
+          />
           <input
             ref={searchRef}
             type="text"
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Search categories..."
             className="w-full pl-8 pr-3 py-1.5 text-sm border border-border rounded-md bg-surface text-text focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600"
           />
@@ -94,12 +99,12 @@ export function CategoryPicker({ value, onChange, groups, onClose }: Props) {
           {value === null && <Check size={14} className="text-brand-600 shrink-0" />}
         </button>
 
-        {filtered.map(group => (
+        {filtered.map((group) => (
           <div key={group.id}>
             <div className="px-3 py-1.5 text-xs font-medium text-text-tertiary bg-surface-alt">
               {group.name}
             </div>
-            {group.categories.map(cat => (
+            {group.categories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => onChange(cat.id)}
@@ -114,7 +119,9 @@ export function CategoryPicker({ value, onChange, groups, onClose }: Props) {
         ))}
 
         {filtered.length === 0 && (
-          <div className="px-3 py-4 text-sm text-text-tertiary text-center">No categories found</div>
+          <div className="px-3 py-4 text-sm text-text-tertiary text-center">
+            No categories found
+          </div>
         )}
       </div>
 
@@ -123,16 +130,24 @@ export function CategoryPicker({ value, onChange, groups, onClose }: Props) {
           <div className="p-3 space-y-2">
             <select
               value={newGroupId}
-              onChange={e => setNewGroupId(e.target.value)}
+              onChange={(e) => setNewGroupId(e.target.value)}
               className="w-full text-sm border border-border rounded px-2 py-1.5 bg-surface text-text focus:border-brand-600 focus:outline-none"
             >
-              {groups.map(g => (
-                <option key={g.id} value={g.id}>{g.name}</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
               ))}
             </select>
             {!isIncomeGroup && (
               <div className="flex gap-1">
-                {([['fixed', 'Fixed'], ['flexible', 'Flexible'], ['non_monthly', 'Non-Monthly']] as [BudgetType, string][]).map(([key, label]) => (
+                {(
+                  [
+                    ['fixed', 'Fixed'],
+                    ['flexible', 'Flexible'],
+                    ['non_monthly', 'Non-Monthly'],
+                  ] as [BudgetType, string][]
+                ).map(([key, label]) => (
                   <button
                     key={key}
                     type="button"
@@ -151,10 +166,12 @@ export function CategoryPicker({ value, onChange, groups, onClose }: Props) {
             <input
               type="text"
               value={newName}
-              onChange={e => setNewName(e.target.value)}
+              onChange={(e) => setNewName(e.target.value)}
               placeholder="Category name"
               className="w-full text-sm border border-border rounded px-2 py-1.5 bg-surface text-text focus:border-brand-600 focus:outline-none"
-              onKeyDown={e => { if (e.key === 'Enter') handleCreate(); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleCreate();
+              }}
               autoFocus
             />
             <div className="flex gap-2">
@@ -166,7 +183,10 @@ export function CategoryPicker({ value, onChange, groups, onClose }: Props) {
                 {createCategory.isPending ? 'Creating...' : 'Create'}
               </button>
               <button
-                onClick={() => { setShowCreate(false); setNewName(''); }}
+                onClick={() => {
+                  setShowCreate(false);
+                  setNewName('');
+                }}
                 className="p-1.5 text-text-tertiary hover:text-text-secondary"
               >
                 <X size={14} />

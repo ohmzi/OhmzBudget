@@ -1,5 +1,5 @@
 export function parseCsv(text: string): { headers: string[]; rows: string[][] } {
-  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  const lines = text.split(/\r?\n/).filter((l) => l.trim());
   if (lines.length === 0) return { headers: [], rows: [] };
 
   const parseRow = (line: string): string[] => {
@@ -59,16 +59,30 @@ export function generateImportId(date: string, amount: number, payeeName: string
 }
 
 const COLUMN_HINTS: Record<string, string> = {
-  date: 'date', 'transaction date': 'date', 'posted date': 'date', 'post date': 'date',
-  description: 'payee', payee: 'payee', name: 'payee', merchant: 'payee',
-  amount: 'amount', 'transaction amount': 'amount',
-  debit: 'outflow', withdrawal: 'outflow', outflow: 'outflow',
-  credit: 'inflow', deposit: 'inflow', inflow: 'inflow',
-  memo: 'notes', notes: 'notes', note: 'notes', reference: 'notes',
+  date: 'date',
+  'transaction date': 'date',
+  'posted date': 'date',
+  'post date': 'date',
+  description: 'payee',
+  payee: 'payee',
+  name: 'payee',
+  merchant: 'payee',
+  amount: 'amount',
+  'transaction amount': 'amount',
+  debit: 'outflow',
+  withdrawal: 'outflow',
+  outflow: 'outflow',
+  credit: 'inflow',
+  deposit: 'inflow',
+  inflow: 'inflow',
+  memo: 'notes',
+  notes: 'notes',
+  note: 'notes',
+  reference: 'notes',
 };
 
 export type ColumnRole = 'date' | 'payee' | 'amount' | 'inflow' | 'outflow' | 'notes' | 'skip';
 
 export function guessColumnRoles(headers: string[]): ColumnRole[] {
-  return headers.map(h => (COLUMN_HINTS[h.toLowerCase()] as ColumnRole) ?? 'skip');
+  return headers.map((h) => (COLUMN_HINTS[h.toLowerCase()] as ColumnRole) ?? 'skip');
 }

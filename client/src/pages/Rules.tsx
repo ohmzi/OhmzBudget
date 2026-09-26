@@ -17,7 +17,14 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useRules, useCreateRule, useUpdateRule, useDeleteRule, useReorderRules, useRunRules } from '../hooks/useRules';
+import {
+  useRules,
+  useCreateRule,
+  useUpdateRule,
+  useDeleteRule,
+  useReorderRules,
+  useRunRules,
+} from '../hooks/useRules';
 import { useCategories } from '../hooks/useCategories';
 import { usePayees } from '../hooks/usePayees';
 import { previewRules } from '../api/rules';
@@ -75,29 +82,48 @@ function RunRulesPreviewModal({
         </div>
         <div className="px-6 py-4">
           {items.length === 0 ? (
-            <p className="text-sm text-text-secondary py-4 text-center">No uncategorized transactions match any rules.</p>
+            <p className="text-sm text-text-secondary py-4 text-center">
+              No uncategorized transactions match any rules.
+            </p>
           ) : (
             <>
               <p className="text-sm text-text-secondary mb-3">
-                <span className="font-semibold text-text">{items.length}</span> transaction{items.length !== 1 ? 's' : ''} will be updated:
+                <span className="font-semibold text-text">{items.length}</span> transaction
+                {items.length !== 1 ? 's' : ''} will be updated:
               </p>
               <div className="rounded-md border border-border-light overflow-hidden mb-3">
                 <table className="w-full">
                   <thead className="bg-surface-alt border-b border-border-light">
                     <tr>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-text-tertiary">Date</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-text-tertiary">Payee</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-text-tertiary">Amount</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-text-tertiary">New category</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-text-tertiary">
+                        Date
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-text-tertiary">
+                        Payee
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-text-tertiary">
+                        Amount
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-text-tertiary">
+                        New category
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-light">
-                    {shown.map(item => (
+                    {shown.map((item) => (
                       <tr key={item.transactionId}>
-                        <td className="px-3 py-2 text-xs text-text-tertiary">{format(parseISO(item.date), 'MMM d')}</td>
-                        <td className="px-3 py-2 text-xs text-text max-w-[140px] truncate">{item.payeeName ?? '—'}</td>
-                        <td className="px-3 py-2 text-xs text-text tabular-nums">{formatCurrency(item.amount)}</td>
-                        <td className="px-3 py-2 text-xs font-medium text-positive">{item.newCategoryName ?? '—'}</td>
+                        <td className="px-3 py-2 text-xs text-text-tertiary">
+                          {format(parseISO(item.date), 'MMM d')}
+                        </td>
+                        <td className="px-3 py-2 text-xs text-text max-w-[140px] truncate">
+                          {item.payeeName ?? '—'}
+                        </td>
+                        <td className="px-3 py-2 text-xs text-text tabular-nums">
+                          {formatCurrency(item.amount)}
+                        </td>
+                        <td className="px-3 py-2 text-xs font-medium text-positive">
+                          {item.newCategoryName ?? '—'}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -112,10 +138,14 @@ function RunRulesPreviewModal({
           )}
         </div>
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-border">
-          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
           {items.length > 0 && (
             <Button onClick={onConfirm} disabled={running}>
-              {running ? 'Applying...' : `Apply ${items.length} Change${items.length !== 1 ? 's' : ''}`}
+              {running
+                ? 'Applying...'
+                : `Apply ${items.length} Change${items.length !== 1 ? 's' : ''}`}
             </Button>
           )}
         </div>
@@ -137,7 +167,9 @@ function SortableRuleRow({
   onEdit: (rule: Rule) => void;
   onDelete: (id: string) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: rule.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: rule.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -168,15 +200,23 @@ function SortableRuleRow({
         </div>
         <div>
           <p className="text-xs text-text-tertiary mb-0.5">Then</p>
-          <p className="text-sm text-text truncate">{actionSummary(rule.actions, categories, payees)}</p>
+          <p className="text-sm text-text truncate">
+            {actionSummary(rule.actions, categories, payees)}
+          </p>
         </div>
       </div>
 
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={() => onEdit(rule)} className="p-1 text-text-tertiary hover:text-brand-600 rounded transition-colors">
+        <button
+          onClick={() => onEdit(rule)}
+          className="p-1 text-text-tertiary hover:text-brand-600 rounded transition-colors"
+        >
           <Pencil size={14} />
         </button>
-        <button onClick={() => onDelete(rule.id)} className="p-1 text-text-tertiary hover:text-negative rounded transition-colors">
+        <button
+          onClick={() => onDelete(rule.id)}
+          className="p-1 text-text-tertiary hover:text-negative rounded transition-colors"
+        >
           <Trash2 size={14} />
         </button>
       </div>
@@ -201,10 +241,12 @@ export default function RulesPage() {
   const [previewItems, setPreviewItems] = useState<RunRulesPreviewItem[] | null>(null);
   const [previewing, setPreviewing] = useState(false);
 
-  useEffect(() => { setLocalRules(rulesData); }, [rulesData]);
+  useEffect(() => {
+    setLocalRules(rulesData);
+  }, [rulesData]);
 
   const allCategories = (groups as any[]).flatMap((g: any) =>
-    g.categories.map((c: any) => ({ ...c, groupName: g.name }))
+    g.categories.map((c: any) => ({ ...c, groupName: g.name })),
   );
 
   const sensors = useSensors(
@@ -216,11 +258,11 @@ export default function RulesPage() {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = localRules.findIndex(r => r.id === active.id);
-    const newIndex = localRules.findIndex(r => r.id === over.id);
+    const oldIndex = localRules.findIndex((r) => r.id === active.id);
+    const newIndex = localRules.findIndex((r) => r.id === over.id);
     const reordered = arrayMove(localRules, oldIndex, newIndex);
     setLocalRules(reordered);
-    reorderRules.mutate(reordered.map(r => r.id));
+    reorderRules.mutate(reordered.map((r) => r.id));
   }
 
   function handleSaveNew(conditions: RuleCondition[], actions: RuleAction[]) {
@@ -255,7 +297,9 @@ export default function RulesPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-lg font-semibold text-text">Rules</h1>
-            <p className="text-xs text-text-tertiary mt-0.5">Rules run automatically on new transactions and can be applied to existing ones.</p>
+            <p className="text-xs text-text-tertiary mt-0.5">
+              Rules run automatically on new transactions and can be applied to existing ones.
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -276,10 +320,14 @@ export default function RulesPage() {
 
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
-          <div className="flex items-center justify-center h-32 text-sm text-text-tertiary">Loading...</div>
+          <div className="flex items-center justify-center h-32 text-sm text-text-tertiary">
+            Loading...
+          </div>
         ) : localRules.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 gap-3">
-            <p className="text-sm text-text-tertiary">No rules yet. Add one to start auto-categorizing transactions.</p>
+            <p className="text-sm text-text-tertiary">
+              No rules yet. Add one to start auto-categorizing transactions.
+            </p>
             <button
               onClick={() => setAddOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-brand-600 border border-brand-200 rounded-md hover:bg-brand-50 transition-colors"
@@ -290,16 +338,25 @@ export default function RulesPage() {
         ) : (
           <div className="max-w-3xl mx-auto px-6 py-4">
             <div className="bg-surface rounded-lg shadow-card border border-border-light overflow-hidden">
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={localRules.map(r => r.id)} strategy={verticalListSortingStrategy}>
-                  {localRules.map(rule => (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={localRules.map((r) => r.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {localRules.map((rule) => (
                     <SortableRuleRow
                       key={rule.id}
                       rule={rule}
                       categories={allCategories}
                       payees={payees}
-                      onEdit={r => { setEditRule(r); }}
-                      onDelete={id => setDeleteId(id)}
+                      onEdit={(r) => {
+                        setEditRule(r);
+                      }}
+                      onDelete={(id) => setDeleteId(id)}
                     />
                   ))}
                 </SortableContext>
@@ -309,11 +366,7 @@ export default function RulesPage() {
         )}
       </div>
 
-      <AddRuleModal
-        isOpen={addOpen}
-        onClose={() => setAddOpen(false)}
-        onSave={handleSaveNew}
-      />
+      <AddRuleModal isOpen={addOpen} onClose={() => setAddOpen(false)} onSave={handleSaveNew} />
 
       {editRule && (
         <AddRuleModal
@@ -327,7 +380,9 @@ export default function RulesPage() {
       <ConfirmModal
         isOpen={deleteId !== null}
         onClose={() => setDeleteId(null)}
-        onConfirm={() => { if (deleteId) deleteRule.mutate(deleteId); }}
+        onConfirm={() => {
+          if (deleteId) deleteRule.mutate(deleteId);
+        }}
         title="Delete Rule"
         message="Delete this rule? Transactions that were already categorized by it will not be changed."
         confirmLabel="Delete"

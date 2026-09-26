@@ -17,12 +17,12 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]['id'];
 
-const tabIds = new Set<string>(tabs.map(t => t.id));
+const tabIds = new Set<string>(tabs.map((t) => t.id));
 
 export default function SettingsPage() {
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const initialTab = tabParam && tabIds.has(tabParam) ? tabParam as TabId : 'categories';
+  const initialTab = tabParam && tabIds.has(tabParam) ? (tabParam as TabId) : 'categories';
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
 
   return (

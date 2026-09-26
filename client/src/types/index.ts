@@ -126,12 +126,43 @@ export interface Account {
   balance: number;
 }
 
-export interface NetWorthPoint { month: string; assets: number; liabilities: number; netWorth: number; }
-export interface IncomeExpensesPoint { month: string; income: number; expenses: number; net: number; }
-export interface CashFlowPoint { month: string; net: number; }
-export interface SpendingByCategory { categoryId: string | null; categoryName: string | null; categoryIcon: string | null; groupName: string | null; totalSpent: number; }
-export interface IncomeByCategoryItem { categoryId: string | null; categoryName: string | null; categoryIcon: string | null; groupName: string | null; totalReceived: number; }
-export interface SpendingTrendPoint { categoryId: string; categoryName: string | null; categoryIcon: string | null; month: string; total: number; }
+export interface NetWorthPoint {
+  month: string;
+  assets: number;
+  liabilities: number;
+  netWorth: number;
+}
+export interface IncomeExpensesPoint {
+  month: string;
+  income: number;
+  expenses: number;
+  net: number;
+}
+export interface CashFlowPoint {
+  month: string;
+  net: number;
+}
+export interface SpendingByCategory {
+  categoryId: string | null;
+  categoryName: string | null;
+  categoryIcon: string | null;
+  groupName: string | null;
+  totalSpent: number;
+}
+export interface IncomeByCategoryItem {
+  categoryId: string | null;
+  categoryName: string | null;
+  categoryIcon: string | null;
+  groupName: string | null;
+  totalReceived: number;
+}
+export interface SpendingTrendPoint {
+  categoryId: string;
+  categoryName: string | null;
+  categoryIcon: string | null;
+  month: string;
+  total: number;
+}
 
 export interface SpendingComparisonData {
   currentTotal: number;
@@ -206,12 +237,21 @@ export interface PayeeWithCount extends Payee {
 }
 
 // --- Schedule System ---
-export type RecurrenceType = 'once' | 'weekly' | 'biweekly' | 'semimonthly' | 'monthly' | 'quarterly' | 'semiannually' | 'yearly';
+export type RecurrenceType =
+  | 'once'
+  | 'weekly'
+  | 'biweekly'
+  | 'semimonthly'
+  | 'monthly'
+  | 'quarterly'
+  | 'semiannually'
+  | 'yearly';
 export type AmountType = 'exact' | 'approximate' | 'variable';
 export type ScheduleStatus = 'active' | 'paused' | 'canceled';
 export type ScheduleSource = 'manual' | 'detected';
 export type WeekendAdjust = 'none' | 'before' | 'after' | 'closest';
-export type OccurrenceDisplayStatus = 'upcoming' | 'due' | 'waiting' | 'paid' | 'skipped' | 'cancelled';
+export type OccurrenceDisplayStatus =
+  'upcoming' | 'due' | 'waiting' | 'paid' | 'skipped' | 'cancelled';
 export type MatchType = 'automatic' | 'manual';
 
 export type RecurrenceRule =

@@ -35,12 +35,22 @@ import { DeleteCategoryModal } from './DeleteCategoryModal';
 import { EditCategoryModal } from './EditCategoryModal';
 import type { Category, CategoryGroup } from '../../types';
 
-function InlineEdit({ value, onSave, onCancel }: { value: string; onSave: (v: string) => void; onCancel: () => void }) {
+function InlineEdit({
+  value,
+  onSave,
+  onCancel,
+}: {
+  value: string;
+  onSave: (v: string) => void;
+  onCancel: () => void;
+}) {
   const [text, setText] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
   const cancelled = useRef(false);
 
-  useEffect(() => { inputRef.current?.select(); }, []);
+  useEffect(() => {
+    inputRef.current?.select();
+  }, []);
 
   return (
     <input
@@ -49,10 +59,18 @@ function InlineEdit({ value, onSave, onCancel }: { value: string; onSave: (v: st
       value={text}
       onChange={(e) => setText(e.target.value)}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' && text.trim()) { (e.target as HTMLInputElement).blur(); }
-        if (e.key === 'Escape') { cancelled.current = true; onCancel(); }
+        if (e.key === 'Enter' && text.trim()) {
+          (e.target as HTMLInputElement).blur();
+        }
+        if (e.key === 'Escape') {
+          cancelled.current = true;
+          onCancel();
+        }
       }}
-      onBlur={() => { if (!cancelled.current && text.trim()) onSave(text.trim()); else if (!cancelled.current) onCancel(); }}
+      onBlur={() => {
+        if (!cancelled.current && text.trim()) onSave(text.trim());
+        else if (!cancelled.current) onCancel();
+      }}
       className="text-sm bg-surface border border-brand-500 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-brand-600 w-48"
     />
   );
@@ -80,7 +98,10 @@ function EmojiPickerPopover({
   return (
     <div ref={ref} className="absolute z-50 mt-1" style={{ left: 0, top: '100%' }}>
       <EmojiPicker
-        onEmojiClick={(data: EmojiClickData) => { onSelect(data.emoji); onClose(); }}
+        onEmojiClick={(data: EmojiClickData) => {
+          onSelect(data.emoji);
+          onClose();
+        }}
         width={320}
         height={400}
         searchPlaceholder="Search emoji..."
@@ -97,7 +118,9 @@ function SortableCategoryRow({
   cat: Category;
   onOpenEditModal: (id: string) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: cat.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: cat.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -167,7 +190,9 @@ function GroupCard({
   const isEditingGroup = editingId === group.id;
   const isAddingCategory = addingCategoryGroupId === group.id;
 
-  useEffect(() => { setLocalCats(group.categories); }, [group.categories]);
+  useEffect(() => {
+    setLocalCats(group.categories);
+  }, [group.categories]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -181,7 +206,10 @@ function GroupCard({
     const newIndex = localCats.findIndex((c) => c.id === over.id);
     const reordered = arrayMove(localCats, oldIndex, newIndex);
     setLocalCats(reordered);
-    onReorderCategories(group.id, reordered.map((c) => c.id));
+    onReorderCategories(
+      group.id,
+      reordered.map((c) => c.id),
+    );
   }
 
   return (
@@ -195,7 +223,12 @@ function GroupCard({
               className="text-text-disabled hover:text-text-tertiary cursor-grab active:cursor-grabbing touch-none shrink-0 -ml-1"
               aria-label="Drag to reorder group"
             >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><circle cx="4" cy="4" r="1.5"/><circle cx="10" cy="4" r="1.5"/><circle cx="4" cy="10" r="1.5"/><circle cx="10" cy="10" r="1.5"/></svg>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                <circle cx="4" cy="4" r="1.5" />
+                <circle cx="10" cy="4" r="1.5" />
+                <circle cx="4" cy="10" r="1.5" />
+                <circle cx="10" cy="10" r="1.5" />
+              </svg>
             </button>
           )}
           {isEditingGroup ? (
@@ -230,11 +263,7 @@ function GroupCard({
         <SortableContext items={localCats.map((c) => c.id)} strategy={verticalListSortingStrategy}>
           <div className="py-2 space-y-1">
             {localCats.map((cat) => (
-              <SortableCategoryRow
-                key={cat.id}
-                cat={cat}
-                onOpenEditModal={onOpenEditModal}
-              />
+              <SortableCategoryRow key={cat.id} cat={cat} onOpenEditModal={onOpenEditModal} />
             ))}
             {localCats.length === 0 && !isAddingCategory && (
               <p className="text-xs text-text-tertiary py-2 px-4">No categories yet.</p>
@@ -273,10 +302,17 @@ function GroupCard({
               placeholder="Category name..."
               className="text-sm border border-border rounded px-2.5 py-1.5 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 flex-1"
             />
-            <button onClick={onAddCategorySubmit} disabled={!newCategoryName.trim()} className="p-1.5 text-positive hover:bg-positive-subtle rounded disabled:opacity-40 transition-colors">
+            <button
+              onClick={onAddCategorySubmit}
+              disabled={!newCategoryName.trim()}
+              className="p-1.5 text-positive hover:bg-positive-subtle rounded disabled:opacity-40 transition-colors"
+            >
               <Check size={16} />
             </button>
-            <button onClick={onAddCategoryCancel} className="p-1.5 text-text-tertiary hover:bg-hover rounded transition-colors">
+            <button
+              onClick={onAddCategoryCancel}
+              className="p-1.5 text-text-tertiary hover:bg-hover rounded transition-colors"
+            >
               <X size={16} />
             </button>
           </div>
@@ -295,8 +331,14 @@ function GroupCard({
   );
 }
 
-function SortableGroupCard(props: Omit<Parameters<typeof GroupCard>[0], 'dragAttributes' | 'dragListeners'> & { groupId: string }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: props.groupId });
+function SortableGroupCard(
+  props: Omit<Parameters<typeof GroupCard>[0], 'dragAttributes' | 'dragListeners'> & {
+    groupId: string;
+  },
+) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: props.groupId,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -407,16 +449,27 @@ function Section({
             placeholder="Group name..."
             className="text-sm border border-border rounded px-2.5 py-1.5 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 flex-1"
           />
-          <button onClick={onAddGroupSubmit} disabled={!addingGroupName.trim()} className="p-1.5 text-positive hover:bg-positive-subtle rounded disabled:opacity-40 transition-colors">
+          <button
+            onClick={onAddGroupSubmit}
+            disabled={!addingGroupName.trim()}
+            className="p-1.5 text-positive hover:bg-positive-subtle rounded disabled:opacity-40 transition-colors"
+          >
             <Check size={16} />
           </button>
-          <button onClick={onAddGroupCancel} className="p-1.5 text-text-tertiary hover:bg-hover rounded transition-colors">
+          <button
+            onClick={onAddGroupCancel}
+            className="p-1.5 text-text-tertiary hover:bg-hover rounded transition-colors"
+          >
             <X size={16} />
           </button>
         </div>
       )}
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleGroupDragEnd}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleGroupDragEnd}
+      >
         <SortableContext items={groups.map((g) => g.id)} strategy={verticalListSortingStrategy}>
           <div className="space-y-4">
             {groups.map((group) => (
@@ -471,10 +524,16 @@ export function CategoryManager() {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryIcon, setNewCategoryIcon] = useState('');
   const [deleteGroupId, setDeleteGroupId] = useState<string | null>(null);
-  const [deleteCatState, setDeleteCatState] = useState<{ id: string; name: string; count: number } | null>(null);
+  const [deleteCatState, setDeleteCatState] = useState<{
+    id: string;
+    name: string;
+    count: number;
+  } | null>(null);
   const [editModalCategory, setEditModalCategory] = useState<Category | null>(null);
 
-  useEffect(() => { setLocalGroups(groups); }, [groups]);
+  useEffect(() => {
+    setLocalGroups(groups);
+  }, [groups]);
 
   const incomeGroups = localGroups.filter((g) => g.isIncome === 1);
   const expenseGroups = localGroups.filter((g) => g.isIncome === 0);
@@ -491,7 +550,10 @@ export function CategoryManager() {
 
   function handleAddGroup() {
     if (!addingGroupName.trim() || !addingGroupSection) return;
-    createGroup.mutate({ name: addingGroupName.trim(), isIncome: addingGroupSection === 'income' ? 1 : 0 });
+    createGroup.mutate({
+      name: addingGroupName.trim(),
+      isIncome: addingGroupSection === 'income' ? 1 : 0,
+    });
     setAddingGroupSection(null);
     setAddingGroupName('');
   }
@@ -509,7 +571,7 @@ export function CategoryManager() {
   }
 
   function handleOpenEditModal(id: string) {
-    const cat = localGroups.flatMap(g => g.categories).find(c => c.id === id);
+    const cat = localGroups.flatMap((g) => g.categories).find((c) => c.id === id);
     if (cat) setEditModalCategory(cat);
   }
 
@@ -535,7 +597,11 @@ export function CategoryManager() {
   const deleteGroupTarget = localGroups.find((g) => g.id === deleteGroupId);
 
   if (isLoading) {
-    return <div className="flex items-center justify-center h-32 text-sm text-text-tertiary">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-32 text-sm text-text-tertiary">
+        Loading...
+      </div>
+    );
   }
 
   const sharedProps = {
@@ -549,7 +615,11 @@ export function CategoryManager() {
     onDeleteGroup: (id: string) => setDeleteGroupId(id),
     onAddCategoryStart: (groupId: string) => setAddingCategoryGroupId(groupId),
     onAddCategorySubmit: handleAddCategory,
-    onAddCategoryCancel: () => { setAddingCategoryGroupId(null); setNewCategoryName(''); setNewCategoryIcon(''); },
+    onAddCategoryCancel: () => {
+      setAddingCategoryGroupId(null);
+      setNewCategoryName('');
+      setNewCategoryIcon('');
+    },
     newCategoryName,
     onNewCategoryNameChange: setNewCategoryName,
     newCategoryIcon,
@@ -558,7 +628,10 @@ export function CategoryManager() {
     onReorderCategories: (_groupId: string, ids: string[]) => reorderCategories.mutate(ids),
     onAddGroupNameChange: setAddingGroupName,
     onAddGroupSubmit: handleAddGroup,
-    onAddGroupCancel: () => { setAddingGroupSection(null); setAddingGroupName(''); },
+    onAddGroupCancel: () => {
+      setAddingGroupSection(null);
+      setAddingGroupName('');
+    },
   };
 
   return (
@@ -584,7 +657,10 @@ export function CategoryManager() {
       <ConfirmModal
         isOpen={deleteGroupId !== null}
         onClose={() => setDeleteGroupId(null)}
-        onConfirm={() => { if (deleteGroupId) deleteGroup.mutate(deleteGroupId); setDeleteGroupId(null); }}
+        onConfirm={() => {
+          if (deleteGroupId) deleteGroup.mutate(deleteGroupId);
+          setDeleteGroupId(null);
+        }}
         title="Delete Group"
         message={`Delete "${deleteGroupTarget?.name ?? ''}" and all its categories? This cannot be undone.`}
         confirmLabel="Delete"
@@ -616,9 +692,18 @@ export function CategoryManager() {
       <EditCategoryModal
         category={editModalCategory}
         groups={localGroups}
-        isIncome={editModalCategory ? localGroups.some(g => g.isIncome === 1 && g.categories.some(c => c.id === editModalCategory.id)) : false}
+        isIncome={
+          editModalCategory
+            ? localGroups.some(
+                (g) => g.isIncome === 1 && g.categories.some((c) => c.id === editModalCategory.id),
+              )
+            : false
+        }
         onClose={() => setEditModalCategory(null)}
-        onDelete={(id) => { setEditModalCategory(null); handleDeleteCategoryClick(id); }}
+        onDelete={(id) => {
+          setEditModalCategory(null);
+          handleDeleteCategoryClick(id);
+        }}
       />
     </div>
   );

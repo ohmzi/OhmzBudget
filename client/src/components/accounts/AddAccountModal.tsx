@@ -52,13 +52,17 @@ export function AddAccountModal({ isOpen, onClose }: Props) {
             className="block w-full rounded-lg border border-border px-3 py-2 text-sm bg-surface text-text focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           >
             {ACCOUNT_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>{t.label}</option>
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
             ))}
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-text-secondary mb-1">Current Balance</label>
+          <label className="block text-sm font-medium text-text-secondary mb-1">
+            Current Balance
+          </label>
           <CurrencyInput value={startingBalance} onChange={setStartingBalance} placeholder="0.00" />
           <p className="mt-1 text-xs text-text-secondary">Enter your balance as of today.</p>
         </div>

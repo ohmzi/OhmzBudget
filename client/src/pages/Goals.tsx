@@ -8,8 +8,19 @@ import { formatCurrency } from '../utils/currency';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import type { Goal } from '../types';
 
-function GoalCard({ goal, onEdit, onDelete }: { goal: Goal; onEdit: (g: Goal) => void; onDelete: (id: string) => void }) {
-  const pct = goal.targetAmount > 0 ? Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100)) : 0;
+function GoalCard({
+  goal,
+  onEdit,
+  onDelete,
+}: {
+  goal: Goal;
+  onEdit: (g: Goal) => void;
+  onDelete: (id: string) => void;
+}) {
+  const pct =
+    goal.targetAmount > 0
+      ? Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100))
+      : 0;
   const remaining = goal.targetAmount - goal.currentAmount;
   const isComplete = goal.currentAmount >= goal.targetAmount;
 
@@ -31,17 +42,25 @@ function GoalCard({ goal, onEdit, onDelete }: { goal: Goal; onEdit: (g: Goal) =>
             <div>
               <h3 className="text-sm font-semibold text-text">{goal.name}</h3>
               {dateLabel && (
-                <p className={`text-xs mt-0.5 ${goal.targetDate && differenceInDays(parseISO(goal.targetDate), new Date()) < 0 ? 'text-negative' : 'text-text-tertiary'}`}>
+                <p
+                  className={`text-xs mt-0.5 ${goal.targetDate && differenceInDays(parseISO(goal.targetDate), new Date()) < 0 ? 'text-negative' : 'text-text-tertiary'}`}
+                >
                   {dateLabel}
                 </p>
               )}
             </div>
           </div>
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onClick={() => onEdit(goal)} className="p-1 text-text-tertiary hover:text-brand-600 rounded transition-colors">
+            <button
+              onClick={() => onEdit(goal)}
+              className="p-1 text-text-tertiary hover:text-brand-600 rounded transition-colors"
+            >
               <Pencil size={13} />
             </button>
-            <button onClick={() => onDelete(goal.id)} className="p-1 text-text-tertiary hover:text-negative rounded transition-colors">
+            <button
+              onClick={() => onDelete(goal.id)}
+              className="p-1 text-text-tertiary hover:text-negative rounded transition-colors"
+            >
               <Trash2 size={13} />
             </button>
           </div>
@@ -49,8 +68,12 @@ function GoalCard({ goal, onEdit, onDelete }: { goal: Goal; onEdit: (g: Goal) =>
 
         <div className="mb-2">
           <div className="flex items-baseline justify-between mb-1.5">
-            <span className="text-lg font-semibold text-text tabular-nums">{formatCurrency(goal.currentAmount)}</span>
-            <span className="text-sm text-text-tertiary tabular-nums">of {formatCurrency(goal.targetAmount)}</span>
+            <span className="text-lg font-semibold text-text tabular-nums">
+              {formatCurrency(goal.currentAmount)}
+            </span>
+            <span className="text-sm text-text-tertiary tabular-nums">
+              of {formatCurrency(goal.targetAmount)}
+            </span>
           </div>
           <div className="h-2 rounded-full bg-surface-alt overflow-hidden">
             <div
@@ -64,10 +87,14 @@ function GoalCard({ goal, onEdit, onDelete }: { goal: Goal; onEdit: (g: Goal) =>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className={`text-xs font-medium ${isComplete ? 'text-positive' : 'text-text-secondary'}`}>
+          <span
+            className={`text-xs font-medium ${isComplete ? 'text-positive' : 'text-text-secondary'}`}
+          >
             {isComplete ? 'Goal reached!' : `${formatCurrency(remaining)} to go`}
           </span>
-          <span className={`text-xs font-semibold tabular-nums ${isComplete ? 'text-positive' : 'text-text-tertiary'}`}>
+          <span
+            className={`text-xs font-semibold tabular-nums ${isComplete ? 'text-positive' : 'text-text-tertiary'}`}
+          >
             {pct}%
           </span>
         </div>
@@ -98,7 +125,8 @@ export default function GoalsPage() {
             <h1 className="text-lg font-semibold text-text">Goals</h1>
             {goals.length > 0 && (
               <p className="text-xs text-text-tertiary mt-0.5">
-                {formatCurrency(totalCurrent)} saved of {formatCurrency(totalTarget)} total ({overallPct}%)
+                {formatCurrency(totalCurrent)} saved of {formatCurrency(totalTarget)} total (
+                {overallPct}%)
               </p>
             )}
           </div>
@@ -110,11 +138,15 @@ export default function GoalsPage() {
 
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
-          <div className="flex items-center justify-center h-32 text-sm text-text-tertiary">Loading...</div>
+          <div className="flex items-center justify-center h-32 text-sm text-text-tertiary">
+            Loading...
+          </div>
         ) : goals.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 gap-3">
             <span className="text-4xl">🎯</span>
-            <p className="text-sm text-text-secondary">No goals yet. Set a savings target to get started.</p>
+            <p className="text-sm text-text-secondary">
+              No goals yet. Set a savings target to get started.
+            </p>
             <button
               onClick={() => setAddOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-brand-600 border border-brand-200 rounded-md hover:bg-brand-50 transition-colors"
@@ -125,12 +157,12 @@ export default function GoalsPage() {
         ) : (
           <div className="p-6 max-w-3xl mx-auto">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {goals.map(goal => (
+              {goals.map((goal) => (
                 <GoalCard
                   key={goal.id}
                   goal={goal}
-                  onEdit={g => setEditGoal(g)}
-                  onDelete={id => setDeleteId(id)}
+                  onEdit={(g) => setEditGoal(g)}
+                  onDelete={(id) => setDeleteId(id)}
                 />
               ))}
             </div>
@@ -141,14 +173,14 @@ export default function GoalsPage() {
       <GoalFormModal
         isOpen={addOpen}
         onClose={() => setAddOpen(false)}
-        onSave={data => createGoal.mutate(data)}
+        onSave={(data) => createGoal.mutate(data)}
       />
 
       {editGoal && (
         <GoalFormModal
           isOpen={!!editGoal}
           onClose={() => setEditGoal(null)}
-          onSave={data => updateGoal.mutate({ id: editGoal.id, data })}
+          onSave={(data) => updateGoal.mutate({ id: editGoal.id, data })}
           editGoal={editGoal}
         />
       )}
@@ -156,7 +188,9 @@ export default function GoalsPage() {
       <ConfirmModal
         isOpen={deleteId !== null}
         onClose={() => setDeleteId(null)}
-        onConfirm={() => { if (deleteId) deleteGoal.mutate(deleteId); }}
+        onConfirm={() => {
+          if (deleteId) deleteGoal.mutate(deleteId);
+        }}
         title="Delete Goal"
         message="Delete this goal? This cannot be undone."
         confirmLabel="Delete"

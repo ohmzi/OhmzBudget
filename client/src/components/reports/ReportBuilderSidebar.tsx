@@ -2,7 +2,13 @@ import { format, subMonths, startOfYear, endOfYear, subYears } from 'date-fns';
 import ChartTypeSelector from './ChartTypeSelector';
 import AccountMultiSelect from './AccountMultiSelect';
 import CategoryTreePicker from './CategoryTreePicker';
-import type { CustomReportConfig, ReportMode, ReportGroupBy, BalanceType, DatePresetCustom } from '../../types';
+import type {
+  CustomReportConfig,
+  ReportMode,
+  ReportGroupBy,
+  BalanceType,
+  DatePresetCustom,
+} from '../../types';
 
 interface Props {
   config: CustomReportConfig;
@@ -42,25 +48,39 @@ function computeDateRange(preset: DatePresetCustom): { from: string; to: string 
   const now = new Date();
   const to = format(now, 'yyyy-MM');
   switch (preset) {
-    case '3m': return { from: format(subMonths(now, 2), 'yyyy-MM'), to };
-    case '6m': return { from: format(subMonths(now, 5), 'yyyy-MM'), to };
-    case '12m': return { from: format(subMonths(now, 11), 'yyyy-MM'), to };
-    case 'ytd': return { from: format(startOfYear(now), 'yyyy-MM'), to };
-    case 'last-year': return { from: format(startOfYear(subYears(now, 1)), 'yyyy-MM'), to: format(endOfYear(subYears(now, 1)), 'yyyy-MM') };
-    case 'all': return { from: '2020-01', to };
-    default: return { from: format(subMonths(now, 5), 'yyyy-MM'), to };
+    case '3m':
+      return { from: format(subMonths(now, 2), 'yyyy-MM'), to };
+    case '6m':
+      return { from: format(subMonths(now, 5), 'yyyy-MM'), to };
+    case '12m':
+      return { from: format(subMonths(now, 11), 'yyyy-MM'), to };
+    case 'ytd':
+      return { from: format(startOfYear(now), 'yyyy-MM'), to };
+    case 'last-year':
+      return {
+        from: format(startOfYear(subYears(now, 1)), 'yyyy-MM'),
+        to: format(endOfYear(subYears(now, 1)), 'yyyy-MM'),
+      };
+    case 'all':
+      return { from: '2020-01', to };
+    default:
+      return { from: format(subMonths(now, 5), 'yyyy-MM'), to };
   }
 }
 
-function set<K extends keyof CustomReportConfig>(config: CustomReportConfig, key: K, value: CustomReportConfig[K]): CustomReportConfig {
+function set<K extends keyof CustomReportConfig>(
+  config: CustomReportConfig,
+  key: K,
+  value: CustomReportConfig[K],
+): CustomReportConfig {
   return { ...config, [key]: value };
 }
 
 export default function ReportBuilderSidebar({ config, onChange }: Props) {
   function handleModeChange(mode: ReportMode) {
     let next = set(config, 'mode', mode);
-    const validGroups = GROUP_BY_OPTIONS.filter(g => g.modes.includes(mode));
-    if (!validGroups.find(g => g.id === next.groupBy)) {
+    const validGroups = GROUP_BY_OPTIONS.filter((g) => g.modes.includes(mode));
+    if (!validGroups.find((g) => g.id === next.groupBy)) {
       next = set(next, 'groupBy', validGroups[0].id);
     }
     if (mode === 'time' && next.chartType === 'donut') {
@@ -87,13 +107,13 @@ export default function ReportBuilderSidebar({ config, onChange }: Props) {
         <ChartTypeSelector
           value={config.chartType}
           mode={config.mode}
-          onChange={ct => onChange(set(config, 'chartType', ct))}
+          onChange={(ct) => onChange(set(config, 'chartType', ct))}
         />
       </Section>
 
       <Section label="Mode">
         <div className="flex gap-1">
-          {MODE_OPTIONS.map(m => (
+          {MODE_OPTIONS.map((m) => (
             <button
               key={m.id}
               onClick={() => handleModeChange(m.id)}
@@ -112,18 +132,20 @@ export default function ReportBuilderSidebar({ config, onChange }: Props) {
       <Section label="Group By">
         <select
           value={config.groupBy}
-          onChange={e => onChange(set(config, 'groupBy', e.target.value as ReportGroupBy))}
+          onChange={(e) => onChange(set(config, 'groupBy', e.target.value as ReportGroupBy))}
           className="w-full rounded-md border border-border text-sm py-1.5 px-2 bg-surface text-text focus:border-brand-600 focus:ring-1 focus:ring-brand-600 focus:outline-none"
         >
-          {GROUP_BY_OPTIONS.filter(g => g.modes.includes(config.mode)).map(g => (
-            <option key={g.id} value={g.id}>{g.label}</option>
+          {GROUP_BY_OPTIONS.filter((g) => g.modes.includes(config.mode)).map((g) => (
+            <option key={g.id} value={g.id}>
+              {g.label}
+            </option>
           ))}
         </select>
       </Section>
 
       <Section label="Balance Type">
         <div className="flex gap-1">
-          {BALANCE_OPTIONS.map(b => (
+          {BALANCE_OPTIONS.map((b) => (
             <button
               key={b.id}
               onClick={() => onChange(set(config, 'balanceType', b.id))}
@@ -141,7 +163,7 @@ export default function ReportBuilderSidebar({ config, onChange }: Props) {
 
       <Section label="Date Range">
         <div className="flex flex-wrap gap-1 mb-2">
-          {DATE_PRESETS.map(p => (
+          {DATE_PRESETS.map((p) => (
             <button
               key={p.id}
               onClick={() => handlePresetChange(p.id)}
@@ -160,13 +182,17 @@ export default function ReportBuilderSidebar({ config, onChange }: Props) {
             <input
               type="month"
               value={config.dateRange.from}
-              onChange={e => onChange(set(config, 'dateRange', { ...config.dateRange, from: e.target.value }))}
+              onChange={(e) =>
+                onChange(set(config, 'dateRange', { ...config.dateRange, from: e.target.value }))
+              }
               className="flex-1 rounded-md border border-border text-xs py-1 px-2 bg-surface text-text focus:border-brand-600 focus:outline-none"
             />
             <input
               type="month"
               value={config.dateRange.to}
-              onChange={e => onChange(set(config, 'dateRange', { ...config.dateRange, to: e.target.value }))}
+              onChange={(e) =>
+                onChange(set(config, 'dateRange', { ...config.dateRange, to: e.target.value }))
+              }
               className="flex-1 rounded-md border border-border text-xs py-1 px-2 bg-surface text-text focus:border-brand-600 focus:outline-none"
             />
           </div>
@@ -176,7 +202,9 @@ export default function ReportBuilderSidebar({ config, onChange }: Props) {
       <Section label="Accounts">
         <AccountMultiSelect
           selected={config.filters.accountIds}
-          onChange={ids => onChange(set(config, 'filters', { ...config.filters, accountIds: ids }))}
+          onChange={(ids) =>
+            onChange(set(config, 'filters', { ...config.filters, accountIds: ids }))
+          }
         />
       </Section>
 
@@ -184,8 +212,12 @@ export default function ReportBuilderSidebar({ config, onChange }: Props) {
         <CategoryTreePicker
           selectedCategoryIds={config.filters.categoryIds}
           selectedGroupIds={config.filters.categoryGroupIds}
-          onCategoryChange={ids => onChange(set(config, 'filters', { ...config.filters, categoryIds: ids }))}
-          onGroupChange={ids => onChange(set(config, 'filters', { ...config.filters, categoryGroupIds: ids }))}
+          onCategoryChange={(ids) =>
+            onChange(set(config, 'filters', { ...config.filters, categoryIds: ids }))
+          }
+          onGroupChange={(ids) =>
+            onChange(set(config, 'filters', { ...config.filters, categoryGroupIds: ids }))
+          }
         />
       </Section>
     </div>

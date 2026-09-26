@@ -4,7 +4,12 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { useNetWorth } from '../../hooks/useReports';
 import { formatCurrency } from '../../utils/currency';
 import { chartColors } from '../../utils/chartColors';
-import { computeChartTicks, parseDates, formatDateLabel, useChartWidth } from '../../utils/chartTicks';
+import {
+  computeChartTicks,
+  parseDates,
+  formatDateLabel,
+  useChartWidth,
+} from '../../utils/chartTicks';
 
 function MiniTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
@@ -31,15 +36,45 @@ const PRESETS: { value: Preset; label: string }[] = [
   { value: 'all', label: 'All time' },
 ];
 
-function computeRange(preset: Preset): { from: string; to: string; granularity: 'daily' | 'monthly' } {
+function computeRange(preset: Preset): {
+  from: string;
+  to: string;
+  granularity: 'daily' | 'monthly';
+} {
   const now = new Date();
   switch (preset) {
-    case '1m': return { from: format(subDays(now, 30), 'yyyy-MM-dd'), to: format(now, 'yyyy-MM-dd'), granularity: 'daily' };
-    case '3m': return { from: format(subMonths(now, 3), 'yyyy-MM-dd'), to: format(now, 'yyyy-MM-dd'), granularity: 'daily' };
-    case '6m': return { from: format(subMonths(now, 5), 'yyyy-MM'), to: format(now, 'yyyy-MM'), granularity: 'monthly' };
-    case 'ytd': return { from: format(startOfYear(now), 'yyyy-MM'), to: format(now, 'yyyy-MM'), granularity: 'monthly' };
-    case '1y': return { from: format(subMonths(now, 11), 'yyyy-MM'), to: format(now, 'yyyy-MM'), granularity: 'monthly' };
-    case 'all': return { from: '2000-01', to: format(now, 'yyyy-MM'), granularity: 'monthly' };
+    case '1m':
+      return {
+        from: format(subDays(now, 30), 'yyyy-MM-dd'),
+        to: format(now, 'yyyy-MM-dd'),
+        granularity: 'daily',
+      };
+    case '3m':
+      return {
+        from: format(subMonths(now, 3), 'yyyy-MM-dd'),
+        to: format(now, 'yyyy-MM-dd'),
+        granularity: 'daily',
+      };
+    case '6m':
+      return {
+        from: format(subMonths(now, 5), 'yyyy-MM'),
+        to: format(now, 'yyyy-MM'),
+        granularity: 'monthly',
+      };
+    case 'ytd':
+      return {
+        from: format(startOfYear(now), 'yyyy-MM'),
+        to: format(now, 'yyyy-MM'),
+        granularity: 'monthly',
+      };
+    case '1y':
+      return {
+        from: format(subMonths(now, 11), 'yyyy-MM'),
+        to: format(now, 'yyyy-MM'),
+        granularity: 'monthly',
+      };
+    case 'all':
+      return { from: '2000-01', to: format(now, 'yyyy-MM'), granularity: 'monthly' };
   }
 }
 
@@ -51,17 +86,25 @@ export default function NetWorthMini() {
   const { from, to, granularity } = useMemo(() => computeRange(preset), [preset]);
   const { data = [], isLoading } = useNetWorth(from, to, granularity);
 
-  const rawMonths = useMemo(() => data.map(d => d.month), [data]);
+  const rawMonths = useMemo(() => data.map((d) => d.month), [data]);
   const dates = useMemo(() => parseDates(rawMonths), [rawMonths]);
 
   const tickResult = useMemo(
-    () => computeChartTicks({ dates, rawStrings: rawMonths, chartWidth, labelSpacingPx: 70, minTicks: 3, maxTicks: 7 }),
+    () =>
+      computeChartTicks({
+        dates,
+        rawStrings: rawMonths,
+        chartWidth,
+        labelSpacingPx: 70,
+        minTicks: 3,
+        maxTicks: 7,
+      }),
     [dates, rawMonths, chartWidth],
   );
 
   const yDomain = useMemo(() => {
     if (data.length === 0) return [0, 100];
-    const values = data.map(d => d.netWorth);
+    const values = data.map((d) => d.netWorth);
     const min = Math.min(...values);
     const max = Math.max(...values);
     const range = max - min;
@@ -90,24 +133,33 @@ export default function NetWorthMini() {
     <div>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium text-text-tertiary uppercase tracking-wide">Net Worth</p>
-          <p className={`text-3xl font-semibold tabular-nums mt-1 ${latest >= 0 ? 'text-text' : 'text-negative'}`}>
+          <p className="text-xs font-medium text-text-tertiary uppercase tracking-wide">
+            Net Worth
+          </p>
+          <p
+            className={`text-3xl font-semibold tabular-nums mt-1 ${latest >= 0 ? 'text-text' : 'text-negative'}`}
+          >
             {formatCurrency(latest)}
           </p>
           {data.length > 1 && (
-            <p className={`text-sm tabular-nums mt-0.5 ${change >= 0 ? 'text-positive' : 'text-negative'}`}>
-              {change >= 0 ? '+' : ''}{formatCurrency(change)} ({Math.abs(pct).toFixed(1)}%)
+            <p
+              className={`text-sm tabular-nums mt-0.5 ${change >= 0 ? 'text-positive' : 'text-negative'}`}
+            >
+              {change >= 0 ? '+' : ''}
+              {formatCurrency(change)} ({Math.abs(pct).toFixed(1)}%)
             </p>
           )}
         </div>
 
         <select
           value={preset}
-          onChange={e => setPreset(e.target.value as Preset)}
+          onChange={(e) => setPreset(e.target.value as Preset)}
           className="text-sm border border-border rounded-lg px-3 py-1.5 bg-surface text-text cursor-pointer focus:outline-none focus:ring-1 focus:ring-brand-600"
         >
-          {PRESETS.map(p => (
-            <option key={p.value} value={p.value}>{p.label}</option>
+          {PRESETS.map((p) => (
+            <option key={p.value} value={p.value}>
+              {p.label}
+            </option>
           ))}
         </select>
       </div>

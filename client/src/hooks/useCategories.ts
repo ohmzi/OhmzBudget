@@ -133,7 +133,12 @@ export function useCreateCategory() {
           qc.invalidateQueries({ queryKey: ['categories'] });
         },
         redo: async () => {
-          await categoriesApi.createCategory({ groupId: created.groupId, name: created.name, icon: created.icon ?? undefined, budgetType: created.budgetType });
+          await categoriesApi.createCategory({
+            groupId: created.groupId,
+            name: created.name,
+            icon: created.icon ?? undefined,
+            budgetType: created.budgetType,
+          });
           qc.invalidateQueries({ queryKey: ['categories'] });
         },
       });
@@ -144,8 +149,13 @@ export function useCreateCategory() {
 export function useUpdateCategory() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { name?: string; groupId?: string; icon?: string; budgetType?: string | null } }) =>
-      categoriesApi.updateCategory(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { name?: string; groupId?: string; icon?: string; budgetType?: string | null };
+    }) => categoriesApi.updateCategory(id, data),
     onMutate: async ({ id }) => {
       const groups = qc.getQueryData<CategoryGroup[]>(['categories']);
       return { old: findCategory(groups, id) };
@@ -157,7 +167,12 @@ export function useUpdateCategory() {
       useUndoStore.getState().push({
         description: `Edit category`,
         undo: async () => {
-          await categoriesApi.updateCategory(id, { name: snapshot.name, groupId: snapshot.groupId, icon: snapshot.icon ?? undefined, budgetType: snapshot.budgetType });
+          await categoriesApi.updateCategory(id, {
+            name: snapshot.name,
+            groupId: snapshot.groupId,
+            icon: snapshot.icon ?? undefined,
+            budgetType: snapshot.budgetType,
+          });
           qc.invalidateQueries({ queryKey: ['categories'] });
         },
         redo: async () => {

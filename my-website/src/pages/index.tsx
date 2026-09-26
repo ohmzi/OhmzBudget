@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
@@ -18,8 +18,8 @@ function HeroSection(): ReactNode {
               <span className={styles.headlineBlue}>Your rules.</span>
             </Heading>
             <p className={styles.heroDescription}>
-              A fast, open-source budgeting app that gives you complete control
-              over your financial data.
+              A fast, open-source budgeting app that gives you complete control over your financial
+              data.
             </p>
             <div className={styles.ctaRow}>
               <Link className={styles.ctaPrimary} to="/docs/intro">
@@ -164,37 +164,51 @@ function FeaturesSection(): ReactNode {
           <SmallFeature
             title="Feature 1"
             icon={
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <rect x="2" y="3" width="20" height="18" rx="2" />
                 <line x1="2" y1="9" x2="22" y2="9" />
                 <line x1="9" y1="3" x2="9" y2="21" />
               </svg>
             }
           >
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+            incididunt ut labore et dolore magna aliqua.
           </SmallFeature>
 
           <SmallFeature
             title="Feature 2"
             icon={
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                 <polyline points="9 22 9 12 15 12 15 22" />
               </svg>
             }
           >
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+            incididunt ut labore et dolore magna aliqua.
           </SmallFeature>
         </div>
 
         <div className={styles.ownDataSection}>
           <h2 className={styles.ownDataTitle}>Own your data</h2>
           <p className={styles.ownDataText}>
-            FlyBudget runs entirely on your computer. No cloud accounts, no
-            subscriptions, no data collection. Your financial data never
-            leaves your machine unless you choose to export it.
+            FlyBudget runs entirely on your computer. No cloud accounts, no subscriptions, no data
+            collection. Your financial data never leaves your machine unless you choose to export
+            it.
           </p>
         </div>
       </div>
@@ -203,7 +217,7 @@ function FeaturesSection(): ReactNode {
 }
 
 export default function Home(): ReactNode {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
     <Layout description={siteConfig.tagline}>
       <HeroSection />

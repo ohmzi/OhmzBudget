@@ -17,7 +17,9 @@ export function SyncStatusBadge({ status, className = '' }: Props) {
   const config = statusConfig[status];
 
   return (
-    <span className={`inline-flex items-center gap-1.5 text-xs font-medium text-text-secondary ${className}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 text-xs font-medium text-text-secondary ${className}`}
+    >
       {status === 'syncing' ? (
         <Loader2 size={12} className="animate-spin text-brand-500" />
       ) : (

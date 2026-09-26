@@ -11,7 +11,11 @@ export function PlaidConfigForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!clientId.trim() || !secret.trim()) return;
-    await configure.mutateAsync({ clientId: clientId.trim(), secret: secret.trim(), environment: 'development' });
+    await configure.mutateAsync({
+      clientId: clientId.trim(),
+      secret: secret.trim(),
+      environment: 'development',
+    });
   }
 
   return (
@@ -24,8 +28,8 @@ export function PlaidConfigForm() {
           <div>
             <h3 className="text-sm font-semibold text-text">Set Up Bank Sync</h3>
             <p className="text-xs text-text-secondary mt-1 leading-relaxed">
-              Connect your bank accounts to automatically import transactions using Plaid.
-              A developer account is free and always includes up to 10 bank connections.
+              Connect your bank accounts to automatically import transactions using Plaid. A
+              developer account is free and always includes up to 10 bank connections.
             </p>
             <a
               href="https://dashboard.plaid.com/signup"
@@ -45,7 +49,7 @@ export function PlaidConfigForm() {
           <input
             type="text"
             value={clientId}
-            onChange={e => setClientId(e.target.value)}
+            onChange={(e) => setClientId(e.target.value)}
             placeholder="Enter your Plaid Client ID"
             className="w-full text-sm border border-border rounded-md px-3 py-2 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
           />
@@ -55,7 +59,7 @@ export function PlaidConfigForm() {
           <input
             type="password"
             value={secret}
-            onChange={e => setSecret(e.target.value)}
+            onChange={(e) => setSecret(e.target.value)}
             placeholder="Enter your Plaid Secret"
             className="w-full text-sm border border-border rounded-md px-3 py-2 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
           />
@@ -64,7 +68,9 @@ export function PlaidConfigForm() {
           {configure.isPending ? 'Saving...' : 'Save Credentials'}
         </Button>
         {configure.isError && (
-          <p className="text-xs text-negative">Failed to save credentials. Please check your input and try again.</p>
+          <p className="text-xs text-negative">
+            Failed to save credentials. Please check your input and try again.
+          </p>
         )}
       </form>
     </div>

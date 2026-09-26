@@ -33,7 +33,7 @@ function getPlaidClient(): PlaidApi {
           'PLAID-SECRET': creds.secret,
         },
       },
-    })
+    }),
   );
   return plaidClient;
 }
@@ -104,7 +104,7 @@ export async function exchangePublicToken(publicToken: string) {
   const item = accountsResponse.data.item;
   const plaidAccounts = accountsResponse.data.accounts;
 
-  const accounts: PlaidAccountInfo[] = plaidAccounts.map(a => ({
+  const accounts: PlaidAccountInfo[] = plaidAccounts.map((a) => ({
     plaidAccountId: a.account_id,
     name: a.name,
     officialName: a.official_name ?? null,
@@ -165,7 +165,10 @@ export interface PlaidSyncResult {
   }>;
 }
 
-export async function syncTransactions(accessToken: string, cursor: string | null): Promise<PlaidSyncResult> {
+export async function syncTransactions(
+  accessToken: string,
+  cursor: string | null,
+): Promise<PlaidSyncResult> {
   const client = getPlaidClient();
 
   const allAdded: PlaidSyncResult['added'] = [];
@@ -219,7 +222,7 @@ export async function syncTransactions(accessToken: string, cursor: string | nul
   let accountBalances: PlaidSyncResult['accountBalances'] = [];
   try {
     const balResponse = await client.accountsGet({ access_token: accessToken });
-    accountBalances = balResponse.data.accounts.map(a => ({
+    accountBalances = balResponse.data.accounts.map((a) => ({
       accountId: a.account_id,
       current: a.balances.current ?? 0,
       available: a.balances.available ?? null,
@@ -228,7 +231,13 @@ export async function syncTransactions(accessToken: string, cursor: string | nul
     // Balance fetch is best-effort
   }
 
-  return { added: allAdded, modified: allModified, removed: allRemoved, nextCursor, accountBalances };
+  return {
+    added: allAdded,
+    modified: allModified,
+    removed: allRemoved,
+    nextCursor,
+    accountBalances,
+  };
 }
 
 export function plaidAmountToCents(plaidAmount: number): number {
@@ -237,7 +246,13 @@ export function plaidAmountToCents(plaidAmount: number): number {
 
 export function mapPlaidAccountType(type: string, subtype: string | null): AccountType {
   if (type === 'depository') {
-    if (subtype === 'savings' || subtype === 'money market' || subtype === 'hsa' || subtype === 'cd') return 'savings';
+    if (
+      subtype === 'savings' ||
+      subtype === 'money market' ||
+      subtype === 'hsa' ||
+      subtype === 'cd'
+    )
+      return 'savings';
     return 'checking';
   }
   if (type === 'credit') return 'credit';

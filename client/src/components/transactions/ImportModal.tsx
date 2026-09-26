@@ -1,7 +1,13 @@
 import { useState, useCallback } from 'react';
 import { Upload, AlertTriangle, CheckCircle, X } from 'lucide-react';
 import { Modal } from '../ui/Modal';
-import { parseCsv, normalizeDate, generateImportId, guessColumnRoles, type ColumnRole } from '../../utils/csv';
+import {
+  parseCsv,
+  normalizeDate,
+  generateImportId,
+  guessColumnRoles,
+  type ColumnRole,
+} from '../../utils/csv';
 import { importPreview } from '../../api/transactions';
 import { useImportConfirm } from '../../hooks/useTransactions';
 import { formatCurrency, parseCents } from '../../utils/currency';
@@ -52,9 +58,12 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
     reader.onload = (e) => {
       const text = e.target?.result as string;
       const { headers: h, rows: r } = parseCsv(text);
-      if (h.length === 0) { setError('Could not parse CSV file'); return; }
+      if (h.length === 0) {
+        setError('Could not parse CSV file');
+        return;
+      }
       setHeaders(h);
-      setRawRows(r.filter(row => row.some(cell => cell.length > 0)));
+      setRawRows(r.filter((row) => row.some((cell) => cell.length > 0)));
       setRoles(guessColumnRoles(h));
       setStep('map');
     };
@@ -73,7 +82,11 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
   }
 
   function setRole(idx: number, role: ColumnRole) {
-    setRoles(prev => { const next = [...prev]; next[idx] = role; return next; });
+    setRoles((prev) => {
+      const next = [...prev];
+      next[idx] = role;
+      return next;
+    });
   }
 
   function buildImportRows(): ImportRow[] {
@@ -84,7 +97,10 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
     const outflowIdx = roles.indexOf('outflow');
     const notesIdx = roles.indexOf('notes');
 
-    if (dateIdx === -1) { setError('Date column is required'); return []; }
+    if (dateIdx === -1) {
+      setError('Date column is required');
+      return [];
+    }
     if (amountIdx === -1 && inflowIdx === -1 && outflowIdx === -1) {
       setError('At least one amount column is required');
       return [];
@@ -105,8 +121,8 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
       }
       if (amount === 0) continue;
 
-      const payeeName = payeeIdx !== -1 ? (raw[payeeIdx] || null) : null;
-      const notes = notesIdx !== -1 ? (raw[notesIdx] || null) : null;
+      const payeeName = payeeIdx !== -1 ? raw[payeeIdx] || null : null;
+      const notes = notesIdx !== -1 ? raw[notesIdx] || null : null;
       const importedId = generateImportId(date, amount, payeeName ?? '');
       rows.push({ date, amount, payeeName, notes, importedId });
     }
@@ -116,13 +132,16 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
   async function handlePreview() {
     setError(null);
     const rows = buildImportRows();
-    if (!rows.length) { if (!error) setError('No valid rows found'); return; }
+    if (!rows.length) {
+      if (!error) setError('No valid rows found');
+      return;
+    }
 
     setLoading(true);
     try {
       const preview = await importPreview(accountId, rows);
       setPreviewRows(preview);
-      setExcluded(new Set(preview.map((r, i) => r.isDuplicate ? i : -1).filter(i => i >= 0)));
+      setExcluded(new Set(preview.map((r, i) => (r.isDuplicate ? i : -1)).filter((i) => i >= 0)));
       setStep('preview');
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Preview failed');
@@ -136,18 +155,28 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
       .filter((_, i) => !excluded.has(i))
       .map(({ isDuplicate: _, ...row }) => row as ImportRow);
 
-    if (!rows.length) { setError('No rows selected'); return; }
+    if (!rows.length) {
+      setError('No rows selected');
+      return;
+    }
 
-    confirmMutation.mutate({ accountId, rows }, {
-      onSuccess: (data) => { setResult(data); setStep('done'); },
-      onError: (e) => setError(e instanceof Error ? e.message : 'Import failed'),
-    });
+    confirmMutation.mutate(
+      { accountId, rows },
+      {
+        onSuccess: (data) => {
+          setResult(data);
+          setStep('done');
+        },
+        onError: (e) => setError(e instanceof Error ? e.message : 'Import failed'),
+      },
+    );
   }
 
   function toggleExclude(idx: number) {
-    setExcluded(prev => {
+    setExcluded((prev) => {
       const next = new Set(prev);
-      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
       return next;
     });
   }
@@ -167,7 +196,9 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
       {error && (
         <div className="mb-4 flex items-center gap-2 px-3 py-2 text-sm bg-negative-subtle text-negative rounded-lg">
           <AlertTriangle size={14} /> {error}
-          <button onClick={() => setError(null)} className="ml-auto"><X size={14} /></button>
+          <button onClick={() => setError(null)} className="ml-auto">
+            <X size={14} />
+          </button>
         </div>
       )}
 
@@ -179,9 +210,17 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
           onClick={() => document.getElementById('csv-file-input')?.click()}
         >
           <Upload size={32} className="text-text-tertiary" />
-          <p className="text-sm text-text-secondary">Drag and drop a CSV file, or click to browse</p>
+          <p className="text-sm text-text-secondary">
+            Drag and drop a CSV file, or click to browse
+          </p>
           <p className="text-xs text-text-tertiary">Supports .csv files</p>
-          <input id="csv-file-input" type="file" accept=".csv" className="hidden" onChange={handleFileInput} />
+          <input
+            id="csv-file-input"
+            type="file"
+            accept=".csv"
+            className="hidden"
+            onChange={handleFileInput}
+          />
         </div>
       )}
 
@@ -202,8 +241,10 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
                         onChange={(e) => setRole(i, e.target.value as ColumnRole)}
                         className="w-full text-xs border border-border rounded px-1.5 py-1 bg-surface text-text"
                       >
-                        {roleOptions.map(o => (
-                          <option key={o.value} value={o.value}>{o.label}</option>
+                        {roleOptions.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.label}
+                          </option>
                         ))}
                       </select>
                     </th>
@@ -214,7 +255,10 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
                 {rawRows.slice(0, 3).map((row, ri) => (
                   <tr key={ri}>
                     {row.map((cell, ci) => (
-                      <td key={ci} className="px-2 py-1 text-xs text-text-secondary border-b border-border-light max-w-[150px] truncate">
+                      <td
+                        key={ci}
+                        className="px-2 py-1 text-xs text-text-secondary border-b border-border-light max-w-[150px] truncate"
+                      >
                         {cell}
                       </td>
                     ))}
@@ -224,10 +268,17 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
             </table>
           </div>
           <div className="flex justify-end gap-2">
-            <button onClick={() => setStep('upload')} className="px-3 py-1.5 text-sm text-text-secondary border border-border rounded-lg hover:bg-hover">
+            <button
+              onClick={() => setStep('upload')}
+              className="px-3 py-1.5 text-sm text-text-secondary border border-border rounded-lg hover:bg-hover"
+            >
               Back
             </button>
-            <button onClick={handlePreview} disabled={loading} className="px-4 py-1.5 text-sm font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50">
+            <button
+              onClick={handlePreview}
+              disabled={loading}
+              className="px-4 py-1.5 text-sm font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50"
+            >
               {loading ? 'Checking...' : 'Preview'}
             </button>
           </div>
@@ -237,32 +288,52 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
       {step === 'preview' && (
         <div className="space-y-4">
           <p className="text-sm text-text-secondary">
-            {previewRows.length} transactions found.
-            {' '}{previewRows.filter(r => r.isDuplicate).length} duplicates detected.
-            {' '}{previewRows.length - excluded.size} will be imported.
+            {previewRows.length} transactions found.{' '}
+            {previewRows.filter((r) => r.isDuplicate).length} duplicates detected.{' '}
+            {previewRows.length - excluded.size} will be imported.
           </p>
           <div className="max-h-64 overflow-y-auto border border-border rounded-lg">
             <table className="w-full text-sm border-collapse">
               <thead className="sticky top-0 bg-surface-alt">
                 <tr>
                   <th className="px-2 py-1.5 text-left text-xs font-medium text-text-tertiary w-8"></th>
-                  <th className="px-2 py-1.5 text-left text-xs font-medium text-text-tertiary">Date</th>
-                  <th className="px-2 py-1.5 text-left text-xs font-medium text-text-tertiary">Payee</th>
-                  <th className="px-2 py-1.5 text-right text-xs font-medium text-text-tertiary">Amount</th>
+                  <th className="px-2 py-1.5 text-left text-xs font-medium text-text-tertiary">
+                    Date
+                  </th>
+                  <th className="px-2 py-1.5 text-left text-xs font-medium text-text-tertiary">
+                    Payee
+                  </th>
+                  <th className="px-2 py-1.5 text-right text-xs font-medium text-text-tertiary">
+                    Amount
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {previewRows.map((row, i) => (
-                  <tr key={i} className={`border-t border-border-light ${excluded.has(i) ? 'opacity-40' : ''} ${row.isDuplicate ? 'bg-caution-subtle' : ''}`}>
+                  <tr
+                    key={i}
+                    className={`border-t border-border-light ${excluded.has(i) ? 'opacity-40' : ''} ${row.isDuplicate ? 'bg-caution-subtle' : ''}`}
+                  >
                     <td className="px-2 py-1.5">
-                      <input type="checkbox" checked={!excluded.has(i)} onChange={() => toggleExclude(i)} className="w-3.5 h-3.5 accent-brand-600" />
+                      <input
+                        type="checkbox"
+                        checked={!excluded.has(i)}
+                        onChange={() => toggleExclude(i)}
+                        className="w-3.5 h-3.5 accent-brand-600"
+                      />
                     </td>
                     <td className="px-2 py-1.5 text-xs text-text-secondary">{row.date}</td>
                     <td className="px-2 py-1.5 text-xs text-text flex items-center gap-1">
                       {row.payeeName ?? '—'}
-                      {row.isDuplicate && <span className="text-[10px] px-1 py-0.5 bg-caution-subtle text-caution rounded">duplicate</span>}
+                      {row.isDuplicate && (
+                        <span className="text-[10px] px-1 py-0.5 bg-caution-subtle text-caution rounded">
+                          duplicate
+                        </span>
+                      )}
                     </td>
-                    <td className={`px-2 py-1.5 text-xs text-right tabular-nums ${row.amount < 0 ? 'text-text' : 'text-positive'}`}>
+                    <td
+                      className={`px-2 py-1.5 text-xs text-right tabular-nums ${row.amount < 0 ? 'text-text' : 'text-positive'}`}
+                    >
                       {formatCurrency(row.amount)}
                     </td>
                   </tr>
@@ -271,7 +342,10 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
             </table>
           </div>
           <div className="flex justify-end gap-2">
-            <button onClick={() => setStep('map')} className="px-3 py-1.5 text-sm text-text-secondary border border-border rounded-lg hover:bg-hover">
+            <button
+              onClick={() => setStep('map')}
+              className="px-3 py-1.5 text-sm text-text-secondary border border-border rounded-lg hover:bg-hover"
+            >
               Back
             </button>
             <button
@@ -279,7 +353,9 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
               disabled={confirmMutation.isPending || previewRows.length === excluded.size}
               className="px-4 py-1.5 text-sm font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700 disabled:opacity-50"
             >
-              {confirmMutation.isPending ? 'Importing...' : `Import ${previewRows.length - excluded.size} Transactions`}
+              {confirmMutation.isPending
+                ? 'Importing...'
+                : `Import ${previewRows.length - excluded.size} Transactions`}
             </button>
           </div>
         </div>
@@ -294,7 +370,10 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
               {result.imported} imported, {result.skipped} skipped
             </p>
           </div>
-          <button onClick={handleClose} className="px-4 py-1.5 text-sm font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700">
+          <button
+            onClick={handleClose}
+            className="px-4 py-1.5 text-sm font-medium bg-brand-600 text-white rounded-lg hover:bg-brand-700"
+          >
             Done
           </button>
         </div>

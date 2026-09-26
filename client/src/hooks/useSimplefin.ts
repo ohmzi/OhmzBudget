@@ -30,8 +30,13 @@ export function useSetupSimplefin() {
 export function useMapSimplefinAccounts() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ connectionId, mappings }: { connectionId: string; mappings: simplefinApi.SimplefinAccountMappingAction[] }) =>
-      simplefinApi.mapSimplefinAccounts(connectionId, mappings),
+    mutationFn: ({
+      connectionId,
+      mappings,
+    }: {
+      connectionId: string;
+      mappings: simplefinApi.SimplefinAccountMappingAction[];
+    }) => simplefinApi.mapSimplefinAccounts(connectionId, mappings),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['simplefin-connections'] });
       qc.invalidateQueries({ queryKey: ['accounts'] });

@@ -29,8 +29,8 @@ payeesRouter.get('/', (_req, res) => {
     .groupBy(transactions.payeeId)
     .all();
 
-  const countMap = new Map(counts.map(c => [c.payeeId, c.count]));
-  res.json(rows.map(p => ({ ...p, transactionCount: countMap.get(p.id) ?? 0 })));
+  const countMap = new Map(counts.map((c) => [c.payeeId, c.count]));
+  res.json(rows.map((p) => ({ ...p, transactionCount: countMap.get(p.id) ?? 0 })));
 });
 
 payeesRouter.post('/', (req, res) => {
@@ -79,7 +79,10 @@ payeesRouter.put('/:id', (req, res) => {
 });
 
 payeesRouter.delete('/:id', (req, res) => {
-  db.update(transactions).set({ payeeId: null }).where(eq(transactions.payeeId, req.params.id)).run();
+  db.update(transactions)
+    .set({ payeeId: null })
+    .where(eq(transactions.payeeId, req.params.id))
+    .run();
   db.delete(payees).where(eq(payees.id, req.params.id)).run();
   res.status(204).send();
 });

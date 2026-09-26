@@ -10,8 +10,15 @@ export const configurePlaid = (data: { clientId: string; secret: string; environ
 export const createLinkToken = () =>
   apiFetch<{ linkToken: string }>('/plaid/link-token', { method: 'POST' });
 
-export const exchangePublicToken = (data: { publicToken: string; institutionId: string; institutionName: string }) =>
-  apiFetch<PlaidExchangeResult>('/plaid/exchange-token', { method: 'POST', body: JSON.stringify(data) });
+export const exchangePublicToken = (data: {
+  publicToken: string;
+  institutionId: string;
+  institutionName: string;
+}) =>
+  apiFetch<PlaidExchangeResult>('/plaid/exchange-token', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 
 export interface AccountMappingAction {
   plaidAccountId: string;
@@ -25,11 +32,10 @@ export interface AccountMappingAction {
 export const mapAccounts = (itemId: string, mappings: AccountMappingAction[]) =>
   apiFetch<{ mapped: number; created: number; skipped: number }>(
     `/plaid/items/${itemId}/map-accounts`,
-    { method: 'POST', body: JSON.stringify({ mappings }) }
+    { method: 'POST', body: JSON.stringify({ mappings }) },
   );
 
-export const getPlaidItems = () =>
-  apiFetch<PlaidItem[]>('/plaid/items');
+export const getPlaidItems = () => apiFetch<PlaidItem[]>('/plaid/items');
 
 export const syncItem = (itemId: string) =>
   apiFetch<PlaidSyncResult>(`/plaid/items/${itemId}/sync`, { method: 'POST' });

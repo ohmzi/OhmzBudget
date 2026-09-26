@@ -23,7 +23,9 @@ import { formatCurrency } from '../../utils/currency';
 import type { Account, AccountType } from '../../types';
 
 function SortableAccountRow({ account }: { account: Account }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: account.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: account.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -46,18 +48,32 @@ function SortableAccountRow({ account }: { account: Account }) {
       >
         <GripVertical size={16} />
       </button>
-      <span className="text-sm font-medium text-text-secondary flex-1 min-w-0 truncate">{account.name}</span>
+      <span className="text-sm font-medium text-text-secondary flex-1 min-w-0 truncate">
+        {account.name}
+      </span>
       <Badge variant={account.type as AccountType} />
-      <span className={`text-sm tabular-nums font-medium shrink-0 ${account.balance >= 0 ? 'text-text-secondary' : 'text-negative'}`}>
+      <span
+        className={`text-sm tabular-nums font-medium shrink-0 ${account.balance >= 0 ? 'text-text-secondary' : 'text-negative'}`}
+      >
         {formatCurrency(account.balance)}
       </span>
     </div>
   );
 }
 
-function AccountSection({ title, accounts, onReorder }: { title: string; accounts: Account[]; onReorder: (ids: string[]) => void }) {
+function AccountSection({
+  title,
+  accounts,
+  onReorder,
+}: {
+  title: string;
+  accounts: Account[];
+  onReorder: (ids: string[]) => void;
+}) {
   const [local, setLocal] = useState(accounts);
-  useEffect(() => { setLocal(accounts); }, [accounts]);
+  useEffect(() => {
+    setLocal(accounts);
+  }, [accounts]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -100,18 +116,28 @@ export function AccountReorder() {
   const offBudget = accounts.filter((a) => a.isOffBudget);
 
   if (isLoading) {
-    return <div className="flex items-center justify-center h-32 text-sm text-text-tertiary">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-32 text-sm text-text-tertiary">
+        Loading...
+      </div>
+    );
   }
 
   if (accounts.length === 0) {
-    return <p className="text-sm text-text-tertiary text-center py-8">No accounts yet. Add one from the Accounts page.</p>;
+    return (
+      <p className="text-sm text-text-tertiary text-center py-8">
+        No accounts yet. Add one from the Accounts page.
+      </p>
+    );
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-sm font-semibold text-text">Account Order</h2>
-        <p className="text-xs text-text-tertiary mt-0.5">Drag to reorder accounts in the sidebar.</p>
+        <p className="text-xs text-text-tertiary mt-0.5">
+          Drag to reorder accounts in the sidebar.
+        </p>
       </div>
       <AccountSection
         title="On Budget"

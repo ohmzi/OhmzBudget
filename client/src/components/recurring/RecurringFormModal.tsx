@@ -7,7 +7,13 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
 import { usePayees } from '../../hooks/usePayees';
 import { format } from 'date-fns';
-import { RECURRENCE_TYPE_LABELS, type Schedule, type RecurrenceType, type AmountType, type WeekendAdjust } from '../../types';
+import {
+  RECURRENCE_TYPE_LABELS,
+  type Schedule,
+  type RecurrenceType,
+  type AmountType,
+  type WeekendAdjust,
+} from '../../types';
 
 interface Props {
   isOpen: boolean;
@@ -45,7 +51,10 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
   const [dateFlexibility, setDateFlexibility] = useState(3);
   const [accountId, setAccountId] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [payeeValue, setPayeeValue] = useState<{ id: string | null; name: string }>({ id: null, name: '' });
+  const [payeeValue, setPayeeValue] = useState<{ id: string | null; name: string }>({
+    id: null,
+    name: '',
+  });
   const [notes, setNotes] = useState('');
   const [autoCreate, setAutoCreate] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -64,7 +73,9 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
         setDateFlexibility(editItem.dateFlexibility);
         setAccountId(editItem.accountId || '');
         setCategoryId(editItem.categoryId || '');
-        const matchedPayee = editItem.payeeId ? payees.find(p => p.id === editItem.payeeId) : null;
+        const matchedPayee = editItem.payeeId
+          ? payees.find((p) => p.id === editItem.payeeId)
+          : null;
         setPayeeValue({ id: editItem.payeeId, name: matchedPayee?.name || '' });
         setNotes(editItem.notes || '');
         setAutoCreate(Boolean(editItem.autoCreate));
@@ -109,10 +120,16 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
     });
   }
 
-  const showWeekendAdjust = recurrenceType !== 'once' && recurrenceType !== 'weekly' && recurrenceType !== 'biweekly';
+  const showWeekendAdjust =
+    recurrenceType !== 'once' && recurrenceType !== 'weekly' && recurrenceType !== 'biweekly';
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={editItem ? 'Edit Recurring' : 'Add Recurring'} size="lg">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={editItem ? 'Edit Recurring' : 'Add Recurring'}
+      size="lg"
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-text-secondary mb-1">Name</label>
@@ -139,7 +156,9 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
                 type="button"
                 onClick={() => setIsExpense(true)}
                 className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
-                  isExpense ? 'bg-negative-subtle text-negative ring-1 ring-negative/20' : 'text-text-tertiary hover:bg-hover'
+                  isExpense
+                    ? 'bg-negative-subtle text-negative ring-1 ring-negative/20'
+                    : 'text-text-tertiary hover:bg-hover'
                 }`}
               >
                 Expense
@@ -148,7 +167,9 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
                 type="button"
                 onClick={() => setIsExpense(false)}
                 className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
-                  !isExpense ? 'bg-positive-subtle text-positive ring-1 ring-positive/20' : 'text-text-tertiary hover:bg-hover'
+                  !isExpense
+                    ? 'bg-positive-subtle text-positive ring-1 ring-positive/20'
+                    : 'text-text-tertiary hover:bg-hover'
                 }`}
               >
                 Income
@@ -158,7 +179,9 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-text-secondary mb-1">Amount Precision</label>
+          <label className="block text-sm font-medium text-text-secondary mb-1">
+            Amount Precision
+          </label>
           <div className="flex gap-1">
             {AMOUNT_TYPE_OPTIONS.map((opt) => (
               <button
@@ -176,7 +199,9 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
             ))}
           </div>
           {amountType === 'variable' && (
-            <p className="text-xs text-text-tertiary mt-1">Amount is estimated — used for forecasting and matching, not an exact expectation.</p>
+            <p className="text-xs text-text-tertiary mt-1">
+              Amount is estimated — used for forecasting and matching, not an exact expectation.
+            </p>
           )}
         </div>
 
@@ -188,19 +213,20 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
               onChange={(e) => setRecurrenceType(e.target.value as RecurrenceType)}
             >
               {RECURRENCE_TYPE_LABELS.map((f) => (
-                <option key={f.value} value={f.value}>{f.label}</option>
+                <option key={f.value} value={f.value}>
+                  {f.label}
+                </option>
               ))}
             </Select>
           </div>
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-1">Account</label>
-            <Select
-              value={accountId}
-              onChange={(e) => setAccountId(e.target.value)}
-            >
+            <Select value={accountId} onChange={(e) => setAccountId(e.target.value)}>
               <option value="">No account</option>
               {accounts.map((a) => (
-                <option key={a.id} value={a.id}>{a.name}</option>
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                </option>
               ))}
             </Select>
           </div>
@@ -217,7 +243,9 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-1">End Date <span className="text-text-tertiary font-normal">(optional)</span></label>
+            <label className="block text-sm font-medium text-text-secondary mb-1">
+              End Date <span className="text-text-tertiary font-normal">(optional)</span>
+            </label>
             <Input
               type="date"
               value={endDate}
@@ -228,7 +256,9 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-text-secondary mb-1">Payee <span className="text-text-tertiary font-normal">(optional)</span></label>
+          <label className="block text-sm font-medium text-text-secondary mb-1">
+            Payee <span className="text-text-tertiary font-normal">(optional)</span>
+          </label>
           <PayeeCombobox
             value={payeeValue}
             onChange={setPayeeValue}
@@ -239,15 +269,15 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
 
         <div>
           <label className="block text-sm font-medium text-text-secondary mb-1">Category</label>
-          <Select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-          >
+          <Select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
             <option value="">No category</option>
             {groups.map((g) => (
               <optgroup key={g.id} label={g.name}>
                 {g.categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.icon ? `${c.icon} ` : ''}{c.name}</option>
+                  <option key={c.id} value={c.id}>
+                    {c.icon ? `${c.icon} ` : ''}
+                    {c.name}
+                  </option>
                 ))}
               </optgroup>
             ))}
@@ -255,7 +285,9 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-text-secondary mb-1">Notes <span className="text-text-tertiary font-normal">(optional)</span></label>
+          <label className="block text-sm font-medium text-text-secondary mb-1">
+            Notes <span className="text-text-tertiary font-normal">(optional)</span>
+          </label>
           <Input
             type="text"
             value={notes}
@@ -289,25 +321,32 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
             <div className="mt-2 space-y-3 pl-2 border-l-2 border-border-light">
               {showWeekendAdjust && (
                 <div>
-                  <label className="block text-xs font-medium text-text-secondary mb-1">Weekend Adjustment</label>
+                  <label className="block text-xs font-medium text-text-secondary mb-1">
+                    Weekend Adjustment
+                  </label>
                   <Select
                     value={weekendAdjust}
                     onChange={(e) => setWeekendAdjust(e.target.value as WeekendAdjust)}
                   >
                     {WEEKEND_ADJUST_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
                     ))}
                   </Select>
                 </div>
               )}
               <div>
                 <label className="block text-xs font-medium text-text-secondary mb-1">
-                  Date Flexibility <span className="text-text-tertiary font-normal">(± days for matching)</span>
+                  Date Flexibility{' '}
+                  <span className="text-text-tertiary font-normal">(± days for matching)</span>
                 </label>
                 <Input
                   type="number"
                   value={dateFlexibility}
-                  onChange={(e) => setDateFlexibility(Math.max(0, Math.min(14, parseInt(e.target.value) || 0)))}
+                  onChange={(e) =>
+                    setDateFlexibility(Math.max(0, Math.min(14, parseInt(e.target.value) || 0)))
+                  }
                   min={0}
                   max={14}
                 />

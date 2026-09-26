@@ -4,7 +4,10 @@ import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { applyRulesToNew } from './rulesEngine.js';
 
-export function resolvePayee(payeeName: string | null | undefined, payeeId: string | null | undefined) {
+export function resolvePayee(
+  payeeName: string | null | undefined,
+  payeeId: string | null | undefined,
+) {
   let id = payeeId ?? null;
   let name = payeeName ?? null;
   if (!id && payeeName) {
@@ -13,7 +16,14 @@ export function resolvePayee(payeeName: string | null | undefined, payeeId: stri
       id = existing.id;
     } else {
       id = nanoid();
-      db.insert(payees).values({ id, name: payeeName, defaultCategoryId: null, createdAt: new Date().toISOString() }).run();
+      db.insert(payees)
+        .values({
+          id,
+          name: payeeName,
+          defaultCategoryId: null,
+          createdAt: new Date().toISOString(),
+        })
+        .run();
     }
     name = payeeName;
   }
@@ -21,7 +31,12 @@ export function resolvePayee(payeeName: string | null | undefined, payeeId: stri
 }
 
 // checks payee defaults then rules — first matching rule wins
-export function inferCategory(payeeId: string | null, payeeName: string | null, amount: number, notes: string | null) {
+export function inferCategory(
+  payeeId: string | null,
+  payeeName: string | null,
+  amount: number,
+  notes: string | null,
+) {
   let categoryId: string | null = null;
   let matchedPayeeId = payeeId;
   if (payeeId) {
@@ -29,8 +44,12 @@ export function inferCategory(payeeId: string | null, payeeName: string | null, 
     if (payee?.defaultCategoryId) categoryId = payee.defaultCategoryId;
   }
   if (!categoryId) {
-    const allRules = db.select().from(rules).orderBy(rules.sortOrder).all()
-      .map(r => ({ ...r, conditions: JSON.parse(r.conditions), actions: JSON.parse(r.actions) }));
+    const allRules = db
+      .select()
+      .from(rules)
+      .orderBy(rules.sortOrder)
+      .all()
+      .map((r) => ({ ...r, conditions: JSON.parse(r.conditions), actions: JSON.parse(r.actions) }));
     const actions = applyRulesToNew({ payeeName, amount, notes, categoryId: null }, allRules);
     if (actions) {
       for (const a of actions) {

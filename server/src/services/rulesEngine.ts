@@ -28,23 +28,31 @@ type TxInput = {
 };
 
 function evalCondition(c: Condition, tx: TxInput): boolean {
-  const raw = c.field === 'payee_name' ? tx.payeeName
-    : c.field === 'amount' ? String(tx.amount)
-    : tx.notes;
+  const raw =
+    c.field === 'payee_name' ? tx.payeeName : c.field === 'amount' ? String(tx.amount) : tx.notes;
   const subject = (raw ?? '').toLowerCase();
   const val = c.value.toLowerCase();
   switch (c.op) {
-    case 'contains':    return subject.includes(val);
-    case 'starts_with': return subject.startsWith(val);
-    case 'ends_with':   return subject.endsWith(val);
-    case 'exact':       return subject === val;
-    case 'regex': try { return new RegExp(c.value, 'i').test(raw ?? ''); } catch { return false; }
+    case 'contains':
+      return subject.includes(val);
+    case 'starts_with':
+      return subject.startsWith(val);
+    case 'ends_with':
+      return subject.endsWith(val);
+    case 'exact':
+      return subject === val;
+    case 'regex':
+      try {
+        return new RegExp(c.value, 'i').test(raw ?? '');
+      } catch {
+        return false;
+      }
   }
 }
 
 function firstMatch(tx: TxInput, rules: EngineRule[]): Action[] | null {
   for (const rule of rules) {
-    if (rule.conditions.every(c => evalCondition(c, tx))) return rule.actions;
+    if (rule.conditions.every((c) => evalCondition(c, tx))) return rule.actions;
   }
   return null;
 }
@@ -58,20 +66,22 @@ export function applyRulesToNew(tx: TxInput, rules: EngineRule[]): Action[] | nu
 export function previewRules(rules: EngineRule[]) {
   const uncategorized = db.select().from(transactions).where(isNull(transactions.categoryId)).all();
   const cats = db.select().from(categories).all();
-  const catMap = new Map(cats.map(c => [c.id, c.name]));
+  const catMap = new Map(cats.map((c) => [c.id, c.name]));
 
   return uncategorized.flatMap((tx) => {
     const actions = firstMatch(tx, rules);
     if (!actions) return [];
-    const catAction = actions.find(a => a.field === 'category_id');
-    return [{
-      transactionId: tx.id,
-      date: tx.date,
-      payeeName: tx.payeeName,
-      amount: tx.amount,
-      newCategoryName: catAction ? (catMap.get(catAction.value) ?? null) : null,
-      actions,
-    }];
+    const catAction = actions.find((a) => a.field === 'category_id');
+    return [
+      {
+        transactionId: tx.id,
+        date: tx.date,
+        payeeName: tx.payeeName,
+        amount: tx.amount,
+        newCategoryName: catAction ? (catMap.get(catAction.value) ?? null) : null,
+        actions,
+      },
+    ];
   });
 }
 
@@ -101,7 +111,13 @@ export function testConditions(conditions: Condition[]) {
   const all = db.select().from(transactions).all();
   const fakeRule: EngineRule = { id: '', conditions, actions: [], sortOrder: 0 };
   return all
-    .filter(tx => firstMatch(tx, [fakeRule]) !== null)
+    .filter((tx) => firstMatch(tx, [fakeRule]) !== null)
     .slice(0, 20)
-    .map(tx => ({ id: tx.id, date: tx.date, payeeName: tx.payeeName, amount: tx.amount, categoryId: tx.categoryId }));
+    .map((tx) => ({
+      id: tx.id,
+      date: tx.date,
+      payeeName: tx.payeeName,
+      amount: tx.amount,
+      categoryId: tx.categoryId,
+    }));
 }

@@ -19,11 +19,21 @@ export const chartColors = {
 
   caution: '#D97706',
 
-  get grid() { return cssVar('--color-chart-grid', '#F3F4F6'); },
-  get axis() { return cssVar('--color-chart-axis', '#9CA3AF'); },
-  get tooltipBorder() { return cssVar('--color-chart-tooltip-border', '#E5E7EB'); },
-  get tooltipBg() { return cssVar('--color-chart-tooltip-bg', '#FFFFFF'); },
-  get label() { return cssVar('--color-chart-label', '#374151'); },
+  get grid() {
+    return cssVar('--color-chart-grid', '#F3F4F6');
+  },
+  get axis() {
+    return cssVar('--color-chart-axis', '#9CA3AF');
+  },
+  get tooltipBorder() {
+    return cssVar('--color-chart-tooltip-border', '#E5E7EB');
+  },
+  get tooltipBg() {
+    return cssVar('--color-chart-tooltip-bg', '#FFFFFF');
+  },
+  get label() {
+    return cssVar('--color-chart-label', '#374151');
+  },
 };
 
 export const CATEGORY_COLORS = [

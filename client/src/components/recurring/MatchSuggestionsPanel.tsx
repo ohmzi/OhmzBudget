@@ -21,7 +21,8 @@ export default function MatchSuggestionsPanel() {
         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-brand-700 hover:bg-brand-100 transition-colors"
       >
         {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-        {totalCandidates} transaction{totalCandidates !== 1 ? 's' : ''} may match your recurring items — review
+        {totalCandidates} transaction{totalCandidates !== 1 ? 's' : ''} may match your recurring
+        items — review
       </button>
 
       {expanded && (
@@ -43,19 +44,27 @@ export default function MatchSuggestionsPanel() {
                       <span className="text-text-tertiary ml-2 text-xs">
                         {format(parseISO(c.date), 'MMM d')} · {formatCurrency(c.amount)}
                       </span>
-                      <span className="text-text-tertiary ml-2 text-xs">
-                        ({c.score}% match)
-                      </span>
+                      <span className="text-text-tertiary ml-2 text-xs">({c.score}% match)</span>
                     </div>
                     <button
-                      onClick={() => matchOcc.mutate({ occurrenceId: sg.occurrenceId, transactionId: c.transactionId })}
+                      onClick={() =>
+                        matchOcc.mutate({
+                          occurrenceId: sg.occurrenceId,
+                          transactionId: c.transactionId,
+                        })
+                      }
                       className="p-1 rounded text-positive hover:bg-positive-subtle transition-colors"
                       title="Accept match"
                     >
                       <Check size={14} />
                     </button>
                     <button
-                      onClick={() => dismissMatch.mutate({ occurrenceId: sg.occurrenceId, transactionId: c.transactionId })}
+                      onClick={() =>
+                        dismissMatch.mutate({
+                          occurrenceId: sg.occurrenceId,
+                          transactionId: c.transactionId,
+                        })
+                      }
                       className="p-1 rounded text-text-tertiary hover:text-negative hover:bg-negative-subtle transition-colors"
                       title="Dismiss"
                     >

@@ -53,8 +53,13 @@ export function useCreateTransaction() {
 export function useUpdateTransaction() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof txApi.updateTransaction>[1] }) =>
-      txApi.updateTransaction(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Parameters<typeof txApi.updateTransaction>[1];
+    }) => txApi.updateTransaction(id, data),
     onMutate: async ({ id }) => {
       return { old: findTxInCache(qc, id) };
     },

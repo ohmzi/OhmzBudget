@@ -34,8 +34,8 @@ export function SimplefinConfigForm({ onSetupComplete }: Props) {
           <div>
             <h3 className="text-sm font-semibold text-text">Set Up Bank Sync</h3>
             <p className="text-xs text-text-secondary mt-1 leading-relaxed">
-              Connect your bank accounts to automatically import transactions using SimpleFIN Bridge.
-              The service costs $1.50/month paid directly to SimpleFIN.
+              Connect your bank accounts to automatically import transactions using SimpleFIN
+              Bridge. The service costs $1.50/month paid directly to SimpleFIN.
             </p>
             <a
               href="https://beta-bridge.simplefin.org/simplefin/create"
@@ -55,20 +55,24 @@ export function SimplefinConfigForm({ onSetupComplete }: Props) {
           <input
             type="text"
             value={token}
-            onChange={e => setToken(e.target.value)}
+            onChange={(e) => setToken(e.target.value)}
             placeholder="Paste your SimpleFIN setup token"
             className="w-full text-sm border border-border rounded-md px-3 py-2 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600 font-mono"
           />
         </div>
         <Button type="submit" disabled={!token.trim() || setup.isPending}>
           {setup.isPending ? (
-            <><Loader2 size={16} className="animate-spin" /> Connecting...</>
+            <>
+              <Loader2 size={16} className="animate-spin" /> Connecting...
+            </>
           ) : (
             'Connect'
           )}
         </Button>
         {setup.isError && (
-          <p className="text-xs text-negative">Failed to connect. Check your setup token and try again.</p>
+          <p className="text-xs text-negative">
+            Failed to connect. Check your setup token and try again.
+          </p>
         )}
       </form>
     </div>

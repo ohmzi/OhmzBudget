@@ -7,9 +7,17 @@ import type { BudgetType, Category, CategoryGroup } from '../../types';
 
 const BUDGET_TYPE_OPTIONS: { value: BudgetType; label: string; description: string }[] = [
   { value: 'fixed', label: 'Fixed', description: 'Consistent, predictable monthly amount' },
-  { value: 'flexible', label: 'Flexible', description: 'Variable spending that changes each month' },
+  {
+    value: 'flexible',
+    label: 'Flexible',
+    description: 'Variable spending that changes each month',
+  },
   { value: 'non_monthly', label: 'Non-Monthly', description: 'Periodic or irregular expenses' },
-  { value: 'savings', label: 'Savings/Investments', description: 'Savings goals and investment contributions' },
+  {
+    value: 'savings',
+    label: 'Savings/Investments',
+    description: 'Savings goals and investment contributions',
+  },
 ];
 
 function EmojiPickerPopover({
@@ -32,7 +40,10 @@ function EmojiPickerPopover({
   return (
     <div ref={ref} className="absolute z-[60] mt-1" style={{ left: 0, top: '100%' }}>
       <EmojiPicker
-        onEmojiClick={(data: EmojiClickData) => { onSelect(data.emoji); onClose(); }}
+        onEmojiClick={(data: EmojiClickData) => {
+          onSelect(data.emoji);
+          onClose();
+        }}
         width={320}
         height={400}
         searchPlaceholder="Search emoji..."
@@ -70,7 +81,7 @@ export function EditCategoryModal({ category, groups, isIncome, onClose, onDelet
 
   if (!category) return null;
 
-  const applicableGroups = groups.filter(g => isIncome ? g.isIncome === 1 : g.isIncome === 0);
+  const applicableGroups = groups.filter((g) => (isIncome ? g.isIncome === 1 : g.isIncome === 0));
   const groupLocked = isIncome && applicableGroups.length <= 1;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -81,7 +92,8 @@ export function EditCategoryModal({ category, groups, isIncome, onClose, onDelet
     if (name.trim() !== category.name) data.name = name.trim();
     if ((icon || null) !== (category.icon || null)) data.icon = icon || null;
     if (groupId !== category.groupId) data.groupId = groupId;
-    if (!isIncome && budgetType !== (category.budgetType ?? 'flexible')) data.budgetType = budgetType;
+    if (!isIncome && budgetType !== (category.budgetType ?? 'flexible'))
+      data.budgetType = budgetType;
 
     if (Object.keys(data).length > 0) {
       await updateCategory.mutateAsync({ id: category.id, data });
@@ -104,10 +116,7 @@ export function EditCategoryModal({ category, groups, isIncome, onClose, onDelet
                 {icon || '📦'}
               </button>
               {showEmojiPicker && (
-                <EmojiPickerPopover
-                  onSelect={setIcon}
-                  onClose={() => setShowEmojiPicker(false)}
-                />
+                <EmojiPickerPopover onSelect={setIcon} onClose={() => setShowEmojiPicker(false)} />
               )}
             </div>
             <input
@@ -129,8 +138,10 @@ export function EditCategoryModal({ category, groups, isIncome, onClose, onDelet
               groupLocked ? 'opacity-60 cursor-not-allowed bg-surface-alt' : ''
             }`}
           >
-            {applicableGroups.map(g => (
-              <option key={g.id} value={g.id}>{g.name}</option>
+            {applicableGroups.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name}
+              </option>
             ))}
           </select>
         </div>
@@ -139,7 +150,7 @@ export function EditCategoryModal({ category, groups, isIncome, onClose, onDelet
           <div>
             <label className="block text-sm font-medium text-text mb-2">Budget Type</label>
             <div className="space-y-2">
-              {BUDGET_TYPE_OPTIONS.map(opt => (
+              {BUDGET_TYPE_OPTIONS.map((opt) => (
                 <label
                   key={opt.value}
                   className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
@@ -167,11 +178,20 @@ export function EditCategoryModal({ category, groups, isIncome, onClose, onDelet
         )}
 
         <div className="flex items-center justify-between pt-2">
-          <Button type="button" variant="danger" onClick={() => { onClose(); onDelete(category!.id); }}>
+          <Button
+            type="button"
+            variant="danger"
+            onClick={() => {
+              onClose();
+              onDelete(category!.id);
+            }}
+          >
             Delete
           </Button>
           <div className="flex gap-3">
-            <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="secondary" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={!name.trim() || updateCategory.isPending}>
               {updateCategory.isPending ? 'Saving...' : 'Save'}
             </Button>

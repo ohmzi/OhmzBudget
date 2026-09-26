@@ -9,7 +9,13 @@ interface Props {
   allowNegative?: boolean;
 }
 
-export function CurrencyInput({ value, onChange, placeholder = '0.00', className = '', allowNegative = false }: Props) {
+export function CurrencyInput({
+  value,
+  onChange,
+  placeholder = '0.00',
+  className = '',
+  allowNegative = false,
+}: Props) {
   const [focused, setFocused] = useState(false);
   const [raw, setRaw] = useState('');
 
@@ -27,7 +33,7 @@ export function CurrencyInput({ value, onChange, placeholder = '0.00', className
   return (
     <input
       type={focused ? 'number' : 'text'}
-      value={focused ? raw : (value === 0 ? '' : formatCurrency(value))}
+      value={focused ? raw : value === 0 ? '' : formatCurrency(value)}
       onFocus={handleFocus}
       onBlur={handleBlur}
       onChange={(e) => setRaw(e.target.value)}

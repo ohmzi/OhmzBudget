@@ -1,11 +1,25 @@
 import { useState, useMemo } from 'react';
-import { AreaChart, Area, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import {
+  AreaChart,
+  Area,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 import { useSpendingComparison } from '../../hooks/useReports';
 import { formatCurrency } from '../../utils/currency';
 import { Card } from '../ui/Card';
 import { chartColors } from '../../utils/chartColors';
 
-type Mode = 'week_vs_last_week' | 'month_vs_last_month' | 'month_vs_last_year' | 'month_vs_average' | 'year_vs_last_year';
+type Mode =
+  | 'week_vs_last_week'
+  | 'month_vs_last_month'
+  | 'month_vs_last_year'
+  | 'month_vs_average'
+  | 'year_vs_last_year';
 
 const MODES: { value: Mode; label: string }[] = [
   { value: 'week_vs_last_week', label: 'This week vs. last week' },
@@ -29,13 +43,18 @@ function ComparisonTooltip({ active, payload, label }: any) {
   return (
     <div className="bg-surface border border-border rounded-lg shadow-hover px-3 py-2">
       <p className="text-xs text-text-tertiary mb-1">{label}</p>
-      {payload.map((p: any) => (
-        p.value != null && (
-          <p key={p.dataKey} className="text-xs font-medium" style={{ color: p.stroke || p.color }}>
-            {p.name}: {formatCurrency(p.value)}
-          </p>
-        )
-      ))}
+      {payload.map(
+        (p: any) =>
+          p.value != null && (
+            <p
+              key={p.dataKey}
+              className="text-xs font-medium"
+              style={{ color: p.stroke || p.color }}
+            >
+              {p.name}: {formatCurrency(p.value)}
+            </p>
+          ),
+      )}
     </div>
   );
 }
@@ -46,7 +65,10 @@ export default function SpendingComparison() {
 
   const chartData = useMemo(() => {
     if (!data) return [];
-    const merged: Record<number, { day: number; label: string; current?: number; comparison?: number }> = {};
+    const merged: Record<
+      number,
+      { day: number; label: string; current?: number; comparison?: number }
+    > = {};
 
     for (let day = 1; day <= data.maxDays; day++) {
       merged[day] = { day, label: `Day ${day}` };
@@ -95,11 +117,13 @@ export default function SpendingComparison() {
         </div>
         <select
           value={mode}
-          onChange={e => setMode(e.target.value as Mode)}
+          onChange={(e) => setMode(e.target.value as Mode)}
           className="text-xs border border-border rounded-lg px-2 py-1.5 bg-surface text-text cursor-pointer focus:outline-none focus:ring-1 focus:ring-brand-600 min-w-0 max-w-[200px]"
         >
-          {MODES.map(m => (
-            <option key={m.value} value={m.value}>{m.label}</option>
+          {MODES.map((m) => (
+            <option key={m.value} value={m.value}>
+              {m.label}
+            </option>
           ))}
         </select>
       </div>

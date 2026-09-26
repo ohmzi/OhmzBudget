@@ -23,7 +23,20 @@ interface Props {
   onFilterSearch?: (search: string) => void;
 }
 
-export function TransactionRow({ tx, categoryEntry, categoryMap, groups, payees, accountName, accountType, showAccountCol, isSelected, onOpenDetail, onFilterCategory, onFilterSearch }: Props) {
+export function TransactionRow({
+  tx,
+  categoryEntry,
+  categoryMap,
+  groups,
+  payees,
+  accountName,
+  accountType,
+  showAccountCol,
+  isSelected,
+  onOpenDetail,
+  onFilterCategory,
+  onFilterSearch,
+}: Props) {
   const [expanded, setExpanded] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showPayeePicker, setShowPayeePicker] = useState(false);
@@ -50,7 +63,8 @@ export function TransactionRow({ tx, categoryEntry, categoryMap, groups, payees,
     setShowPayeePicker(false);
   }
 
-  const arrowBase = 'opacity-0 w-9 h-9 flex items-center justify-center border border-border rounded-lg hover:bg-hover text-text-tertiary hover:text-text-secondary transition-opacity shrink-0';
+  const arrowBase =
+    'opacity-0 w-9 h-9 flex items-center justify-center border border-border rounded-lg hover:bg-hover text-text-tertiary hover:text-text-secondary transition-opacity shrink-0';
 
   return (
     <div>
@@ -71,10 +85,16 @@ export function TransactionRow({ tx, categoryEntry, categoryMap, groups, payees,
           {canEditPayee ? (
             <button
               className="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all group-hover/payee:border group-hover/payee:border-border group-hover/payee:bg-surface cursor-pointer border border-transparent min-w-0"
-              onClick={(e) => { e.stopPropagation(); setShowPayeePicker(!showPayeePicker); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowPayeePicker(!showPayeePicker);
+              }}
             >
               <span className="text-sm font-medium text-text truncate">{payeeName}</span>
-              <ChevronDown size={12} className="opacity-0 group-hover/payee:opacity-100 text-text-tertiary shrink-0 transition-opacity ml-auto" />
+              <ChevronDown
+                size={12}
+                className="opacity-0 group-hover/payee:opacity-100 text-text-tertiary shrink-0 transition-opacity ml-auto"
+              />
             </button>
           ) : (
             <span className="text-sm font-medium text-text truncate">{payeeName}</span>
@@ -82,7 +102,10 @@ export function TransactionRow({ tx, categoryEntry, categoryMap, groups, payees,
           {tx.payeeName && onFilterSearch && (
             <button
               className={`${arrowBase} group-hover/payee:opacity-100`}
-              onClick={(e) => { e.stopPropagation(); onFilterSearch(tx.payeeName!); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onFilterSearch(tx.payeeName!);
+              }}
               title={`Show all "${tx.payeeName}" transactions`}
             >
               <ArrowRight size={12} />
@@ -104,7 +127,10 @@ export function TransactionRow({ tx, categoryEntry, categoryMap, groups, payees,
         <div className="group/cat flex items-center gap-1 flex-[2] min-w-0 relative mr-3">
           {isSplitParent ? (
             <button
-              onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
               className="flex items-center gap-1 text-brand-600 hover:text-brand-700"
             >
               {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -120,21 +146,38 @@ export function TransactionRow({ tx, categoryEntry, categoryMap, groups, payees,
                     ? 'group-hover/cat:border group-hover/cat:border-border group-hover/cat:bg-surface cursor-pointer'
                     : ''
                 } border border-transparent`}
-                onClick={canEditCategory ? (e) => { e.stopPropagation(); setShowCategoryPicker(!showCategoryPicker); } : (e) => e.stopPropagation()}
+                onClick={
+                  canEditCategory
+                    ? (e) => {
+                        e.stopPropagation();
+                        setShowCategoryPicker(!showCategoryPicker);
+                      }
+                    : (e) => e.stopPropagation()
+                }
                 disabled={!canEditCategory}
               >
-                {categoryEntry?.icon && <span className="text-base shrink-0">{categoryEntry.icon}</span>}
-                <span className={`text-sm truncate ${categoryEntry ? 'text-text-secondary' : 'text-text-disabled'}`}>
+                {categoryEntry?.icon && (
+                  <span className="text-base shrink-0">{categoryEntry.icon}</span>
+                )}
+                <span
+                  className={`text-sm truncate ${categoryEntry ? 'text-text-secondary' : 'text-text-disabled'}`}
+                >
                   {categoryEntry?.name ?? '—'}
                 </span>
                 {canEditCategory && (
-                  <ChevronDown size={12} className="opacity-0 group-hover/cat:opacity-100 text-text-tertiary shrink-0 transition-opacity ml-auto" />
+                  <ChevronDown
+                    size={12}
+                    className="opacity-0 group-hover/cat:opacity-100 text-text-tertiary shrink-0 transition-opacity ml-auto"
+                  />
                 )}
               </button>
               {tx.categoryId && onFilterCategory && (
                 <button
                   className={`${arrowBase} group-hover/cat:opacity-100`}
-                  onClick={(e) => { e.stopPropagation(); onFilterCategory(tx.categoryId!); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onFilterCategory(tx.categoryId!);
+                  }}
                   title={`Show all "${categoryEntry?.name}" transactions`}
                 >
                   <ArrowRight size={12} />
@@ -167,7 +210,10 @@ export function TransactionRow({ tx, categoryEntry, categoryMap, groups, payees,
             </div>
             <button
               className={`${arrowBase} group-hover/acct:opacity-100`}
-              onClick={(e) => { e.stopPropagation(); navigate(`/accounts/${tx.accountId}`); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/accounts/${tx.accountId}`);
+              }}
               title={`Go to ${accountName}`}
             >
               <ArrowRight size={12} />
@@ -186,7 +232,9 @@ export function TransactionRow({ tx, categoryEntry, categoryMap, groups, payees,
 
         {/* Amount */}
         <div className="w-24 text-right shrink-0 mx-2">
-          <span className={`text-sm font-medium tabular-nums ${tx.amount > 0 ? 'text-positive' : 'text-text'}`}>
+          <span
+            className={`text-sm font-medium tabular-nums ${tx.amount > 0 ? 'text-positive' : 'text-text'}`}
+          >
             {formatCurrency(Math.abs(tx.amount))}
           </span>
         </div>
@@ -198,29 +246,36 @@ export function TransactionRow({ tx, categoryEntry, categoryMap, groups, payees,
       </div>
 
       {/* Split children */}
-      {isSplitParent && expanded && tx.children!.map((child) => {
-        const childCat = child.categoryId ? categoryMap.get(child.categoryId) : null;
-        return (
-          <div key={child.id} className="flex items-center pl-16 pr-4 py-2 bg-surface-alt border-b border-border-light">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              {childCat ? (
-                <>
-                  {childCat.icon && <span className="text-sm shrink-0">{childCat.icon}</span>}
-                  <span className="text-xs text-text-tertiary truncate">{childCat.name}</span>
-                </>
-              ) : (
-                <span className="text-xs text-text-disabled">&mdash;</span>
-              )}
-              {child.notes && (
-                <span className="text-xs text-text-disabled truncate ml-2">{child.notes}</span>
-              )}
+      {isSplitParent &&
+        expanded &&
+        tx.children!.map((child) => {
+          const childCat = child.categoryId ? categoryMap.get(child.categoryId) : null;
+          return (
+            <div
+              key={child.id}
+              className="flex items-center pl-16 pr-4 py-2 bg-surface-alt border-b border-border-light"
+            >
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                {childCat ? (
+                  <>
+                    {childCat.icon && <span className="text-sm shrink-0">{childCat.icon}</span>}
+                    <span className="text-xs text-text-tertiary truncate">{childCat.name}</span>
+                  </>
+                ) : (
+                  <span className="text-xs text-text-disabled">&mdash;</span>
+                )}
+                {child.notes && (
+                  <span className="text-xs text-text-disabled truncate ml-2">{child.notes}</span>
+                )}
+              </div>
+              <span
+                className={`text-xs tabular-nums shrink-0 ${child.amount > 0 ? 'text-positive' : 'text-text-secondary'}`}
+              >
+                {formatCurrency(Math.abs(child.amount))}
+              </span>
             </div>
-            <span className={`text-xs tabular-nums shrink-0 ${child.amount > 0 ? 'text-positive' : 'text-text-secondary'}`}>
-              {formatCurrency(Math.abs(child.amount))}
-            </span>
-          </div>
-        );
-      })}
+          );
+        })}
     </div>
   );
 }

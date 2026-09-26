@@ -6,7 +6,12 @@ import ReportBuilderSidebar from '../components/reports/ReportBuilderSidebar';
 import ReportChartArea from '../components/reports/ReportChartArea';
 import SaveReportModal from '../components/reports/SaveReportModal';
 import SavedReportsList from '../components/reports/SavedReportsList';
-import { useCustomReportData, useSavedReport, useCreateSavedReport, useUpdateSavedReport } from '../hooks/useCustomReports';
+import {
+  useCustomReportData,
+  useSavedReport,
+  useCreateSavedReport,
+  useUpdateSavedReport,
+} from '../hooks/useCustomReports';
 import { useDebounce } from '../hooks/useDebounce';
 import { downloadCsv } from '../utils/exportCsv';
 import { Button } from '../components/ui/Button';
@@ -18,7 +23,11 @@ const DEFAULT_CONFIG: CustomReportConfig = {
   mode: 'total',
   groupBy: 'category',
   balanceType: 'expense',
-  dateRange: { preset: '6m', from: format(subMonths(now, 5), 'yyyy-MM'), to: format(now, 'yyyy-MM') },
+  dateRange: {
+    preset: '6m',
+    from: format(subMonths(now, 5), 'yyyy-MM'),
+    to: format(now, 'yyyy-MM'),
+  },
   filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] },
 };
 
@@ -47,16 +56,22 @@ export default function CustomReportBuilder() {
 
   function handleSave(name: string) {
     if (id && savedReport) {
-      updateMutation.mutate({ id, data: { name, config } }, {
-        onSuccess: () => setSaveOpen(false),
-      });
-    } else {
-      createMutation.mutate({ name, config }, {
-        onSuccess: (saved) => {
-          setSaveOpen(false);
-          navigate(`/reports/custom/${saved.id}`, { replace: true });
+      updateMutation.mutate(
+        { id, data: { name, config } },
+        {
+          onSuccess: () => setSaveOpen(false),
         },
-      });
+      );
+    } else {
+      createMutation.mutate(
+        { name, config },
+        {
+          onSuccess: (saved) => {
+            setSaveOpen(false);
+            navigate(`/reports/custom/${saved.id}`, { replace: true });
+          },
+        },
+      );
     }
   }
 
@@ -64,13 +79,19 @@ export default function CustomReportBuilder() {
     if (!data) return;
     const filename = `custom-report-${config.dateRange.from}-${config.dateRange.to}.csv`;
     if (data.mode === 'total') {
-      downloadCsv(filename, data.data.map(d => ({ name: d.name, amount_cents: d.value })));
+      downloadCsv(
+        filename,
+        data.data.map((d) => ({ name: d.name, amount_cents: d.value })),
+      );
     } else {
-      downloadCsv(filename, data.data.map(d => {
-        const row: Record<string, unknown> = { month: d.month };
-        for (const g of data.groups) row[g] = d[g] ?? 0;
-        return row;
-      }));
+      downloadCsv(
+        filename,
+        data.data.map((d) => {
+          const row: Record<string, unknown> = { month: d.month };
+          for (const g of data.groups) row[g] = d[g] ?? 0;
+          return row;
+        }),
+      );
     }
   }
 
@@ -78,12 +99,13 @@ export default function CustomReportBuilder() {
     <div className="flex flex-col h-full">
       <div className="px-6 py-3 border-b border-border bg-surface flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/reports" className="text-text-tertiary hover:text-text-secondary transition-colors">
+          <Link
+            to="/reports"
+            className="text-text-tertiary hover:text-text-secondary transition-colors"
+          >
             <ArrowLeft size={16} />
           </Link>
-          <h1 className="text-lg font-semibold text-text">
-            {reportName || 'Custom Report'}
-          </h1>
+          <h1 className="text-lg font-semibold text-text">{reportName || 'Custom Report'}</h1>
           <SavedReportsList activeId={id} />
         </div>
         <div className="flex items-center gap-2">

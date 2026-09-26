@@ -2,7 +2,16 @@ import { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { ChevronRight } from 'lucide-react';
-import { BarChart, Bar, Cell, XAxis, YAxis, LabelList, ResponsiveContainer, Tooltip } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  YAxis,
+  LabelList,
+  ResponsiveContainer,
+  Tooltip,
+} from 'recharts';
 import { useBudget, useCategoryHistory } from '../hooks/useBudget';
 import { useTransactions } from '../hooks/useTransactions';
 import { useAppStore } from '../store/appStore';
@@ -16,7 +25,9 @@ function ChartTooltip({ active, payload, label }: any) {
   return (
     <div className="bg-surface border border-border rounded-lg shadow-hover px-3 py-2">
       <p className="text-xs text-text-tertiary mb-1">{label}</p>
-      <p className="text-xs font-medium text-text">{formatCurrency(Math.round(payload[0].value * 100))}</p>
+      <p className="text-xs font-medium text-text">
+        {formatCurrency(Math.round(payload[0].value * 100))}
+      </p>
     </div>
   );
 }
@@ -29,19 +40,26 @@ interface HistoryChartProps {
   onBarClick: (month: string | null) => void;
 }
 
-function HistoryChart({ categoryId, month, isIncome, selectedBarMonth, onBarClick }: HistoryChartProps) {
+function HistoryChart({
+  categoryId,
+  month,
+  isIncome,
+  selectedBarMonth,
+  onBarClick,
+}: HistoryChartProps) {
   const { data } = useCategoryHistory(categoryId, month);
 
   const chartData = useMemo(
-    () => (data?.history ?? []).map(h => ({
-      label: format(parseISO(`${h.month}-01`), 'MMM'),
-      rawMonth: h.month,
-      amount: h.amount / 100,
-    })),
+    () =>
+      (data?.history ?? []).map((h) => ({
+        label: format(parseISO(`${h.month}-01`), 'MMM'),
+        rawMonth: h.month,
+        amount: h.amount / 100,
+      })),
     [data],
   );
 
-  const hasData = chartData.some(d => d.amount > 0);
+  const hasData = chartData.some((d) => d.amount > 0);
   const barColor = isIncome ? chartColors.positive : chartColors.negative;
 
   return (
@@ -53,14 +71,19 @@ function HistoryChart({ categoryId, month, isIncome, selectedBarMonth, onBarClic
       {hasData ? (
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={chartData} margin={{ top: 16, right: 8, left: 0, bottom: 0 }}>
-            <XAxis dataKey="label" tick={{ fontSize: 11, fill: chartColors.axis }} axisLine={false} tickLine={false} />
+            <XAxis
+              dataKey="label"
+              tick={{ fontSize: 11, fill: chartColors.axis }}
+              axisLine={false}
+              tickLine={false}
+            />
             <YAxis
               tick={{ fontSize: 10, fill: chartColors.axis }}
               axisLine={false}
               tickLine={false}
               width={50}
               domain={[0, 'auto']}
-              tickFormatter={(v: number) => v >= 1000 ? `$${(v / 1000).toFixed(1)}k` : `$${v}`}
+              tickFormatter={(v: number) => (v >= 1000 ? `$${(v / 1000).toFixed(1)}k` : `$${v}`)}
             />
             <Tooltip content={<ChartTooltip />} cursor={false} />
             <Bar
@@ -78,7 +101,9 @@ function HistoryChart({ categoryId, month, isIncome, selectedBarMonth, onBarClic
                 <Cell
                   key={entry.rawMonth}
                   fill={barColor}
-                  fillOpacity={selectedBarMonth == null || entry.rawMonth === selectedBarMonth ? 1 : 0.35}
+                  fillOpacity={
+                    selectedBarMonth == null || entry.rawMonth === selectedBarMonth ? 1 : 0.35
+                  }
                 />
               ))}
               <LabelList
@@ -99,7 +124,13 @@ function HistoryChart({ categoryId, month, isIncome, selectedBarMonth, onBarClic
   );
 }
 
-function BudgetWidget({ budgeted, actual, remaining, month, isIncome }: {
+function BudgetWidget({
+  budgeted,
+  actual,
+  remaining,
+  month,
+  isIncome,
+}: {
   budgeted: number;
   actual: number;
   remaining: number;
@@ -111,7 +142,9 @@ function BudgetWidget({ budgeted, actual, remaining, month, isIncome }: {
   return (
     <div className="bg-surface rounded-lg shadow-card border border-border-light p-4">
       <h2 className="text-sm font-semibold text-text">Budget</h2>
-      <p className="text-xs text-text-tertiary mt-0.5">{format(parseISO(`${month}-01`), 'MMMM yyyy')}</p>
+      <p className="text-xs text-text-tertiary mt-0.5">
+        {format(parseISO(`${month}-01`), 'MMMM yyyy')}
+      </p>
       <div className="mt-3 border-t border-border-light pt-3 space-y-2.5">
         <div className="flex items-center justify-between">
           <span className="text-sm text-text-secondary">Planned</span>
@@ -123,22 +156,30 @@ function BudgetWidget({ budgeted, actual, remaining, month, isIncome }: {
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-text-secondary">Remaining</span>
-          <span className={`text-sm tabular-nums font-medium ${remColor}`}>{formatCurrency(remaining)}</span>
+          <span className={`text-sm tabular-nums font-medium ${remColor}`}>
+            {formatCurrency(remaining)}
+          </span>
         </div>
       </div>
     </div>
   );
 }
 
-function SummaryWidget({ transactions, isIncome }: { transactions: Transaction[]; isIncome: boolean }) {
+function SummaryWidget({
+  transactions,
+  isIncome,
+}: {
+  transactions: Transaction[];
+  isIncome: boolean;
+}) {
   const stats = useMemo(() => {
     if (transactions.length === 0) return null;
 
-    const amounts = transactions.map(t => Math.abs(t.amount));
+    const amounts = transactions.map((t) => Math.abs(t.amount));
     const total = amounts.reduce((s, a) => s + a, 0);
     const largest = Math.max(...amounts);
     const average = Math.round(total / amounts.length);
-    const dates = transactions.map(t => t.date).sort();
+    const dates = transactions.map((t) => t.date).sort();
 
     return {
       count: transactions.length,
@@ -150,14 +191,28 @@ function SummaryWidget({ transactions, isIncome }: { transactions: Transaction[]
     };
   }, [transactions]);
 
-  const rows = stats ? [
-    { label: 'Total transactions', value: String(stats.count), isAmount: false },
-    { label: 'Largest transaction', value: formatCurrency(stats.largest), isAmount: true },
-    { label: 'Average transaction', value: formatCurrency(stats.average), isAmount: true },
-    { label: `Total ${isIncome ? 'income' : 'spending'}`, value: formatCurrency(stats.total), isAmount: true },
-    { label: 'First transaction', value: format(parseISO(stats.firstDate), 'MMM d, yyyy'), isAmount: false },
-    { label: 'Last transaction', value: format(parseISO(stats.lastDate), 'MMM d, yyyy'), isAmount: false },
-  ] : [];
+  const rows = stats
+    ? [
+        { label: 'Total transactions', value: String(stats.count), isAmount: false },
+        { label: 'Largest transaction', value: formatCurrency(stats.largest), isAmount: true },
+        { label: 'Average transaction', value: formatCurrency(stats.average), isAmount: true },
+        {
+          label: `Total ${isIncome ? 'income' : 'spending'}`,
+          value: formatCurrency(stats.total),
+          isAmount: true,
+        },
+        {
+          label: 'First transaction',
+          value: format(parseISO(stats.firstDate), 'MMM d, yyyy'),
+          isAmount: false,
+        },
+        {
+          label: 'Last transaction',
+          value: format(parseISO(stats.lastDate), 'MMM d, yyyy'),
+          isAmount: false,
+        },
+      ]
+    : [];
 
   return (
     <div className="bg-surface rounded-lg shadow-card border border-border-light p-4">
@@ -166,7 +221,7 @@ function SummaryWidget({ transactions, isIncome }: { transactions: Transaction[]
         <p className="text-sm text-text-disabled py-6 text-center">No data</p>
       ) : (
         <div className="border-t border-border-light pt-3 space-y-2.5">
-          {rows.map(row => (
+          {rows.map((row) => (
             <div key={row.label} className="flex items-center justify-between">
               <span className="text-sm text-text-secondary">{row.label}</span>
               <span className="text-sm tabular-nums text-text">{row.value}</span>
@@ -180,7 +235,7 @@ function SummaryWidget({ transactions, isIncome }: { transactions: Transaction[]
 
 export default function CategoryDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const selectedMonth = useAppStore(s => s.selectedMonth);
+  const selectedMonth = useAppStore((s) => s.selectedMonth);
   const [selectedBarMonth, setSelectedBarMonth] = useState<string | null>(selectedMonth);
 
   const { data: budgetData } = useBudget(selectedMonth);
@@ -211,9 +266,17 @@ export default function CategoryDetailPage() {
     <div className="flex flex-col h-full">
       <div className="px-6 py-3 border-b border-border bg-surface shrink-0">
         <div className="flex items-center gap-1.5 text-base">
-          <Link to="/budget" className="font-semibold text-text hover:text-brand-600 transition-colors">Budget</Link>
+          <Link
+            to="/budget"
+            className="font-semibold text-text hover:text-brand-600 transition-colors"
+          >
+            Budget
+          </Link>
           <ChevronRight size={14} className="text-text-tertiary" />
-          <span className="font-semibold text-text">{cat?.icon ? `${cat.icon} ` : ''}{categoryName}</span>
+          <span className="font-semibold text-text">
+            {cat?.icon ? `${cat.icon} ` : ''}
+            {categoryName}
+          </span>
         </div>
       </div>
 
@@ -243,7 +306,14 @@ export default function CategoryDetailPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 bg-surface rounded-lg shadow-card border border-border-light overflow-hidden">
-            {id && <TransactionTable categoryId={id} month={txMonth} onClearMonth={() => setSelectedBarMonth(null)} overlayDetail />}
+            {id && (
+              <TransactionTable
+                categoryId={id}
+                month={txMonth}
+                onClearMonth={() => setSelectedBarMonth(null)}
+                overlayDetail
+              />
+            )}
           </div>
           <div>
             <SummaryWidget transactions={transactions} isIncome={isIncome} />

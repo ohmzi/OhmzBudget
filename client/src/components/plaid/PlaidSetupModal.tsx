@@ -19,7 +19,11 @@ export function PlaidSetupModal({ isOpen, onClose, onConfigured }: Props) {
   async function handleSubmit() {
     if (!clientId.trim() || !secret.trim()) return;
     try {
-      await configure.mutateAsync({ clientId: clientId.trim(), secret: secret.trim(), environment: 'development' });
+      await configure.mutateAsync({
+        clientId: clientId.trim(),
+        secret: secret.trim(),
+        environment: 'development',
+      });
       setDone(true);
     } catch {
       // Error handled by mutation state
@@ -49,7 +53,12 @@ export function PlaidSetupModal({ isOpen, onClose, onConfigured }: Props) {
             <h3 className="text-sm font-semibold text-text">Connect with Plaid</h3>
             <p className="text-xs text-text-secondary mt-2 max-w-sm mx-auto leading-relaxed">
               Create a free{' '}
-              <a href="https://dashboard.plaid.com/signup" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline">
+              <a
+                href="https://dashboard.plaid.com/signup"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-600 underline"
+              >
                 Plaid developer account
               </a>{' '}
               to get your API credentials, then enter them below.
@@ -62,7 +71,7 @@ export function PlaidSetupModal({ isOpen, onClose, onConfigured }: Props) {
               <input
                 type="text"
                 value={clientId}
-                onChange={e => setClientId(e.target.value)}
+                onChange={(e) => setClientId(e.target.value)}
                 placeholder="Enter your Plaid Client ID"
                 className="w-full text-sm border border-border rounded-md px-3 py-2 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
               />
@@ -72,15 +81,20 @@ export function PlaidSetupModal({ isOpen, onClose, onConfigured }: Props) {
               <input
                 type="password"
                 value={secret}
-                onChange={e => setSecret(e.target.value)}
+                onChange={(e) => setSecret(e.target.value)}
                 placeholder="Enter your Plaid Secret"
                 className="w-full text-sm border border-border rounded-md px-3 py-2 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
               />
             </div>
             <div className="flex justify-center">
-              <Button onClick={handleSubmit} disabled={!clientId.trim() || !secret.trim() || configure.isPending}>
+              <Button
+                onClick={handleSubmit}
+                disabled={!clientId.trim() || !secret.trim() || configure.isPending}
+              >
                 {configure.isPending ? (
-                  <><Loader2 size={16} className="animate-spin" /> Saving...</>
+                  <>
+                    <Loader2 size={16} className="animate-spin" /> Saving...
+                  </>
                 ) : (
                   'Save Credentials'
                 )}

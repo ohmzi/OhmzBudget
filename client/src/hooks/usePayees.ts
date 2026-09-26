@@ -12,8 +12,13 @@ export function usePayees() {
 export function useCreatePayee() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ name, defaultCategoryId }: { name: string; defaultCategoryId?: string | null }) =>
-      payeesApi.createPayee(name, defaultCategoryId),
+    mutationFn: ({
+      name,
+      defaultCategoryId,
+    }: {
+      name: string;
+      defaultCategoryId?: string | null;
+    }) => payeesApi.createPayee(name, defaultCategoryId),
     onSuccess: (created) => {
       qc.invalidateQueries({ queryKey: QK });
       useUndoStore.getState().push({
@@ -34,8 +39,14 @@ export function useCreatePayee() {
 export function useUpdatePayee() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: { id: string; name?: string; defaultCategoryId?: string | null }) =>
-      payeesApi.updatePayee(id, data),
+    mutationFn: ({
+      id,
+      ...data
+    }: {
+      id: string;
+      name?: string;
+      defaultCategoryId?: string | null;
+    }) => payeesApi.updatePayee(id, data),
     onMutate: async ({ id }) => {
       const payees = qc.getQueryData<PayeeWithCount[]>(QK);
       return { old: payees?.find((p) => p.id === id) };
@@ -47,7 +58,10 @@ export function useUpdatePayee() {
       useUndoStore.getState().push({
         description: `Edit payee`,
         undo: async () => {
-          await payeesApi.updatePayee(id, { name: snapshot.name, defaultCategoryId: snapshot.defaultCategoryId });
+          await payeesApi.updatePayee(id, {
+            name: snapshot.name,
+            defaultCategoryId: snapshot.defaultCategoryId,
+          });
           qc.invalidateQueries({ queryKey: QK });
         },
         redo: async () => {

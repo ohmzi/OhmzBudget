@@ -43,8 +43,13 @@ export function useExchangePublicToken() {
 export function useMapAccounts() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ itemId, mappings }: { itemId: string; mappings: plaidApi.AccountMappingAction[] }) =>
-      plaidApi.mapAccounts(itemId, mappings),
+    mutationFn: ({
+      itemId,
+      mappings,
+    }: {
+      itemId: string;
+      mappings: plaidApi.AccountMappingAction[];
+    }) => plaidApi.mapAccounts(itemId, mappings),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['plaid-items'] });
       qc.invalidateQueries({ queryKey: ['accounts'] });

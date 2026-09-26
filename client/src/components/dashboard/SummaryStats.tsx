@@ -15,11 +15,14 @@ const GOAL_OPTIONS = [10, 15, 20, 25, 30];
 
 export default function SummaryStats({ currentMonth }: Props) {
   const twelveMonthsAgo = useMemo(() => format(subMonths(new Date(), 11), 'yyyy-MM'), []);
-  const savingsGoal = usePreferencesStore(s => s.savingsGoal);
-  const setSavingsGoal = usePreferencesStore(s => s.setSavingsGoal);
+  const savingsGoal = usePreferencesStore((s) => s.savingsGoal);
+  const setSavingsGoal = usePreferencesStore((s) => s.setSavingsGoal);
 
   const { data: budgetData = [], isLoading: budgetLoading } = useBudget(currentMonth);
-  const { data: ieData = [], isLoading: ieLoading } = useIncomeVsExpenses(twelveMonthsAgo, currentMonth);
+  const { data: ieData = [], isLoading: ieLoading } = useIncomeVsExpenses(
+    twelveMonthsAgo,
+    currentMonth,
+  );
 
   const isLoading = budgetLoading || ieLoading;
 
@@ -33,16 +36,15 @@ export default function SummaryStats({ currentMonth }: Props) {
     );
   }
 
-  const expenseCats = budgetData
-    .filter(g => g.isIncome === 0)
-    .flatMap(g => g.categories);
+  const expenseCats = budgetData.filter((g) => g.isIncome === 0).flatMap((g) => g.categories);
 
   const totalBudgeted = expenseCats.reduce((sum, c) => sum + c.budgeted, 0);
   const totalSpent = expenseCats.reduce((sum, c) => sum + Math.abs(c.spent), 0);
   const leftToSpend = totalBudgeted - totalSpent;
   const spentPct = totalBudgeted > 0 ? totalSpent / totalBudgeted : 0;
 
-  const ltsColor = spentPct > 1 ? 'text-negative' : spentPct >= 0.8 ? 'text-caution' : 'text-positive';
+  const ltsColor =
+    spentPct > 1 ? 'text-negative' : spentPct >= 0.8 ? 'text-caution' : 'text-positive';
 
   const monthCount = ieData.length || 1;
   const avgIncome = Math.round(ieData.reduce((sum, p) => sum + p.income, 0) / monthCount);
@@ -51,11 +53,7 @@ export default function SummaryStats({ currentMonth }: Props) {
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      <StatCard
-        label="Left to Spend"
-        value={formatCurrency(leftToSpend)}
-        valueColor={ltsColor}
-      />
+      <StatCard label="Left to Spend" value={formatCurrency(leftToSpend)} valueColor={ltsColor} />
       <StatCard
         label="Avg Monthly Income"
         value={formatCurrency(avgIncome)}
@@ -71,15 +69,19 @@ export default function SummaryStats({ currentMonth }: Props) {
           <p className="text-xs font-medium text-text-tertiary">Savings Rate</p>
           <select
             value={savingsGoal}
-            onChange={e => setSavingsGoal(Number(e.target.value))}
+            onChange={(e) => setSavingsGoal(Number(e.target.value))}
             className="text-[10px] border border-border rounded px-1 py-0.5 bg-surface text-text-secondary cursor-pointer focus:outline-none"
           >
-            {GOAL_OPTIONS.map(g => (
-              <option key={g} value={g}>{g}% goal</option>
+            {GOAL_OPTIONS.map((g) => (
+              <option key={g} value={g}>
+                {g}% goal
+              </option>
             ))}
           </select>
         </div>
-        <p className={`text-lg font-semibold tabular-nums mt-0.5 ${savingsRate >= savingsGoal ? 'text-positive' : 'text-negative'}`}>
+        <p
+          className={`text-lg font-semibold tabular-nums mt-0.5 ${savingsRate >= savingsGoal ? 'text-positive' : 'text-negative'}`}
+        >
           {savingsRate}%
         </p>
       </div>

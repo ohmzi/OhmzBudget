@@ -51,7 +51,9 @@ budgetRouter.get('/:month', (req, res) => {
   const spentMap = Object.fromEntries(spentRows.map((r) => [r.categoryId, r.spent]));
   const budgetMap = Object.fromEntries(budgeted.map((b) => [b.categoryId, b]));
   const priorBudgetMap = Object.fromEntries(priorBudgetedRows.map((r) => [r.categoryId, r.total]));
-  const priorActivityMap = Object.fromEntries(priorActivityRows.map((r) => [r.categoryId, r.total]));
+  const priorActivityMap = Object.fromEntries(
+    priorActivityRows.map((r) => [r.categoryId, r.total]),
+  );
 
   const result = groups.map((g) => ({
     ...g,
@@ -87,15 +89,20 @@ budgetRouter.put('/:month/:categoryId', (req, res) => {
     .get();
 
   if (existing) {
-    db.update(budgetMonths).set({ budgeted: parsed.data.budgeted }).where(eq(budgetMonths.id, existing.id)).run();
+    db.update(budgetMonths)
+      .set({ budgeted: parsed.data.budgeted })
+      .where(eq(budgetMonths.id, existing.id))
+      .run();
   } else {
-    db.insert(budgetMonths).values({
-      id: nanoid(),
-      month,
-      categoryId,
-      budgeted: parsed.data.budgeted,
-      notes: null,
-    }).run();
+    db.insert(budgetMonths)
+      .values({
+        id: nanoid(),
+        month,
+        categoryId,
+        budgeted: parsed.data.budgeted,
+        notes: null,
+      })
+      .run();
   }
 
   res.json({ month, categoryId, budgeted: parsed.data.budgeted });
@@ -103,7 +110,10 @@ budgetRouter.put('/:month/:categoryId', (req, res) => {
 
 const historyQuerySchema = z.object({
   months: z.coerce.number().int().min(1).max(24).optional().default(6),
-  currentMonth: z.string().regex(/^\d{4}-\d{2}$/).optional(),
+  currentMonth: z
+    .string()
+    .regex(/^\d{4}-\d{2}$/)
+    .optional(),
 });
 
 budgetRouter.get('/category/:categoryId/history', (req, res) => {
@@ -114,7 +124,9 @@ budgetRouter.get('/category/:categoryId/history', (req, res) => {
   const { months } = parsed.data;
 
   const now = new Date();
-  const currentMonth = parsed.data.currentMonth ?? `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const currentMonth =
+    parsed.data.currentMonth ??
+    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
   const cat = db.select().from(categories).where(eq(categories.id, categoryId)).get();
   if (!cat) return res.status(404).json({ error: 'Category not found' });
@@ -125,13 +137,13 @@ budgetRouter.get('/category/:categoryId/history', (req, res) => {
   const endYear = parseInt(currentMonth.slice(0, 4));
   const endMon = parseInt(currentMonth.slice(5, 7)) + 1;
   const adjEndYear = endYear + Math.floor((endMon - 1) / 12);
-  const adjEndMonth = ((endMon - 1) % 12 + 12) % 12 + 1;
+  const adjEndMonth = ((((endMon - 1) % 12) + 12) % 12) + 1;
   const endDate = `${adjEndYear}-${String(adjEndMonth).padStart(2, '0')}-01`;
 
   const startYear = parseInt(currentMonth.slice(0, 4));
   const startMon = parseInt(currentMonth.slice(5, 7)) - months + 1;
   const adjustedYear = startYear + Math.floor((startMon - 1) / 12);
-  const adjustedMonth = ((startMon - 1) % 12 + 12) % 12 + 1;
+  const adjustedMonth = ((((startMon - 1) % 12) + 12) % 12) + 1;
   const startDate = `${adjustedYear}-${String(adjustedMonth).padStart(2, '0')}-01`;
 
   const amountExpr = isIncome
@@ -149,13 +161,13 @@ budgetRouter.get('/category/:categoryId/history', (req, res) => {
         eq(transactions.categoryId, categoryId),
         gte(transactions.date, startDate),
         lt(transactions.date, endDate),
-      )
+      ),
     )
     .groupBy(sql`strftime('%Y-%m', ${transactions.date})`)
     .orderBy(sql`strftime('%Y-%m', ${transactions.date})`)
     .all();
 
-  const rowMap = Object.fromEntries(rows.map(r => [r.month, r.amount]));
+  const rowMap = Object.fromEntries(rows.map((r) => [r.month, r.amount]));
   const history: { month: string; amount: number }[] = [];
   let y = adjustedYear;
   let m = adjustedMonth;
@@ -163,11 +175,14 @@ budgetRouter.get('/category/:categoryId/history', (req, res) => {
     const key = `${y}-${String(m).padStart(2, '0')}`;
     history.push({ month: key, amount: rowMap[key] ?? 0 });
     m++;
-    if (m > 12) { m = 1; y++; }
+    if (m > 12) {
+      m = 1;
+      y++;
+    }
   }
 
   const total = history.reduce((s, h) => s + h.amount, 0);
-  const nonZeroCount = history.filter(h => h.amount > 0).length;
+  const nonZeroCount = history.filter((h) => h.amount > 0).length;
   const average = nonZeroCount > 0 ? Math.round(total / nonZeroCount) : 0;
   const lastMonthKey = history.length >= 2 ? history[history.length - 2]?.month : undefined;
   const lastMonth = lastMonthKey ? (rowMap[lastMonthKey] ?? 0) : 0;
@@ -193,7 +208,10 @@ budgetRouter.put('/category/:categoryId/bulk', (req, res) => {
   for (let i = 0; i < 12; i++) {
     months.push(`${y}-${String(m).padStart(2, '0')}`);
     m++;
-    if (m > 12) { m = 1; y++; }
+    if (m > 12) {
+      m = 1;
+      y++;
+    }
   }
 
   for (const month of months) {
@@ -206,13 +224,15 @@ budgetRouter.put('/category/:categoryId/bulk', (req, res) => {
     if (existing) {
       db.update(budgetMonths).set({ budgeted }).where(eq(budgetMonths.id, existing.id)).run();
     } else {
-      db.insert(budgetMonths).values({
-        id: nanoid(),
-        month,
-        categoryId,
-        budgeted,
-        notes: null,
-      }).run();
+      db.insert(budgetMonths)
+        .values({
+          id: nanoid(),
+          month,
+          categoryId,
+          budgeted,
+          notes: null,
+        })
+        .run();
     }
   }
 
@@ -228,7 +248,9 @@ budgetRouter.get('/:month/summary', (req, res) => {
     .from(transactions)
     .innerJoin(categories, eq(transactions.categoryId, categories.id))
     .innerJoin(categoryGroups, eq(categories.groupId, categoryGroups.id))
-    .where(and(gte(transactions.date, from), lte(transactions.date, to), eq(categoryGroups.isIncome, 1)))
+    .where(
+      and(gte(transactions.date, from), lte(transactions.date, to), eq(categoryGroups.isIncome, 1)),
+    )
     .get();
 
   const budgetedRow = db
@@ -260,5 +282,11 @@ budgetRouter.get('/:month/summary', (req, res) => {
   const totalBudgeted = budgetedRow?.total ?? 0;
   const carryOver = (priorIncomeRow?.total ?? 0) - (priorBudgetedRow?.total ?? 0);
 
-  res.json({ month, income, totalBudgeted, carryOver, toBeBudgeted: income + carryOver - totalBudgeted });
+  res.json({
+    month,
+    income,
+    totalBudgeted,
+    carryOver,
+    toBeBudgeted: income + carryOver - totalBudgeted,
+  });
 });

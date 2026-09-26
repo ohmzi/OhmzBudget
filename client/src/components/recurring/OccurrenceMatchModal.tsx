@@ -34,14 +34,13 @@ export default function OccurrenceMatchModal({ isOpen, onClose, occurrence }: Pr
   });
 
   const filtered = useMemo(() => {
-    let list = transactions.filter(tx =>
-      !tx.transferTransactionId && !tx.scheduleId
-    );
+    let list = transactions.filter((tx) => !tx.transferTransactionId && !tx.scheduleId);
     if (search) {
       const q = search.toLowerCase();
-      list = list.filter(tx =>
-        (tx.payeeName ?? '').toLowerCase().includes(q) ||
-        (tx.notes ?? '').toLowerCase().includes(q)
+      list = list.filter(
+        (tx) =>
+          (tx.payeeName ?? '').toLowerCase().includes(q) ||
+          (tx.notes ?? '').toLowerCase().includes(q),
       );
     }
     return list;
@@ -49,12 +48,15 @@ export default function OccurrenceMatchModal({ isOpen, onClose, occurrence }: Pr
 
   function handleMatch(transactionId: string) {
     if (!occurrence) return;
-    matchOcc.mutate({ occurrenceId: occurrence.id, transactionId }, {
-      onSuccess: () => {
-        onClose();
-        setSearch('');
+    matchOcc.mutate(
+      { occurrenceId: occurrence.id, transactionId },
+      {
+        onSuccess: () => {
+          onClose();
+          setSearch('');
+        },
       },
-    });
+    );
   }
 
   if (!occurrence) return null;
@@ -65,7 +67,8 @@ export default function OccurrenceMatchModal({ isOpen, onClose, occurrence }: Pr
         <div className="bg-surface-alt rounded-lg px-4 py-3 border border-border-light">
           <p className="text-sm font-medium text-text">{occurrence.scheduleName}</p>
           <p className="text-xs text-text-tertiary mt-0.5">
-            Expected: {format(parseISO(occurrence.expectedDate), 'MMM d, yyyy')} · {formatCurrency(occurrence.expectedAmount)}
+            Expected: {format(parseISO(occurrence.expectedDate), 'MMM d, yyyy')} ·{' '}
+            {formatCurrency(occurrence.expectedAmount)}
           </p>
         </div>
 
@@ -78,16 +81,25 @@ export default function OccurrenceMatchModal({ isOpen, onClose, occurrence }: Pr
 
         <div className="max-h-80 overflow-y-auto">
           {filtered.length === 0 ? (
-            <p className="text-sm text-text-tertiary text-center py-8">No matching transactions found.</p>
+            <p className="text-sm text-text-tertiary text-center py-8">
+              No matching transactions found.
+            </p>
           ) : (
             <div className="divide-y divide-border-light">
               {filtered.map((tx) => (
-                <div key={tx.id} className="flex items-center gap-3 py-2.5 px-2 hover:bg-hover rounded transition-colors">
+                <div
+                  key={tx.id}
+                  className="flex items-center gap-3 py-2.5 px-2 hover:bg-hover rounded transition-colors"
+                >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-text truncate">{tx.payeeName || '—'}</p>
-                    <p className="text-xs text-text-tertiary">{format(parseISO(tx.date), 'MMM d, yyyy')}</p>
+                    <p className="text-xs text-text-tertiary">
+                      {format(parseISO(tx.date), 'MMM d, yyyy')}
+                    </p>
                   </div>
-                  <span className={`text-sm font-medium tabular-nums ${tx.amount > 0 ? 'text-positive' : 'text-text'}`}>
+                  <span
+                    className={`text-sm font-medium tabular-nums ${tx.amount > 0 ? 'text-positive' : 'text-text'}`}
+                  >
                     {formatCurrency(tx.amount)}
                   </span>
                   <button

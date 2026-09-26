@@ -36,8 +36,7 @@ export const getSchedules = (status?: string) => {
   return apiFetch<Schedule[]>(`/schedules${q}`);
 };
 
-export const getSchedule = (id: string) =>
-  apiFetch<ScheduleWithOccurrences>(`/schedules/${id}`);
+export const getSchedule = (id: string) => apiFetch<ScheduleWithOccurrences>(`/schedules/${id}`);
 
 export const createSchedule = (data: CreateScheduleData) =>
   apiFetch<Schedule>('/schedules', { method: 'POST', body: JSON.stringify(data) });
@@ -56,10 +55,19 @@ export const getScheduleOccurrences = (from: string, to: string) => {
 export const getScheduleSummary = (month: string) =>
   apiFetch<ScheduleSummary>(`/schedules/summary?month=${month}`);
 
-export const markOccurrencePaid = (scheduleId: string, date: string, amount?: number, occurrenceId?: string) =>
+export const markOccurrencePaid = (
+  scheduleId: string,
+  date: string,
+  amount?: number,
+  occurrenceId?: string,
+) =>
   apiFetch<Transaction>(`/schedules/${scheduleId}/mark-paid`, {
     method: 'POST',
-    body: JSON.stringify({ date, ...(amount !== undefined ? { amount } : {}), ...(occurrenceId ? { occurrenceId } : {}) }),
+    body: JSON.stringify({
+      date,
+      ...(amount !== undefined ? { amount } : {}),
+      ...(occurrenceId ? { occurrenceId } : {}),
+    }),
   });
 
 export const skipOccurrence = (occurrenceId: string) =>

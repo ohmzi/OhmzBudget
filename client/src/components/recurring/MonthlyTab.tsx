@@ -3,7 +3,13 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 import Calendar from './Calendar';
 import RecurringItemRow from './RecurringItemRow';
 import RecurringSummaryBar from './RecurringSummaryBar';
-import { useScheduleOccurrences, useScheduleSummary, useMarkOccurrencePaid, useSkipOccurrence, useUnmatchOccurrence } from '../../hooks/useSchedules';
+import {
+  useScheduleOccurrences,
+  useScheduleSummary,
+  useMarkOccurrencePaid,
+  useSkipOccurrence,
+  useUnmatchOccurrence,
+} from '../../hooks/useSchedules';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
 import type { Schedule } from '../../types';
@@ -31,7 +37,8 @@ export default function MonthlyTab({ onEdit, allRecurring, onMatchOccurrence }: 
   const accountMap = useMemo(() => new Map(accounts.map((a) => [a.id, a.name])), [accounts]);
   const categoryMap = useMemo(() => {
     const map = new Map<string, string>();
-    for (const g of groups) for (const c of g.categories) map.set(c.id, `${c.icon ? c.icon + ' ' : ''}${c.name}`);
+    for (const g of groups)
+      for (const c of g.categories) map.set(c.id, `${c.icon ? c.icon + ' ' : ''}${c.name}`);
     return map;
   }, [groups]);
 
@@ -63,9 +70,19 @@ export default function MonthlyTab({ onEdit, allRecurring, onMatchOccurrence }: 
                 <RecurringItemRow
                   key={`${occ.scheduleId}-${occ.id}`}
                   occurrence={occ}
-                  accountName={occ.scheduleAccountId ? accountMap.get(occ.scheduleAccountId) : undefined}
-                  categoryName={occ.scheduleCategoryId ? categoryMap.get(occ.scheduleCategoryId) : undefined}
-                  onMarkPaid={() => markPaid.mutate({ scheduleId: occ.scheduleId, date: occ.expectedDate, occurrenceId: occ.id })}
+                  accountName={
+                    occ.scheduleAccountId ? accountMap.get(occ.scheduleAccountId) : undefined
+                  }
+                  categoryName={
+                    occ.scheduleCategoryId ? categoryMap.get(occ.scheduleCategoryId) : undefined
+                  }
+                  onMarkPaid={() =>
+                    markPaid.mutate({
+                      scheduleId: occ.scheduleId,
+                      date: occ.expectedDate,
+                      occurrenceId: occ.id,
+                    })
+                  }
                   onSkip={() => skipOcc.mutate(occ.id)}
                   onMatch={onMatchOccurrence ? () => onMatchOccurrence(occ.id) : undefined}
                   onUnmatch={() => unmatchOcc.mutate(occ.id)}

@@ -18,7 +18,9 @@ export function PayeeCombobox({ value, onChange, payees, className = '' }: Props
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { setQuery(value.name); }, [value.name]);
+  useEffect(() => {
+    setQuery(value.name);
+  }, [value.name]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -63,7 +65,10 @@ export function PayeeCombobox({ value, onChange, payees, className = '' }: Props
             <button
               key={p.id}
               type="button"
-              onMouseDown={(e) => { e.preventDefault(); select(p); }}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                select(p);
+              }}
               className="block w-full text-left px-3 py-1.5 text-sm text-text-secondary hover:bg-brand-50 hover:text-brand-700"
             >
               {p.name}

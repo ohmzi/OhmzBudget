@@ -6,7 +6,16 @@ import { useAccounts } from '../../hooks/useAccounts';
 import type { Goal } from '../../types';
 
 const ICONS = ['🎯', '🏠', '✈️', '🚗', '💰', '🎓', '💍', '🏖️', '📱', '🛡️', '🎁', '⭐'];
-const COLORS = ['#2563EB', '#059669', '#D97706', '#DC2626', '#7C3AED', '#0891B2', '#DB2777', '#4F46E5'];
+const COLORS = [
+  '#2563EB',
+  '#059669',
+  '#D97706',
+  '#DC2626',
+  '#7C3AED',
+  '#0891B2',
+  '#DB2777',
+  '#4F46E5',
+];
 
 interface Props {
   isOpen: boolean;
@@ -76,7 +85,7 @@ export function GoalFormModal({ isOpen, onClose, onSave, editGoal }: Props) {
           <label className="text-sm font-medium text-text-secondary">Name</label>
           <input
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Emergency Fund"
             className="w-full px-3 py-2 text-sm border border-border rounded-md bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
             autoFocus
@@ -99,29 +108,35 @@ export function GoalFormModal({ isOpen, onClose, onSave, editGoal }: Props) {
           <input
             type="date"
             value={targetDate}
-            onChange={e => setTargetDate(e.target.value)}
+            onChange={(e) => setTargetDate(e.target.value)}
             className="w-full px-3 py-2 text-sm border border-border rounded-md bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-text-secondary">Linked account (optional)</label>
+          <label className="text-sm font-medium text-text-secondary">
+            Linked account (optional)
+          </label>
           <select
             value={accountId}
-            onChange={e => setAccountId(e.target.value)}
+            onChange={(e) => setAccountId(e.target.value)}
             className="w-full px-3 py-2 text-sm border border-border rounded-md bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
           >
             <option value="">None</option>
-            {accounts.filter(a => !a.closedAt).map(a => (
-              <option key={a.id} value={a.id}>{a.name}</option>
-            ))}
+            {accounts
+              .filter((a) => !a.closedAt)
+              .map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                </option>
+              ))}
           </select>
         </div>
 
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-text-secondary">Icon</label>
           <div className="flex flex-wrap gap-1.5">
-            {ICONS.map(i => (
+            {ICONS.map((i) => (
               <button
                 key={i}
                 type="button"
@@ -139,7 +154,7 @@ export function GoalFormModal({ isOpen, onClose, onSave, editGoal }: Props) {
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-text-secondary">Color</label>
           <div className="flex gap-2">
-            {COLORS.map(c => (
+            {COLORS.map((c) => (
               <button
                 key={c}
                 type="button"
@@ -154,7 +169,9 @@ export function GoalFormModal({ isOpen, onClose, onSave, editGoal }: Props) {
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
           <Button type="submit" disabled={!name.trim() || targetAmount <= 0}>
             {editGoal ? 'Save' : 'Add Goal'}
           </Button>

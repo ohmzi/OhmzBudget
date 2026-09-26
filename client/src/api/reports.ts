@@ -1,10 +1,20 @@
 import { apiFetch } from './client';
-import type { NetWorthPoint, IncomeExpensesPoint, CashFlowPoint, SpendingByCategory, IncomeByCategoryItem, SpendingTrendPoint, SpendingComparisonData } from '../types';
+import type {
+  NetWorthPoint,
+  IncomeExpensesPoint,
+  CashFlowPoint,
+  SpendingByCategory,
+  IncomeByCategoryItem,
+  SpendingTrendPoint,
+  SpendingComparisonData,
+} from '../types';
 
 const toQueryString = (from: string, to: string) => `?from=${from}&to=${to}`;
 
 export const getNetWorth = (from: string, to: string, granularity?: 'daily' | 'monthly') =>
-  apiFetch<NetWorthPoint[]>(`/reports/net-worth${toQueryString(from, to)}${granularity ? `&granularity=${granularity}` : ''}`);
+  apiFetch<NetWorthPoint[]>(
+    `/reports/net-worth${toQueryString(from, to)}${granularity ? `&granularity=${granularity}` : ''}`,
+  );
 
 export const getIncomeVsExpenses = (from: string, to: string) =>
   apiFetch<IncomeExpensesPoint[]>(`/reports/income-vs-expenses${toQueryString(from, to)}`);
@@ -20,7 +30,7 @@ export const getIncomeByCategory = (from: string, to: string) =>
 
 export const getSpendingTrends = (categoryIds: string[], from: string, to: string) =>
   apiFetch<SpendingTrendPoint[]>(
-    `/reports/spending-trends?category_ids=${categoryIds.join(',')}&from=${from}&to=${to}`
+    `/reports/spending-trends?category_ids=${categoryIds.join(',')}&from=${from}&to=${to}`,
   );
 
 export const getSpendingComparison = (mode: string) =>

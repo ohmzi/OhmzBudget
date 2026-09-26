@@ -13,7 +13,15 @@ interface Props {
   groups: CategoryGroup[];
 }
 
-export function DeleteCategoryModal({ isOpen, onClose, onConfirm, categoryName, categoryId, transactionCount, groups }: Props) {
+export function DeleteCategoryModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  categoryName,
+  categoryId,
+  transactionCount,
+  groups,
+}: Props) {
   const [reassignTo, setReassignTo] = useState('');
 
   function handleConfirm() {
@@ -27,10 +35,13 @@ export function DeleteCategoryModal({ isOpen, onClose, onConfirm, categoryName, 
       <div className="space-y-4">
         <p className="text-sm text-text-secondary">
           <span className="font-medium text-text">{categoryName}</span> has{' '}
-          <span className="font-medium text-text">{transactionCount}</span> transaction{transactionCount !== 1 ? 's' : ''}.
-          Choose a category to reassign them to before deleting.
+          <span className="font-medium text-text">{transactionCount}</span> transaction
+          {transactionCount !== 1 ? 's' : ''}. Choose a category to reassign them to before
+          deleting.
         </p>
-        <p className="text-xs text-caution">Budget allocations for this category will be removed.</p>
+        <p className="text-xs text-caution">
+          Budget allocations for this category will be removed.
+        </p>
         <select
           value={reassignTo}
           onChange={(e) => setReassignTo(e.target.value)}
@@ -42,14 +53,19 @@ export function DeleteCategoryModal({ isOpen, onClose, onConfirm, categoryName, 
               {g.categories
                 .filter((c) => c.id !== categoryId)
                 .map((c) => (
-                  <option key={c.id} value={c.id}>{c.icon ? `${c.icon} ` : ''}{c.name}</option>
+                  <option key={c.id} value={c.id}>
+                    {c.icon ? `${c.icon} ` : ''}
+                    {c.name}
+                  </option>
                 ))}
             </optgroup>
           ))}
         </select>
       </div>
       <div className="flex justify-end gap-3 mt-6">
-        <Button variant="secondary" onClick={onClose}>Cancel</Button>
+        <Button variant="secondary" onClick={onClose}>
+          Cancel
+        </Button>
         <Button variant="danger" onClick={handleConfirm} disabled={!reassignTo}>
           Reassign & Delete
         </Button>

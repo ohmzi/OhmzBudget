@@ -21,7 +21,16 @@ import {
 
 export const schedulesRouter = Router();
 
-const recurrenceTypeEnum = z.enum(['once', 'weekly', 'biweekly', 'semimonthly', 'monthly', 'quarterly', 'semiannually', 'yearly']);
+const recurrenceTypeEnum = z.enum([
+  'once',
+  'weekly',
+  'biweekly',
+  'semimonthly',
+  'monthly',
+  'quarterly',
+  'semiannually',
+  'yearly',
+]);
 const amountTypeEnum = z.enum(['exact', 'approximate', 'variable']);
 const statusEnum = z.enum(['active', 'paused', 'canceled']);
 const weekendAdjustEnum = z.enum(['none', 'before', 'after', 'closest']);
@@ -64,28 +73,27 @@ schedulesRouter.get('/occurrences', (req, res) => {
   const to = req.query.to as string;
   if (!from || !to) return res.status(400).json({ error: 'from and to query params required' });
 
-  const rows = db.select({
-    occ: scheduleOccurrences,
-    schedule: schedules,
-  })
+  const rows = db
+    .select({
+      occ: scheduleOccurrences,
+      schedule: schedules,
+    })
     .from(scheduleOccurrences)
     .innerJoin(schedules, eq(scheduleOccurrences.scheduleId, schedules.id))
     .where(
-      and(
-        gte(scheduleOccurrences.expectedDate, from),
-        lte(scheduleOccurrences.expectedDate, to),
-      ),
+      and(gte(scheduleOccurrences.expectedDate, from), lte(scheduleOccurrences.expectedDate, to)),
     )
     .all();
 
   const matchedTxIds = rows
-    .filter(r => r.occ.matchedTransactionId)
-    .map(r => r.occ.matchedTransactionId!);
+    .filter((r) => r.occ.matchedTransactionId)
+    .map((r) => r.occ.matchedTransactionId!);
 
   const matchedTxMap = new Map<string, { amount: number; date: string }>();
   if (matchedTxIds.length > 0) {
     for (const txId of matchedTxIds) {
-      const tx = db.select({ amount: transactions.amount, date: transactions.date })
+      const tx = db
+        .select({ amount: transactions.amount, date: transactions.date })
         .from(transactions)
         .where(eq(transactions.id, txId))
         .get();
@@ -121,9 +129,10 @@ schedulesRouter.get('/summary', (req, res) => {
   const from = `${month}-01`;
   const to = `${month}-31`;
 
-  const rows = db.select({
-    expectedAmount: scheduleOccurrences.expectedAmount,
-  })
+  const rows = db
+    .select({
+      expectedAmount: scheduleOccurrences.expectedAmount,
+    })
     .from(scheduleOccurrences)
     .innerJoin(schedules, eq(scheduleOccurrences.scheduleId, schedules.id))
     .where(
@@ -172,7 +181,8 @@ schedulesRouter.post('/unmatch-transaction', (req, res) => {
 schedulesRouter.get('/', (req, res) => {
   const status = req.query.status as string | undefined;
   const conditions = status ? [eq(schedules.status, status)] : [];
-  const rows = db.select()
+  const rows = db
+    .select()
     .from(schedules)
     .where(conditions.length ? and(...conditions) : undefined)
     .orderBy(schedules.name)
@@ -232,13 +242,14 @@ schedulesRouter.get('/:id', (req, res) => {
   const schedule = db.select().from(schedules).where(eq(schedules.id, req.params.id)).get();
   if (!schedule) return res.status(404).json({ error: 'Not found' });
 
-  const recentOccs = db.select()
+  const recentOccs = db
+    .select()
     .from(scheduleOccurrences)
     .where(eq(scheduleOccurrences.scheduleId, schedule.id))
     .orderBy(desc(scheduleOccurrences.scheduledDate))
     .limit(20)
     .all()
-    .map(o => ({ ...o, displayStatus: deriveDisplayStatus(o.status, o.expectedDate) }));
+    .map((o) => ({ ...o, displayStatus: deriveDisplayStatus(o.status, o.expectedDate) }));
 
   res.json({ ...schedule, occurrences: recentOccs });
 });
@@ -258,7 +269,9 @@ schedulesRouter.put('/:id', (req, res) => {
     updates.recurrenceRule = JSON.stringify(data.recurrenceRule);
   } else if (data.recurrenceType && data.recurrenceType !== existing.recurrenceType) {
     const startDate = data.startDate || existing.startDate;
-    updates.recurrenceRule = JSON.stringify(buildRecurrenceRule(data.recurrenceType as RecurrenceType, startDate));
+    updates.recurrenceRule = JSON.stringify(
+      buildRecurrenceRule(data.recurrenceType as RecurrenceType, startDate),
+    );
   }
 
   if (data.autoCreate === 1 && existing.autoCreate === 0) {
@@ -267,14 +280,20 @@ schedulesRouter.put('/:id', (req, res) => {
 
   db.update(schedules).set(updates).where(eq(schedules.id, req.params.id)).run();
 
-  const patternChanged = data.recurrenceType || data.recurrenceRule || data.startDate || data.endDate || data.weekendAdjust;
+  const patternChanged =
+    data.recurrenceType ||
+    data.recurrenceRule ||
+    data.startDate ||
+    data.endDate ||
+    data.weekendAdjust;
   if (patternChanged) {
     regenerateFutureOccurrences(req.params.id);
   }
 
   if (data.amount !== undefined && data.amount !== existing.amount) {
     const today = format(new Date(), 'yyyy-MM-dd');
-    const futureOccs = db.select()
+    const futureOccs = db
+      .select()
       .from(scheduleOccurrences)
       .where(
         and(
@@ -283,7 +302,7 @@ schedulesRouter.put('/:id', (req, res) => {
         ),
       )
       .all()
-      .filter(o => o.scheduledDate > today);
+      .filter((o) => o.scheduledDate > today);
 
     for (const occ of futureOccs) {
       db.update(scheduleOccurrences)
@@ -311,7 +330,8 @@ schedulesRouter.delete('/:id', (req, res) => {
       .run();
 
     const today = format(new Date(), 'yyyy-MM-dd');
-    const futureOccs = db.select()
+    const futureOccs = db
+      .select()
       .from(scheduleOccurrences)
       .where(
         and(
@@ -320,7 +340,7 @@ schedulesRouter.delete('/:id', (req, res) => {
         ),
       )
       .all()
-      .filter(o => o.scheduledDate >= today);
+      .filter((o) => o.scheduledDate >= today);
 
     for (const occ of futureOccs) {
       db.update(scheduleOccurrences)
@@ -337,7 +357,8 @@ schedulesRouter.delete('/:id', (req, res) => {
 schedulesRouter.post('/:id/mark-paid', (req, res) => {
   const schedule = db.select().from(schedules).where(eq(schedules.id, req.params.id)).get();
   if (!schedule) return res.status(404).json({ error: 'Not found' });
-  if (!schedule.accountId) return res.status(400).json({ error: 'Schedule has no account assigned' });
+  if (!schedule.accountId)
+    return res.status(400).json({ error: 'Schedule has no account assigned' });
 
   const bodySchema = z.object({
     date: z.string().regex(dateRegex),
@@ -349,7 +370,8 @@ schedulesRouter.post('/:id/mark-paid', (req, res) => {
 
   let occId = parsed.data.occurrenceId;
   if (!occId) {
-    const nearestOcc = db.select()
+    const nearestOcc = db
+      .select()
       .from(scheduleOccurrences)
       .where(
         and(
@@ -360,8 +382,12 @@ schedulesRouter.post('/:id/mark-paid', (req, res) => {
       .orderBy(scheduleOccurrences.expectedDate)
       .all()
       .sort((a, b) => {
-        const aDiff = Math.abs(new Date(a.expectedDate).getTime() - new Date(parsed.data.date).getTime());
-        const bDiff = Math.abs(new Date(b.expectedDate).getTime() - new Date(parsed.data.date).getTime());
+        const aDiff = Math.abs(
+          new Date(a.expectedDate).getTime() - new Date(parsed.data.date).getTime(),
+        );
+        const bDiff = Math.abs(
+          new Date(b.expectedDate).getTime() - new Date(parsed.data.date).getTime(),
+        );
         return aDiff - bDiff;
       })[0];
 
@@ -402,7 +428,11 @@ schedulesRouter.post('/:id/mark-paid', (req, res) => {
 
 // POST /occurrences/:occId/skip
 schedulesRouter.post('/occurrences/:occId/skip', (req, res) => {
-  const occ = db.select().from(scheduleOccurrences).where(eq(scheduleOccurrences.id, req.params.occId)).get();
+  const occ = db
+    .select()
+    .from(scheduleOccurrences)
+    .where(eq(scheduleOccurrences.id, req.params.occId))
+    .get();
   if (!occ) return res.status(404).json({ error: 'Occurrence not found' });
 
   db.update(scheduleOccurrences)
@@ -419,7 +449,11 @@ schedulesRouter.post('/occurrences/:occId/match', (req, res) => {
   const parsed = bodySchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const occ = db.select().from(scheduleOccurrences).where(eq(scheduleOccurrences.id, req.params.occId)).get();
+  const occ = db
+    .select()
+    .from(scheduleOccurrences)
+    .where(eq(scheduleOccurrences.id, req.params.occId))
+    .get();
   if (!occ) return res.status(404).json({ error: 'Occurrence not found' });
 
   linkOccurrenceToTransaction(req.params.occId, parsed.data.transactionId, 'manual', 100);
@@ -428,7 +462,11 @@ schedulesRouter.post('/occurrences/:occId/match', (req, res) => {
 
 // POST /occurrences/:occId/unmatch — unlink from transaction
 schedulesRouter.post('/occurrences/:occId/unmatch', (_req, res) => {
-  const occ = db.select().from(scheduleOccurrences).where(eq(scheduleOccurrences.id, _req.params.occId)).get();
+  const occ = db
+    .select()
+    .from(scheduleOccurrences)
+    .where(eq(scheduleOccurrences.id, _req.params.occId))
+    .get();
   if (!occ) return res.status(404).json({ error: 'Occurrence not found' });
 
   unlinkOccurrence(_req.params.occId);
@@ -454,12 +492,13 @@ schedulesRouter.get('/:id/occurrences', (req, res) => {
   if (from) conditions.push(gte(scheduleOccurrences.expectedDate, from));
   if (to) conditions.push(lte(scheduleOccurrences.expectedDate, to));
 
-  const rows = db.select()
+  const rows = db
+    .select()
     .from(scheduleOccurrences)
     .where(and(...conditions))
     .orderBy(scheduleOccurrences.scheduledDate)
     .all()
-    .map(o => ({ ...o, displayStatus: deriveDisplayStatus(o.status, o.expectedDate) }));
+    .map((o) => ({ ...o, displayStatus: deriveDisplayStatus(o.status, o.expectedDate) }));
 
   res.json(rows);
 });

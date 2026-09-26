@@ -7,7 +7,12 @@ import { downloadCsv } from '../utils/exportCsv';
 import { chartColors, CATEGORY_COLORS } from '../utils/chartColors';
 import { Button } from '../components/ui/Button';
 import { Download } from 'lucide-react';
-import { ChartSkeleton, EmptyState, StatCardRow, EXPENSE_COLORS } from '../components/reports/ChartHelpers';
+import {
+  ChartSkeleton,
+  EmptyState,
+  StatCardRow,
+  EXPENSE_COLORS,
+} from '../components/reports/ChartHelpers';
 import type { StatCard } from '../components/reports/ChartHelpers';
 
 type Preset = '1m' | '3m' | '6m' | 'ytd' | 'last-year' | 'custom';
@@ -27,7 +32,12 @@ const MIN_SAVINGS_CENTS = 500;
 function SankeyDiagram({ from, to }: { from: string; to: string }) {
   const { data: incomeData = [], isLoading: il } = useIncomeByCategory(from, to);
   const { data: spendingData = [], isLoading: sl } = useSpendingByCategory(from, to);
-  const [tooltip, setTooltip] = useState<{ x: number; y: number; title: string; value: string } | null>(null);
+  const [tooltip, setTooltip] = useState<{
+    x: number;
+    y: number;
+    title: string;
+    value: string;
+  } | null>(null);
 
   const sankeyData = useMemo(() => {
     if (!incomeData.length && !spendingData.length) return null;
@@ -43,7 +53,7 @@ function SankeyDiagram({ from, to }: { from: string; to: string }) {
     const totalExpenses = sortedGroups.reduce((sum, [, v]) => sum + v, 0);
     const savings = totalIncome - totalExpenses;
 
-    const incomeNodes = incomeData.map(c => ({
+    const incomeNodes = incomeData.map((c) => ({
       name: `${c.categoryIcon ? c.categoryIcon + ' ' : ''}${c.categoryName ?? 'Income'}`,
       nodeType: 'income' as NodeType,
       amount: c.totalReceived,
@@ -59,99 +69,132 @@ function SankeyDiagram({ from, to }: { from: string; to: string }) {
       color: EXPENSE_COLORS[i % EXPENSE_COLORS.length],
     }));
 
-    const savingsNode = savings > MIN_SAVINGS_CENTS
-      ? [{ name: 'Savings', nodeType: 'savings' as NodeType, amount: savings, color: '#8b5cf6' }]
-      : [];
+    const savingsNode =
+      savings > MIN_SAVINGS_CENTS
+        ? [{ name: 'Savings', nodeType: 'savings' as NodeType, amount: savings, color: '#8b5cf6' }]
+        : [];
 
     const nodes = [
       ...incomeNodes,
-      { name: 'Total Income', nodeType: 'hub' as NodeType, amount: totalIncome, color: chartColors.brand },
+      {
+        name: 'Total Income',
+        nodeType: 'hub' as NodeType,
+        amount: totalIncome,
+        color: chartColors.brand,
+      },
       ...expenseNodes,
       ...savingsNode,
     ];
 
     const links = [
-      ...incomeNodes.map((_, i) => ({ source: i, target: hubIdx, value: incomeData[i].totalReceived })),
-      ...sortedGroups.map(([, amount], i) => ({ source: hubIdx, target: hubIdx + 1 + i, value: amount })),
+      ...incomeNodes.map((_, i) => ({
+        source: i,
+        target: hubIdx,
+        value: incomeData[i].totalReceived,
+      })),
+      ...sortedGroups.map(([, amount], i) => ({
+        source: hubIdx,
+        target: hubIdx + 1 + i,
+        value: amount,
+      })),
       ...(savingsNode.length ? [{ source: hubIdx, target: nodes.length - 1, value: savings }] : []),
-    ].filter(l => l.value > 0);
+    ].filter((l) => l.value > 0);
 
     return links.length ? { nodes, links } : null;
   }, [incomeData, spendingData]);
 
-  const renderNode = useCallback((props: any) => {
-    const { x, y, width, height, payload } = props;
-    if (!payload || height < 1) return null;
+  const renderNode = useCallback(
+    (props: any) => {
+      const { x, y, width, height, payload } = props;
+      if (!payload || height < 1) return null;
 
-    const { name, nodeType, amount, color } = payload;
-    const isLeft = nodeType === 'income';
-    const labelX = isLeft ? x - 8 : x + width + 8;
-    const anchor = isLeft ? 'end' : 'start';
-    const midY = y + height / 2;
+      const { name, nodeType, amount, color } = payload;
+      const isLeft = nodeType === 'income';
+      const labelX = isLeft ? x - 8 : x + width + 8;
+      const anchor = isLeft ? 'end' : 'start';
+      const midY = y + height / 2;
 
-    return (
-      <g
-        onMouseEnter={(e: React.MouseEvent) => setTooltip({ x: e.clientX, y: e.clientY, title: name, value: formatCurrency(amount) })}
-        onMouseLeave={() => setTooltip(null)}
-        style={{ cursor: 'default' }}
-      >
-        <rect x={x} y={y} width={width} height={height} fill={color} rx={3} />
-        <text
-          x={labelX}
-          y={height > 22 ? midY - 6 : midY + 1}
-          textAnchor={anchor}
-          fontSize={11}
-          fill={chartColors.label}
-          fontWeight="500"
+      return (
+        <g
+          onMouseEnter={(e: React.MouseEvent) =>
+            setTooltip({ x: e.clientX, y: e.clientY, title: name, value: formatCurrency(amount) })
+          }
+          onMouseLeave={() => setTooltip(null)}
+          style={{ cursor: 'default' }}
         >
-          {name}
-        </text>
-        {height > 22 && (
-          <text x={labelX} y={midY + 9} textAnchor={anchor} fontSize={10} fill={chartColors.axis}>
-            {formatCentsAxis(amount)}
+          <rect x={x} y={y} width={width} height={height} fill={color} rx={3} />
+          <text
+            x={labelX}
+            y={height > 22 ? midY - 6 : midY + 1}
+            textAnchor={anchor}
+            fontSize={11}
+            fill={chartColors.label}
+            fontWeight="500"
+          >
+            {name}
           </text>
-        )}
-      </g>
-    );
-  }, [setTooltip]);
+          {height > 22 && (
+            <text x={labelX} y={midY + 9} textAnchor={anchor} fontSize={10} fill={chartColors.axis}>
+              {formatCentsAxis(amount)}
+            </text>
+          )}
+        </g>
+      );
+    },
+    [setTooltip],
+  );
 
-  const renderLink = useCallback((props: any) => {
-    const { sourceX, sourceY, sourceControlX, targetX, targetY, targetControlX, linkWidth, payload } = props;
-    if (!linkWidth || linkWidth < 1) return null;
+  const renderLink = useCallback(
+    (props: any) => {
+      const {
+        sourceX,
+        sourceY,
+        sourceControlX,
+        targetX,
+        targetY,
+        targetControlX,
+        linkWidth,
+        payload,
+      } = props;
+      if (!linkWidth || linkWidth < 1) return null;
 
-    const halfW = linkWidth / 2;
-    const color = payload?.target?.color ?? chartColors.axis;
-    const d = [
-      `M${sourceX},${sourceY - halfW}`,
-      `C${sourceControlX},${sourceY - halfW} ${targetControlX},${targetY - halfW} ${targetX},${targetY - halfW}`,
-      `L${targetX},${targetY + halfW}`,
-      `C${targetControlX},${targetY + halfW} ${sourceControlX},${sourceY + halfW} ${sourceX},${sourceY + halfW}`,
-      'Z',
-    ].join(' ');
+      const halfW = linkWidth / 2;
+      const color = payload?.target?.color ?? chartColors.axis;
+      const d = [
+        `M${sourceX},${sourceY - halfW}`,
+        `C${sourceControlX},${sourceY - halfW} ${targetControlX},${targetY - halfW} ${targetX},${targetY - halfW}`,
+        `L${targetX},${targetY + halfW}`,
+        `C${targetControlX},${targetY + halfW} ${sourceControlX},${sourceY + halfW} ${sourceX},${sourceY + halfW}`,
+        'Z',
+      ].join(' ');
 
-    const srcName = payload?.source?.name ?? '';
-    const tgtName = payload?.target?.name ?? '';
-    const value = payload?.value ?? 0;
+      const srcName = payload?.source?.name ?? '';
+      const tgtName = payload?.target?.name ?? '';
+      const value = payload?.value ?? 0;
 
-    return (
-      <path
-        d={d}
-        fill={color}
-        fillOpacity={0.2}
-        stroke={color}
-        strokeWidth={0.5}
-        strokeOpacity={0.4}
-        onMouseEnter={(e: React.MouseEvent) => setTooltip({
-          x: e.clientX,
-          y: e.clientY,
-          title: `${srcName} → ${tgtName}`,
-          value: formatCurrency(value),
-        })}
-        onMouseLeave={() => setTooltip(null)}
-        style={{ cursor: 'default' }}
-      />
-    );
-  }, [setTooltip]);
+      return (
+        <path
+          d={d}
+          fill={color}
+          fillOpacity={0.2}
+          stroke={color}
+          strokeWidth={0.5}
+          strokeOpacity={0.4}
+          onMouseEnter={(e: React.MouseEvent) =>
+            setTooltip({
+              x: e.clientX,
+              y: e.clientY,
+              title: `${srcName} → ${tgtName}`,
+              value: formatCurrency(value),
+            })
+          }
+          onMouseLeave={() => setTooltip(null)}
+          style={{ cursor: 'default' }}
+        />
+      );
+    },
+    [setTooltip],
+  );
 
   if (il || sl) return <ChartSkeleton />;
   if (!sankeyData) return <EmptyState />;
@@ -192,11 +235,14 @@ export default function CashFlowPage() {
     if (preset === 'custom') return;
     const now = new Date();
     const ranges: Record<string, { from: string; to: string }> = {
-      '1m':        { from: format(now, 'yyyy-MM'), to: format(now, 'yyyy-MM') },
-      '3m':        { from: format(subMonths(now, 2), 'yyyy-MM'), to: format(now, 'yyyy-MM') },
-      '6m':        { from: format(subMonths(now, 5), 'yyyy-MM'), to: format(now, 'yyyy-MM') },
-      'ytd':       { from: format(startOfYear(now), 'yyyy-MM'),  to: format(now, 'yyyy-MM') },
-      'last-year': { from: format(startOfYear(subYears(now, 1)), 'yyyy-MM'), to: format(endOfYear(subYears(now, 1)), 'yyyy-MM') },
+      '1m': { from: format(now, 'yyyy-MM'), to: format(now, 'yyyy-MM') },
+      '3m': { from: format(subMonths(now, 2), 'yyyy-MM'), to: format(now, 'yyyy-MM') },
+      '6m': { from: format(subMonths(now, 5), 'yyyy-MM'), to: format(now, 'yyyy-MM') },
+      ytd: { from: format(startOfYear(now), 'yyyy-MM'), to: format(now, 'yyyy-MM') },
+      'last-year': {
+        from: format(startOfYear(subYears(now, 1)), 'yyyy-MM'),
+        to: format(endOfYear(subYears(now, 1)), 'yyyy-MM'),
+      },
     };
     const r = ranges[preset];
     setFrom(r.from);
@@ -219,11 +265,14 @@ export default function CashFlowPage() {
 
   function handleExport() {
     const filename = `cash-flow-${from}-${to}.csv`;
-    downloadCsv(filename, spData.map(d => ({
-      category: `${d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`,
-      group: d.groupName ?? '',
-      total_cents: d.totalSpent,
-    })));
+    downloadCsv(
+      filename,
+      spData.map((d) => ({
+        category: `${d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`,
+        group: d.groupName ?? '',
+        total_cents: d.totalSpent,
+      })),
+    );
   }
 
   return (
@@ -233,7 +282,7 @@ export default function CashFlowPage() {
           <h1 className="text-lg font-semibold text-text shrink-0">Cash Flow</h1>
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex gap-0">
-              {PRESETS.map(p => (
+              {PRESETS.map((p) => (
                 <button
                   key={p.id}
                   onClick={() => setPreset(p.id)}

@@ -30,7 +30,7 @@ export default function IncomeExpensesMini({ sixMonthsAgo, currentMonth }: Props
   const { data = [], isLoading } = useIncomeVsExpenses(sixMonthsAgo, currentMonth);
 
   const chartData = useMemo(
-    () => data.map(d => ({ ...d, month: format(parseISO(`${d.month}-01`), 'MMM yy') })),
+    () => data.map((d) => ({ ...d, month: format(parseISO(`${d.month}-01`), 'MMM yy') })),
     [data],
   );
 
@@ -53,11 +53,15 @@ export default function IncomeExpensesMini({ sixMonthsAgo, currentMonth }: Props
     <Card>
       <div className="flex items-center justify-between mb-1">
         <h3 className="text-sm font-semibold text-text">Cash Flow</h3>
-        <Link to="/reports" className="text-xs text-brand-600 hover:text-brand-700 font-medium">View all</Link>
+        <Link to="/reports" className="text-xs text-brand-600 hover:text-brand-700 font-medium">
+          View all
+        </Link>
       </div>
       <p className="text-sm text-text-tertiary mb-3">
         Net this month:{' '}
-        <span className={`font-semibold tabular-nums ${latestNet >= 0 ? 'text-positive' : 'text-negative'}`}>
+        <span
+          className={`font-semibold tabular-nums ${latestNet >= 0 ? 'text-positive' : 'text-negative'}`}
+        >
           {formatCurrency(latestNet)}
         </span>
       </p>
@@ -73,12 +77,19 @@ export default function IncomeExpensesMini({ sixMonthsAgo, currentMonth }: Props
                 tickLine={false}
               />
               <Tooltip content={<CurrencyTooltip />} cursor={{ fill: 'rgba(37,99,235,0.1)' }} />
-              <Legend
-                iconSize={8}
-                wrapperStyle={{ fontSize: 11, color: chartColors.axis }}
+              <Legend iconSize={8} wrapperStyle={{ fontSize: 11, color: chartColors.axis }} />
+              <Bar
+                dataKey="income"
+                name="Income"
+                fill={chartColors.positive}
+                radius={[3, 3, 0, 0]}
               />
-              <Bar dataKey="income" name="Income" fill={chartColors.positive} radius={[3, 3, 0, 0]} />
-              <Bar dataKey="expenses" name="Expenses" fill={chartColors.negative} radius={[3, 3, 0, 0]} />
+              <Bar
+                dataKey="expenses"
+                name="Expenses"
+                fill={chartColors.negative}
+                radius={[3, 3, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>

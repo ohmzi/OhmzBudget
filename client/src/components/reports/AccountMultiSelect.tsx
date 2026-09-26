@@ -7,15 +7,15 @@ interface Props {
 
 export default function AccountMultiSelect({ selected, onChange }: Props) {
   const { data: accounts = [] } = useAccounts();
-  const open = accounts.filter(a => !a.closedAt);
+  const open = accounts.filter((a) => !a.closedAt);
 
   const allSelected = selected.length === 0;
 
   function toggle(id: string) {
     if (selected.length === 0) {
-      onChange(open.filter(a => a.id !== id).map(a => a.id));
+      onChange(open.filter((a) => a.id !== id).map((a) => a.id));
     } else if (selected.includes(id)) {
-      const next = selected.filter(s => s !== id);
+      const next = selected.filter((s) => s !== id);
       onChange(next.length === open.length ? [] : next);
     } else {
       const next = [...selected, id];
@@ -31,7 +31,7 @@ export default function AccountMultiSelect({ selected, onChange }: Props) {
       >
         {allSelected ? 'All selected' : 'Select all'}
       </button>
-      {open.map(a => {
+      {open.map((a) => {
         const checked = allSelected || selected.includes(a.id);
         return (
           <label key={a.id} className="flex items-center gap-2 py-0.5 cursor-pointer">

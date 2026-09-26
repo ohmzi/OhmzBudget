@@ -18,7 +18,7 @@ function MergeModal({
   onClose: () => void;
 }) {
   const [keepId, setKeepId] = useState(selected[0]);
-  const selectedPayees = payees.filter(p => selected.includes(p.id));
+  const selectedPayees = payees.filter((p) => selected.includes(p.id));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -28,21 +28,47 @@ function MergeModal({
           <h2 className="text-lg font-semibold text-text">Merge Payees</h2>
         </div>
         <div className="px-6 py-5 space-y-4">
-          <p className="text-sm text-text-secondary">Choose which payee name to keep. All transactions will be moved to the selected payee.</p>
+          <p className="text-sm text-text-secondary">
+            Choose which payee name to keep. All transactions will be moved to the selected payee.
+          </p>
           <div className="space-y-2">
-            {selectedPayees.map(p => (
-              <label key={p.id} className={`flex items-center gap-3 p-3 rounded-md border cursor-pointer transition-colors ${keepId === p.id ? 'border-brand-500 bg-brand-50' : 'border-border hover:bg-hover'}`}>
-                <input type="radio" name="keepId" value={p.id} checked={keepId === p.id} onChange={() => setKeepId(p.id)} className="accent-brand-600" />
+            {selectedPayees.map((p) => (
+              <label
+                key={p.id}
+                className={`flex items-center gap-3 p-3 rounded-md border cursor-pointer transition-colors ${keepId === p.id ? 'border-brand-500 bg-brand-50' : 'border-border hover:bg-hover'}`}
+              >
+                <input
+                  type="radio"
+                  name="keepId"
+                  value={p.id}
+                  checked={keepId === p.id}
+                  onChange={() => setKeepId(p.id)}
+                  className="accent-brand-600"
+                />
                 <div>
                   <p className="text-sm font-medium text-text">{p.name}</p>
-                  <p className="text-xs text-text-tertiary">{p.transactionCount} transaction{p.transactionCount !== 1 ? 's' : ''}</p>
+                  <p className="text-xs text-text-tertiary">
+                    {p.transactionCount} transaction{p.transactionCount !== 1 ? 's' : ''}
+                  </p>
                 </div>
               </label>
             ))}
           </div>
           <div className="flex justify-end gap-3 pt-1">
-            <Button variant="secondary" onClick={onClose}>Cancel</Button>
-            <Button onClick={() => { onMerge(keepId, selected.filter(id => id !== keepId)); onClose(); }}>Merge</Button>
+            <Button variant="secondary" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                onMerge(
+                  keepId,
+                  selected.filter((id) => id !== keepId),
+                );
+                onClose();
+              }}
+            >
+              Merge
+            </Button>
           </div>
         </div>
       </div>
@@ -65,17 +91,20 @@ export default function PayeesPage() {
   const [showMerge, setShowMerge] = useState(false);
 
   const allCategories = useMemo(
-    () => (groups as any[]).flatMap((g: any) => g.categories.map((c: any) => ({ ...c, groupName: g.name }))),
+    () =>
+      (groups as any[]).flatMap((g: any) =>
+        g.categories.map((c: any) => ({ ...c, groupName: g.name })),
+      ),
     [groups],
   );
 
   const filtered = useMemo(
-    () => payees.filter(p => p.name.toLowerCase().includes(search.toLowerCase())),
+    () => payees.filter((p) => p.name.toLowerCase().includes(search.toLowerCase())),
     [payees, search],
   );
 
   function toggleSelect(id: string) {
-    setSelected(prev => {
+    setSelected((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
@@ -100,7 +129,7 @@ export default function PayeesPage() {
     mergePayees.mutate({ keepId, mergeIds }, { onSuccess: () => setSelected(new Set()) });
   }
 
-  const deleteTarget = payees.find(p => p.id === deleteId);
+  const deleteTarget = payees.find((p) => p.id === deleteId);
 
   return (
     <div className="flex flex-col h-full bg-surface">
@@ -118,10 +147,13 @@ export default function PayeesPage() {
               </button>
             )}
             <div className="relative">
-              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary" />
+              <Search
+                size={14}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary"
+              />
               <input
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search payees…"
                 className="pl-8 pr-3 py-1.5 text-sm border border-border rounded-full bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
               />
@@ -132,10 +164,14 @@ export default function PayeesPage() {
 
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
-          <div className="flex items-center justify-center h-32 text-sm text-text-tertiary">Loading...</div>
+          <div className="flex items-center justify-center h-32 text-sm text-text-tertiary">
+            Loading...
+          </div>
         ) : filtered.length === 0 ? (
           <div className="flex items-center justify-center h-32 text-sm text-text-tertiary">
-            {search ? 'No payees match your search.' : 'No payees yet. They\'re created automatically from transactions.'}
+            {search
+              ? 'No payees match your search.'
+              : "No payees yet. They're created automatically from transactions."}
           </div>
         ) : (
           <table className="w-full">
@@ -145,30 +181,44 @@ export default function PayeesPage() {
                   <input
                     type="checkbox"
                     checked={selected.size === filtered.length && filtered.length > 0}
-                    onChange={e => setSelected(e.target.checked ? new Set(filtered.map(p => p.id)) : new Set())}
+                    onChange={(e) =>
+                      setSelected(e.target.checked ? new Set(filtered.map((p) => p.id)) : new Set())
+                    }
                     className="accent-brand-600"
                   />
                 </th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-text-tertiary">Name</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-text-tertiary">Default category</th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-text-tertiary">Transactions</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-text-tertiary">
+                  Default category
+                </th>
+                <th className="px-4 py-2 text-right text-xs font-medium text-text-tertiary">
+                  Transactions
+                </th>
                 <th className="w-12 px-4 py-2" />
               </tr>
             </thead>
             <tbody className="divide-y divide-border-light">
-              {filtered.map(p => (
-                <tr key={p.id} className={`group hover:bg-hover transition-colors ${selected.has(p.id) ? 'bg-brand-50' : ''}`}>
+              {filtered.map((p) => (
+                <tr
+                  key={p.id}
+                  className={`group hover:bg-hover transition-colors ${selected.has(p.id) ? 'bg-brand-50' : ''}`}
+                >
                   <td className="px-4 py-2">
-                    <input type="checkbox" checked={selected.has(p.id)} onChange={() => toggleSelect(p.id)} className="accent-brand-600" />
+                    <input
+                      type="checkbox"
+                      checked={selected.has(p.id)}
+                      onChange={() => toggleSelect(p.id)}
+                      className="accent-brand-600"
+                    />
                   </td>
                   <td className="px-4 py-2">
                     {editingId === p.id ? (
                       <input
                         autoFocus
                         value={editingName}
-                        onChange={e => setEditingName(e.target.value)}
+                        onChange={(e) => setEditingName(e.target.value)}
                         onBlur={() => commitEditName(p.id)}
-                        onKeyDown={e => {
+                        onKeyDown={(e) => {
                           if (e.key === 'Enter') commitEditName(p.id);
                           if (e.key === 'Escape') setEditingId(null);
                         }}
@@ -187,16 +237,20 @@ export default function PayeesPage() {
                   <td className="px-4 py-2">
                     <select
                       value={p.defaultCategoryId ?? ''}
-                      onChange={e => handleCategoryChange(p.id, e.target.value)}
+                      onChange={(e) => handleCategoryChange(p.id, e.target.value)}
                       className="text-sm border border-border rounded-md px-2 py-1 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 max-w-[220px]"
                     >
                       <option value="">No default</option>
                       {allCategories.map((c: any) => (
-                        <option key={c.id} value={c.id}>{c.groupName} → {c.name}</option>
+                        <option key={c.id} value={c.id}>
+                          {c.groupName} → {c.name}
+                        </option>
                       ))}
                     </select>
                   </td>
-                  <td className="px-4 py-2 text-right text-sm text-text-secondary">{p.transactionCount}</td>
+                  <td className="px-4 py-2 text-right text-sm text-text-secondary">
+                    {p.transactionCount}
+                  </td>
                   <td className="px-4 py-2">
                     <button
                       onClick={() => setDeleteId(p.id)}
@@ -224,7 +278,9 @@ export default function PayeesPage() {
       <ConfirmModal
         isOpen={deleteId !== null}
         onClose={() => setDeleteId(null)}
-        onConfirm={() => { if (deleteId) deletePayee.mutate(deleteId); }}
+        onConfirm={() => {
+          if (deleteId) deletePayee.mutate(deleteId);
+        }}
         title="Delete Payee"
         message={`Delete "${deleteTarget?.name}"? This will remove the payee from all their transactions.`}
         confirmLabel="Delete"

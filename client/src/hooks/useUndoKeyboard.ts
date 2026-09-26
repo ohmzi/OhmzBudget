@@ -5,7 +5,8 @@ export function useUndoKeyboard() {
   useEffect(() => {
     function handler(e: KeyboardEvent) {
       const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable) return;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable)
+        return;
 
       const mod = e.ctrlKey || e.metaKey;
       if (!mod || e.key.toLowerCase() !== 'z') return;

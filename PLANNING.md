@@ -31,22 +31,22 @@ Runs as a web app (local) and desktop app (Electron). No subscription fee. Bank 
 
 ## Tech Stack
 
-| Layer | Choice | Notes |
-|---|---|---|
-| Frontend | React 19 + TypeScript + Vite | Already scaffolded |
-| Styling | Tailwind CSS v4 | Already installed |
-| Routing | React Router v7 | Already installed |
-| Server state | TanStack Query (React Query) v5 | Cache, refetch, loading/error states for API calls |
-| UI state | Zustand | Lightweight global state: selected month, sidebar, modals |
-| Backend | Node.js + Express + TypeScript | Server dir exists, needs setup |
-| Database | SQLite via `better-sqlite3` | Local-first, single file, zero config |
-| ORM/Migrations | Drizzle ORM + drizzle-kit | Type-safe queries, schema migrations |
-| Charts | Recharts | React-native composable chart library |
-| Desktop | Electron (Phase 8) | Wraps the web app |
-| Icons | Lucide React | Consistent, clean icon set |
-| Date handling | date-fns | Lightweight, tree-shakeable |
-| Form handling | React Hook Form + Zod | Validated forms with TypeScript inference |
-| IDs | nanoid | Short, URL-safe unique IDs |
+| Layer          | Choice                          | Notes                                                     |
+| -------------- | ------------------------------- | --------------------------------------------------------- |
+| Frontend       | React 19 + TypeScript + Vite    | Already scaffolded                                        |
+| Styling        | Tailwind CSS v4                 | Already installed                                         |
+| Routing        | React Router v7                 | Already installed                                         |
+| Server state   | TanStack Query (React Query) v5 | Cache, refetch, loading/error states for API calls        |
+| UI state       | Zustand                         | Lightweight global state: selected month, sidebar, modals |
+| Backend        | Node.js + Express + TypeScript  | Server dir exists, needs setup                            |
+| Database       | SQLite via `better-sqlite3`     | Local-first, single file, zero config                     |
+| ORM/Migrations | Drizzle ORM + drizzle-kit       | Type-safe queries, schema migrations                      |
+| Charts         | Recharts                        | React-native composable chart library                     |
+| Desktop        | Electron (Phase 8)              | Wraps the web app                                         |
+| Icons          | Lucide React                    | Consistent, clean icon set                                |
+| Date handling  | date-fns                        | Lightweight, tree-shakeable                               |
+| Form handling  | React Hook Form + Zod           | Validated forms with TypeScript inference                 |
+| IDs            | nanoid                          | Short, URL-safe unique IDs                                |
 
 ---
 
@@ -158,6 +158,7 @@ All IDs are nanoid strings. Amounts are stored as integer **cents** (no floats).
 Dates stored as `TEXT` in `YYYY-MM-DD` format. Booleans as `INTEGER` (0/1).
 
 ### `accounts`
+
 ```sql
 id             TEXT PRIMARY KEY
 name           TEXT NOT NULL
@@ -170,6 +171,7 @@ created_at     TEXT NOT NULL DEFAULT (datetime('now'))
 ```
 
 ### `category_groups`
+
 ```sql
 id             TEXT PRIMARY KEY
 name           TEXT NOT NULL
@@ -179,6 +181,7 @@ created_at     TEXT NOT NULL DEFAULT (datetime('now'))
 ```
 
 ### `categories`
+
 ```sql
 id             TEXT PRIMARY KEY
 group_id       TEXT NOT NULL REFERENCES category_groups(id) ON DELETE CASCADE
@@ -188,6 +191,7 @@ created_at     TEXT NOT NULL DEFAULT (datetime('now'))
 ```
 
 ### `payees`
+
 ```sql
 id                   TEXT PRIMARY KEY
 name                 TEXT NOT NULL
@@ -196,6 +200,7 @@ created_at           TEXT NOT NULL DEFAULT (datetime('now'))
 ```
 
 ### `transactions`
+
 ```sql
 id                       TEXT PRIMARY KEY
 account_id               TEXT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE
@@ -215,6 +220,7 @@ created_at               TEXT NOT NULL DEFAULT (datetime('now'))
 ```
 
 ### `budget_months`
+
 ```sql
 id           TEXT PRIMARY KEY
 month        TEXT NOT NULL   -- YYYY-MM
@@ -225,6 +231,7 @@ UNIQUE(month, category_id)
 ```
 
 ### `rules`
+
 ```sql
 id          TEXT PRIMARY KEY
 conditions  TEXT NOT NULL   -- JSON: [{field: 'payee_name', op: 'contains', value: 'Netflix'}]
@@ -240,84 +247,95 @@ created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 Base URL: `http://localhost:3001/api`
 
 ### Accounts
-| Method | Path | Description |
-|---|---|---|
-| GET | `/accounts` | List all accounts with computed balance |
-| POST | `/accounts` | Create account |
-| PUT | `/accounts/:id` | Update account |
-| DELETE | `/accounts/:id` | Soft-delete (set closed_at) |
+
+| Method | Path            | Description                             |
+| ------ | --------------- | --------------------------------------- |
+| GET    | `/accounts`     | List all accounts with computed balance |
+| POST   | `/accounts`     | Create account                          |
+| PUT    | `/accounts/:id` | Update account                          |
+| DELETE | `/accounts/:id` | Soft-delete (set closed_at)             |
 
 ### Categories
-| Method | Path | Description |
-|---|---|---|
-| GET | `/categories` | List all groups + categories (nested) |
-| POST | `/categories` | Create category |
-| PUT | `/categories/:id` | Rename, reorder, move group |
-| DELETE | `/categories/:id` | Delete (only if no transactions) |
-| POST | `/category-groups` | Create group |
-| PUT | `/category-groups/:id` | Rename, reorder |
-| DELETE | `/category-groups/:id` | Delete group + children |
-| PUT | `/categories/reorder` | Bulk reorder (drag-and-drop) |
+
+| Method | Path                   | Description                           |
+| ------ | ---------------------- | ------------------------------------- |
+| GET    | `/categories`          | List all groups + categories (nested) |
+| POST   | `/categories`          | Create category                       |
+| PUT    | `/categories/:id`      | Rename, reorder, move group           |
+| DELETE | `/categories/:id`      | Delete (only if no transactions)      |
+| POST   | `/category-groups`     | Create group                          |
+| PUT    | `/category-groups/:id` | Rename, reorder                       |
+| DELETE | `/category-groups/:id` | Delete group + children               |
+| PUT    | `/categories/reorder`  | Bulk reorder (drag-and-drop)          |
 
 ### Budget
-| Method | Path | Description |
-|---|---|---|
-| GET | `/budget/:month` | Get full budget for month (YYYY-MM): all categories with budgeted/spent/balance |
-| PUT | `/budget/:month/:categoryId` | Set budgeted amount for a category in a month |
-| GET | `/budget/:month/summary` | Month summary: income, total budgeted, to-be-budgeted |
+
+| Method | Path                         | Description                                                                     |
+| ------ | ---------------------------- | ------------------------------------------------------------------------------- |
+| GET    | `/budget/:month`             | Get full budget for month (YYYY-MM): all categories with budgeted/spent/balance |
+| PUT    | `/budget/:month/:categoryId` | Set budgeted amount for a category in a month                                   |
+| GET    | `/budget/:month/summary`     | Month summary: income, total budgeted, to-be-budgeted                           |
 
 ### Transactions
-| Method | Path | Description |
-|---|---|---|
-| GET | `/transactions` | List with filters: ?account_id=&month=&category_id=&search=&cleared= |
-| POST | `/transactions` | Create transaction (also creates split children if provided) |
-| PUT | `/transactions/:id` | Update transaction |
-| DELETE | `/transactions/:id` | Delete transaction |
-| POST | `/transactions/import` | Import from CSV/OFX (multipart form, returns preview + dedupe info) |
-| POST | `/transactions/import/confirm` | Confirm import after preview |
-| POST | `/transactions/transfer` | Create a linked transfer (creates two transactions) |
+
+| Method | Path                           | Description                                                          |
+| ------ | ------------------------------ | -------------------------------------------------------------------- |
+| GET    | `/transactions`                | List with filters: ?account_id=&month=&category_id=&search=&cleared= |
+| POST   | `/transactions`                | Create transaction (also creates split children if provided)         |
+| PUT    | `/transactions/:id`            | Update transaction                                                   |
+| DELETE | `/transactions/:id`            | Delete transaction                                                   |
+| POST   | `/transactions/import`         | Import from CSV/OFX (multipart form, returns preview + dedupe info)  |
+| POST   | `/transactions/import/confirm` | Confirm import after preview                                         |
+| POST   | `/transactions/transfer`       | Create a linked transfer (creates two transactions)                  |
 
 ### Payees
-| Method | Path | Description |
-|---|---|---|
-| GET | `/payees` | List all payees |
-| POST | `/payees` | Create payee |
-| PUT | `/payees/:id` | Update payee (name, default category) |
-| DELETE | `/payees/:id` | Delete payee |
-| POST | `/payees/merge` | Merge duplicate payees |
+
+| Method | Path            | Description                           |
+| ------ | --------------- | ------------------------------------- |
+| GET    | `/payees`       | List all payees                       |
+| POST   | `/payees`       | Create payee                          |
+| PUT    | `/payees/:id`   | Update payee (name, default category) |
+| DELETE | `/payees/:id`   | Delete payee                          |
+| POST   | `/payees/merge` | Merge duplicate payees                |
 
 ### Rules
-| Method | Path | Description |
-|---|---|---|
-| GET | `/rules` | List all rules |
-| POST | `/rules` | Create rule |
-| PUT | `/rules/:id` | Update rule |
-| DELETE | `/rules/:id` | Delete rule |
-| POST | `/rules/apply` | Dry-run rules against existing uncategorized transactions |
+
+| Method | Path           | Description                                               |
+| ------ | -------------- | --------------------------------------------------------- |
+| GET    | `/rules`       | List all rules                                            |
+| POST   | `/rules`       | Create rule                                               |
+| PUT    | `/rules/:id`   | Update rule                                               |
+| DELETE | `/rules/:id`   | Delete rule                                               |
+| POST   | `/rules/apply` | Dry-run rules against existing uncategorized transactions |
 
 ### Reports
-| Method | Path | Description |
-|---|---|---|
-| GET | `/reports/net-worth` | Net worth by month: ?from=&to= |
-| GET | `/reports/spending-by-category` | Category totals: ?month=&from=&to= |
-| GET | `/reports/income-vs-expenses` | Monthly income/expense totals: ?from=&to= |
-| GET | `/reports/cash-flow` | Monthly net cash flow: ?from=&to= |
-| GET | `/reports/spending-trends` | Category spending over time: ?category_ids=&from=&to= |
+
+| Method | Path                            | Description                                           |
+| ------ | ------------------------------- | ----------------------------------------------------- |
+| GET    | `/reports/net-worth`            | Net worth by month: ?from=&to=                        |
+| GET    | `/reports/spending-by-category` | Category totals: ?month=&from=&to=                    |
+| GET    | `/reports/income-vs-expenses`   | Monthly income/expense totals: ?from=&to=             |
+| GET    | `/reports/cash-flow`            | Monthly net cash flow: ?from=&to=                     |
+| GET    | `/reports/spending-trends`      | Category spending over time: ?category_ids=&from=&to= |
 
 ---
 
 ## State Management
 
 ### TanStack Query (server state)
+
 Every API resource gets its own query hook in `client/src/hooks/`. Examples:
+
 ```ts
-useAccounts()           // GET /accounts — cached, auto-refetch
-useBudget(month)        // GET /budget/:month — re-fetches when month changes
-useTransactions(filters) // GET /transactions?... — re-fetches on filter change
+useAccounts(); // GET /accounts — cached, auto-refetch
+useBudget(month); // GET /budget/:month — re-fetches when month changes
+useTransactions(filters); // GET /transactions?... — re-fetches on filter change
 ```
+
 Mutations use `useMutation` with `queryClient.invalidateQueries` on success to keep cache fresh.
 
 ### Zustand (UI state)
+
 ```ts
 // store/appStore.ts
 {
@@ -352,6 +370,7 @@ Mutations use `useMutation` with `queryClient.invalidateQueries` on success to k
 
 **Sidebar layout:** Fixed left sidebar (~240px), main content fills remainder.
 Sidebar sections:
+
 1. Logo + app name
 2. Primary nav: Budget, All Accounts, Reports
 3. "Accounts" section header + "Add Account" button
@@ -366,38 +385,47 @@ Sidebar sections:
 These live in `client/src/components/ui/` and are used throughout.
 
 ### `Modal`
+
 - Backdrop blur + centered card
 - Props: `isOpen`, `onClose`, `title`, `children`, `size` ('sm' | 'md' | 'lg')
 - ESC key closes, click backdrop closes
 
 ### `ConfirmModal`
+
 - Extends Modal; adds `message`, `confirmLabel`, `onConfirm`, `danger` (red button)
 
 ### `CurrencyInput`
+
 - Displays formatted value (`$1,234.56`) while editing shows raw number
 - On blur: converts to cents, calls `onChange(cents)`
 - Handles negative values (for credit cards, etc.)
 
 ### `DatePicker`
+
 - Input + calendar popup
 - Returns `YYYY-MM-DD` string
 - Built with date-fns for formatting
 
 ### `Badge`
+
 - Colored pill, Props: `variant` ('checking' | 'savings' | 'credit' | 'cash' | 'investment' | 'positive' | 'negative')
 
 ### `EmptyState`
+
 - Icon + heading + subtext + optional action button
 - Used on empty transaction lists, no categories yet, etc.
 
 ### `Skeleton`
+
 - Loading placeholder rows for tables
 
 ### `Toast`
+
 - Success/error/info toasts, auto-dismiss after 3s
 - Stack up to 3 at once
 
 ### `Dropdown`
+
 - Accessible combobox for category selector, payee selector, etc.
 - Supports search filtering within options
 
@@ -408,6 +436,7 @@ These live in `client/src/components/ui/` and are used throughout.
 **Goal:** Express server running, SQLite DB initialized, all API routes stubbed.
 
 ### Setup tasks
+
 - [ ] `cd server && npm init` + install dependencies:
   - `express`, `cors`, `better-sqlite3`, `drizzle-orm`, `nanoid`
   - Dev: `@types/express`, `@types/better-sqlite3`, `drizzle-kit`, `tsx`, `nodemon`
@@ -426,6 +455,7 @@ These live in `client/src/components/ui/` and are used throughout.
 - [ ] Add `package.json` at root with `dev` script running client + server concurrently (use `concurrently` package)
 
 ### Acceptance criteria
+
 - `npm run dev` from root starts both client (5173) and server (3001)
 - `GET http://localhost:3001/api/accounts` returns `[]`
 - DB file `budget.db` exists with all tables
@@ -437,6 +467,7 @@ These live in `client/src/components/ui/` and are used throughout.
 **Goal:** Users can create and manage financial accounts. Balances shown in sidebar.
 
 ### Backend
+
 - [ ] `server/src/routes/accounts.ts`
   - `GET /accounts` — query all accounts; for each, compute balance:
     `balance = starting_balance + SUM(transactions.amount WHERE account_id = id AND reconciled != -1)`
@@ -445,6 +476,7 @@ These live in `client/src/components/ui/` and are used throughout.
   - `DELETE /accounts/:id` — set `closed_at = datetime('now')`
 
 ### Frontend
+
 - [ ] `useAccounts` hook — `useQuery(['accounts'], fetchAccounts)`
 - [ ] `SidebarAccountList` — reads from `useAccounts`, shows each account with formatted balance
   - On-budget accounts grouped first
@@ -465,6 +497,7 @@ These live in `client/src/components/ui/` and are used throughout.
   - "Add Account" button in page header
 
 ### Account type rules
+
 - **Checking / Savings / Cash:** Positive balance = money you have
 - **Credit Card:** Balance shown as negative (what you owe). Treat as liability.
 - **Investment:** Off-budget by default, tracked for net worth calculation
@@ -476,13 +509,14 @@ These live in `client/src/components/ui/` and are used throughout.
 **Goal:** The core feature. Zero-based envelope budgeting with monthly view.
 
 ### Budget math (important)
+
 ```
-To Be Budgeted = 
-  Income received this month 
-  + Carried over from previous month 
+To Be Budgeted =
+  Income received this month
+  + Carried over from previous month
   - Total budgeted this month across all expense categories
 
-Category Balance = 
+Category Balance =
   Budgeted (this month)
   + Balance carried from prior month (if positive; negative reduces next month)
   - Spent this month
@@ -491,6 +525,7 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
 ```
 
 ### Backend
+
 - [ ] `server/src/services/budgetCalculations.ts`
   - `getBudgetMonth(month: string)` — returns full budget data structure
   - For each category:
@@ -504,6 +539,7 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
 - [ ] `PUT /budget/:month/:categoryId` — upsert `budget_months` row
 
 ### Frontend
+
 - [ ] `MonthNavigator` — prev/next arrows, displays "April 2026", clicking month label shows month picker
 - [ ] `ToBeBudgetedBanner`
   - Large number at top: "To Be Budgeted: $X,XXX.XX"
@@ -531,6 +567,7 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
 - [ ] Initial setup prompt if no categories exist yet (guides user to create first budget)
 
 ### Budget page layout
+
 ```
 [MonthNavigator]
 [ToBeBudgetedBanner]
@@ -556,6 +593,7 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
 **Goal:** Full transaction management. This is where users record and review their spending.
 
 ### Backend
+
 - [ ] `server/src/routes/transactions.ts`
   - `GET /transactions` with query params:
     - `account_id` — filter to single account
@@ -576,6 +614,7 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
   - `POST /transactions/import/confirm` — insert confirmed rows
 
 ### Frontend — Transaction Table
+
 - [ ] `TransactionTable` (shared by both `TransactionsPage` and `AccountTransactionsPage`)
   - Columns: Date | Payee | Category | Notes | Outflow | Inflow | Cleared
   - Outflow = negative amounts (expenses), Inflow = positive (income/deposits)
@@ -607,6 +646,7 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
   - Step 4: Confirm import; skips dupes
 
 ### Page headers
+
 - `AccountTransactionsPage`: Account name, type badge, current balance, Reconcile button
 - `AllTransactionsPage`: "All Transactions" header, total across all accounts
 
@@ -619,6 +659,7 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
 ### Backend — Report endpoints (in `routes/reports.ts`)
 
 **`GET /reports/net-worth?from=YYYY-MM&to=YYYY-MM`**
+
 - For each month in range, compute:
   - Assets = SUM of non-credit account balances
   - Liabilities = SUM of credit account balances (absolute)
@@ -626,17 +667,21 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
 - Returns array of `{ month, assets, liabilities, net_worth }`
 
 **`GET /reports/spending-by-category?from=YYYY-MM&to=YYYY-MM`**
+
 - SUM(transactions.amount) grouped by category_id, filtered to date range
 - Returns `{ group_name, category_name, total_spent }[]` sorted by total_spent desc
 
 **`GET /reports/income-vs-expenses?from=YYYY-MM&to=YYYY-MM`**
+
 - Per month: income total (income categories), expense total (expense categories)
 - Returns `{ month, income, expenses, net }[]`
 
 **`GET /reports/cash-flow?from=YYYY-MM&to=YYYY-MM`**
+
 - Same as income-vs-expenses net, focused on cash accounts only (exclude off-budget)
 
 **`GET /reports/spending-trends?category_ids=a,b,c&from=YYYY-MM&to=YYYY-MM`**
+
 - Per month per category: SUM(amount)
 - Returns `{ month, category_id, category_name, total }[]`
 
@@ -666,6 +711,7 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
   - Legend with color per category
 
 ### Shared report UI
+
 - Date range presets: "Last 3 Months", "Last 6 Months", "This Year", "Last Year", "Custom"
 - "Export as CSV" button on each report
 - Loading skeleton while data fetches
@@ -677,6 +723,7 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
 **Goal:** Reduce manual categorization. Smart defaults for recurring expenses.
 
 ### Backend
+
 - [ ] Payee routes (CRUD — see API Design)
 - [ ] `server/src/services/rulesEngine.ts`
   - `applyRules(transaction)` — evaluates each rule's conditions in sort_order
@@ -686,6 +733,7 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
   - First matching rule wins (stop on first match)
 
 ### Frontend
+
 - [ ] `PayeesPage`
   - Table: Payee Name | Default Category | # Transactions | Actions
   - Click name → edit default category inline
@@ -713,6 +761,7 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
 **Goal:** Verify account balance matches bank statement. Lock past transactions.
 
 ### Workflow
+
 1. User clicks "Reconcile" on an account
 2. App shows current cleared balance
 3. User enters their bank's statement ending balance
@@ -720,12 +769,14 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
 5. User clicks "Finish Reconciliation" — all cleared transactions become reconciled (locked)
 
 ### Backend
+
 - [ ] `PUT /accounts/:id/reconcile` — body: `{ statement_balance, transaction_ids }`
   - Sets `reconciled = 1` for given transaction IDs
   - Creates a reconciliation record (optional — for audit trail)
 - [ ] Reconciled transactions cannot be edited or deleted (server enforces)
 
 ### Frontend
+
 - [ ] `ReconcilePage` (accessed via button on `AccountTransactionsPage`)
   - Header: "Reconcile [Account Name]"
   - Step 1: "Enter your bank's ending balance" — CurrencyInput
@@ -743,11 +794,13 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
 **Goal:** Downloadable native app for Windows, Mac, and Linux.
 
 ### Architecture
+
 - Electron main process: starts Express server as a child process, loads `localhost:3001` in a `BrowserWindow`
 - In dev: loads Vite dev server URL
 - In prod: serves built Vite bundle via Express static middleware
 
 ### Setup tasks
+
 - [ ] `npm install --save-dev electron electron-builder`
 - [ ] `electron/main.ts`
   - Creates `BrowserWindow` (1200×800, with frame)
@@ -770,11 +823,13 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
 **Goal:** Pull transactions automatically from connected bank accounts.
 
 ### API options
+
 - **Plaid** — most widely used, developer tier ~$0, production via pricing contact
 - **Finicity (by Mastercard)** — personal plan available, ~$15/yr
 - **SimpleFIN Bridge** — open-source self-hostable bridge, one-time donation (~$1.50)
 
 ### Implementation plan (when ready)
+
 - [ ] Add `bank_connections` table: `id, account_id, provider, access_token (encrypted), cursor`
 - [ ] "Connect Bank" flow: OAuth popup → receive access token → store encrypted
 - [ ] "Sync" button on account: hits provider API → returns new transactions since last cursor
@@ -787,35 +842,41 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
 ## UI/UX Guidelines
 
 ### Layout
+
 - Fixed left sidebar ~240px wide
 - Main content area fills rest, has its own scroll
 - No horizontal scroll anywhere
 
 ### Color system
-| Purpose | Color |
-|---|---|
-| Positive balance / income | Green (`text-green-600`) |
-| Negative / overspent | Red (`text-red-500`) |
-| Primary actions | Blue (`bg-blue-600`) |
-| Neutral shell | Gray (`bg-gray-50`, `bg-white`) |
-| Warning / caution | Yellow (`text-yellow-600`) |
+
+| Purpose                   | Color                           |
+| ------------------------- | ------------------------------- |
+| Positive balance / income | Green (`text-green-600`)        |
+| Negative / overspent      | Red (`text-red-500`)            |
+| Primary actions           | Blue (`bg-blue-600`)            |
+| Neutral shell             | Gray (`bg-gray-50`, `bg-white`) |
+| Warning / caution         | Yellow (`text-yellow-600`)      |
 
 ### Typography & density
+
 - Transaction tables: compact rows (~36px height), many rows visible
 - Budget table: slightly more spacious (~44px rows), needs room for editable cells
 - Sans-serif system font stack (Tailwind default)
 
 ### Amounts
+
 - Always display 2 decimal places: `$1,234.56`
 - Negative amounts shown as `-$45.00` in red (not parentheses)
 - Store as integer cents in DB — convert to/from on the boundary
 
 ### Dates
+
 - Display: `Apr 15, 2026`
 - Input: date picker, also accepts typed `4/15/2026` or `2026-04-15`
 - Store: `YYYY-MM-DD` string
 
 ### Accessibility
+
 - All interactive elements keyboard navigable
 - Focus ring visible on all focusable elements
 - Color not the only indicator (also use icons/text for red/green states)
@@ -825,19 +886,19 @@ Spent = ABS(SUM of transactions in category this month where amount < 0)
 
 ## Key Decisions Log
 
-| Decision | Choice | Reason |
-|---|---|---|
-| Storage | SQLite local file | Local-first, no server cost, no account needed, same as Actual Budget |
-| Budget method | Zero-based / envelope | Most effective personal budgeting method |
-| Amounts | Integer cents | Avoids all floating point precision errors |
-| ORM | Drizzle | Type-safe, lightweight, great SQLite support |
-| Charts | Recharts | React-native, no D3 knowledge needed, composable |
-| Server state | TanStack Query | Handles cache invalidation, loading/error states automatically |
-| UI state | Zustand | Simple, no boilerplate, replaces Context for global UI state |
-| Auth | None (Phase 1-8) | Single-user local app, no accounts needed |
-| Bank sync | Deferred | Adds significant complexity; app is useful without it |
-| Bank sync API | Finicity / SimpleFIN | ~$15/yr personal tier; SimpleFIN is free/open-source |
-| Desktop | Electron | Largest ecosystem, simplest to wrap a web app |
+| Decision      | Choice                | Reason                                                                |
+| ------------- | --------------------- | --------------------------------------------------------------------- |
+| Storage       | SQLite local file     | Local-first, no server cost, no account needed, same as Actual Budget |
+| Budget method | Zero-based / envelope | Most effective personal budgeting method                              |
+| Amounts       | Integer cents         | Avoids all floating point precision errors                            |
+| ORM           | Drizzle               | Type-safe, lightweight, great SQLite support                          |
+| Charts        | Recharts              | React-native, no D3 knowledge needed, composable                      |
+| Server state  | TanStack Query        | Handles cache invalidation, loading/error states automatically        |
+| UI state      | Zustand               | Simple, no boilerplate, replaces Context for global UI state          |
+| Auth          | None (Phase 1-8)      | Single-user local app, no accounts needed                             |
+| Bank sync     | Deferred              | Adds significant complexity; app is useful without it                 |
+| Bank sync API | Finicity / SimpleFIN  | ~$15/yr personal tier; SimpleFIN is free/open-source                  |
+| Desktop       | Electron              | Largest ecosystem, simplest to wrap a web app                         |
 
 ---
 
@@ -858,6 +919,7 @@ Phase 9  Bank Sync                ← Deferred, separate cost/effort
 ```
 
 ### Current status
+
 - [x] Client scaffolded (React + Vite + Tailwind + React Router)
 - [x] Server directory exists with tsconfig
 - [ ] **Next: Phase 1 — Backend Foundation**
