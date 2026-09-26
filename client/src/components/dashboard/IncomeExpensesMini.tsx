@@ -67,8 +67,8 @@ export default function IncomeExpensesMini({ sixMonthsAgo, currentMonth }: Props
       </p>
 
       {chartData.length > 0 ? (
-        <div className="h-48">
-          <ResponsiveContainer width="100%" height="100%">
+        <div>
+          <ResponsiveContainer width="100%" height={192}>
             <BarChart data={chartData} margin={{ top: 4, right: 4, left: 4, bottom: 0 }} barGap={2}>
               <XAxis
                 dataKey="month"

@@ -129,8 +129,8 @@ export default function SpendingComparison() {
       </div>
 
       {chartData.length > 0 ? (
-        <div className="h-48 mt-2">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="mt-2">
+          <ResponsiveContainer width="100%" height={192}>
             <AreaChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="gSpendingCur" x1="0" y1="0" x2="0" y2="1">

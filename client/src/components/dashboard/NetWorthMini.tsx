@@ -165,8 +165,8 @@ export default function NetWorthMini() {
       </div>
 
       {data.length > 1 && (
-        <div className="h-28 mt-4" ref={chartRef}>
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="mt-4" ref={chartRef}>
+          <ResponsiveContainer width="100%" height={112}>
             <AreaChart data={data} margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
               <defs>
                 <linearGradient id="gNetMini" x1="0" y1="0" x2="0" y2="1">
