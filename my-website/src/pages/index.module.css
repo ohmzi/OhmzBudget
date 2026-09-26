@@ -343,7 +343,7 @@
   .heroArtwork {
     width: 100%;
     max-width: 400px;
-    height: 300px;
+    height: 350px;
     margin: 0 auto;
     margin-left: auto;
   }
@@ -358,7 +358,7 @@
   .heroMoney {
     width: 340px;
     right: 0;
-    top: 0;
+    top: -35px;
   }
 }
 
@@ -386,7 +386,7 @@
 
   .heroArtwork {
     max-width: 300px;
-    height: 230px;
+    height: 270px;
   }
 
   .heroMoney {
