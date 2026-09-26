@@ -118,14 +118,14 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
 .attribute {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(160, 190, 255, 0.65);
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -137,7 +137,7 @@
 }
 
 .attributeDot {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(160, 190, 255, 0.4);
   font-size: 1.25rem;
   line-height: 1;
   user-select: none;
