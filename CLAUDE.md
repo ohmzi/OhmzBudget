@@ -213,4 +213,3 @@ Use conventional commit prefixes:
 
 - **Asset Tracking**: Car value tracking and house/real estate tracking for more accurate net worth calculations. Would need new account types or asset tables beyond the current financial account model.
 - **Goal Tracking**: Save targets per category (e.g., "save $X by date Y").
-- **Dark Mode**: Preferences panel exists but dark mode not yet implemented.
