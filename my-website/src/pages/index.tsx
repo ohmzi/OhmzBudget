@@ -25,6 +25,9 @@ function HeroSection(): ReactNode {
               <Link className={styles.ctaPrimary} to="/docs/intro">
                 Get Started <span aria-hidden="true">&rarr;</span>
               </Link>
+              <Link className={styles.ctaSecondary} to="/docs/intro">
+                View Demo
+              </Link>
               <Link
                 className={styles.ctaSecondary}
                 href="https://github.com/dtymoszenko/budgeting-project"
