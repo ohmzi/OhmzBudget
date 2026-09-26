@@ -49,16 +49,28 @@ const config: Config = {
     ],
   ],
 
+  plugins: [
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'tour',
+        path: 'tour',
+        routeBasePath: 'tour',
+        sidebarPath: './sidebarsTour.ts',
+        editUrl:
+          'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
+      },
+    ],
+  ],
+
   presets: [
     [
       'classic',
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/dtymoszenko/budgeting-project/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
         },
         blog: {
           blogSidebarTitle: 'All Posts',
@@ -67,10 +79,8 @@ const config: Config = {
             type: ['rss', 'atom'],
             xslt: true,
           },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/dtymoszenko/budgeting-project/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -97,7 +107,13 @@ const config: Config = {
       },
       items: [
         {to: '/#features', label: 'Features', position: 'left', activeBaseRegex: '$^'},
-        {to: '/tour', label: 'Tour', position: 'left'},
+        {
+          type: 'docSidebar',
+          sidebarId: 'tourSidebar',
+          docsPluginId: 'tour',
+          position: 'left',
+          label: 'Tour',
+        },
         {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
