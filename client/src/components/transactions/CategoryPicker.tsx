@@ -8,9 +8,10 @@ interface Props {
   onChange: (id: string | null) => void;
   groups: CategoryGroup[];
   onClose: () => void;
+  position?: 'below' | 'above';
 }
 
-export function CategoryPicker({ value, onChange, groups, onClose }: Props) {
+export function CategoryPicker({ value, onChange, groups, onClose, position = 'below' }: Props) {
   const [query, setQuery] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
@@ -70,7 +71,7 @@ export function CategoryPicker({ value, onChange, groups, onClose }: Props) {
   return (
     <div
       ref={containerRef}
-      className="absolute top-full left-0 z-50 mt-1 w-64 bg-surface border border-border rounded-lg shadow-lg"
+      className={`absolute left-0 z-50 w-64 bg-surface border border-border rounded-lg shadow-lg ${position === 'above' ? 'bottom-full mb-1' : 'top-full mt-1'}`}
       onClick={(e) => e.stopPropagation()}
     >
       <div className="p-2 border-b border-border-light">

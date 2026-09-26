@@ -1,14 +1,17 @@
-import { useState, useRef, useEffect } from 'react';
-import { format } from 'date-fns';
-import { MinusCircle, PlusCircle, ChevronDown } from 'lucide-react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { format, isValid as isValidDate, parseISO } from 'date-fns';
+import { MinusCircle, PlusCircle, ChevronDown, CreditCard, Plus } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { CurrencyInput } from '../ui/CurrencyInput';
+import { formatCurrency } from '../../utils/currency';
 import { useAccounts } from '../../hooks/useAccounts';
 import { usePayees } from '../../hooks/usePayees';
+import { useCreatePayee } from '../../hooks/usePayees';
 import { useCategories } from '../../hooks/useCategories';
 import { useCreateTransaction } from '../../hooks/useTransactions';
-import { payeeColor } from '../../utils/transactionColors';
+import { CategoryPicker } from './CategoryPicker';
+import { payeeColor, ACCOUNT_TYPE_COLORS } from '../../utils/transactionColors';
 import type { CategoryGroup } from '../../types';
 
 interface Props {
@@ -20,7 +23,7 @@ const inputClass =
   'block w-full rounded-md border border-border px-3 py-2 text-sm text-text bg-surface placeholder-text-disabled focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600';
 
 const selectClass =
-  'block w-full rounded-md border border-border px-3 py-2 text-sm text-text bg-surface focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 appearance-none cursor-pointer';
+  'block w-full rounded-md border border-border px-3 py-2 text-sm bg-surface focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 appearance-none cursor-pointer';
 
 export function AddTransactionModal({ isOpen, onClose }: Props) {
   const [type, setType] = useState<'debit' | 'credit'>('debit');
@@ -32,34 +35,68 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [accountId, setAccountId] = useState('');
   const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [showAccountPicker, setShowAccountPicker] = useState(false);
   const [notes, setNotes] = useState('');
 
   const payeeRef = useRef<HTMLDivElement>(null);
+  const accountRef = useRef<HTMLDivElement>(null);
 
   const { data: accounts = [] } = useAccounts();
   const { data: payees = [] } = usePayees();
   const { data: groups = [] } = useCategories();
   const createTransaction = useCreateTransaction();
+  const createPayee = useCreatePayee();
 
   const openAccounts = accounts.filter((a) => !a.closedAt);
+  const onBudgetAccounts = openAccounts.filter((a) => !a.isOffBudget);
+  const offBudgetAccounts = openAccounts.filter((a) => a.isOffBudget);
+  const selectedAccount = openAccounts.find((a) => a.id === accountId);
+
+  const sortedPayees = useMemo(
+    () => [...payees].sort((a, b) => b.transactionCount - a.transactionCount),
+    [payees],
+  );
 
   const filteredPayees = payeeQuery
-    ? payees
+    ? sortedPayees
         .filter((p) => p.name.toLowerCase().includes(payeeQuery.toLowerCase()))
         .slice(0, 8)
-    : payees.slice(0, 8);
+    : sortedPayees.slice(0, 8);
 
-  const isValid = amount > 0 && payeeName.trim() !== '' && date !== '' && accountId !== '';
+  const exactMatch = payees.find(
+    (p) => p.name.toLowerCase() === payeeQuery.trim().toLowerCase(),
+  );
+
+  const categoryEntry = useMemo(() => {
+    if (!categoryId) return null;
+    for (const g of groups as CategoryGroup[]) {
+      const cat = g.categories.find((c) => c.id === categoryId);
+      if (cat) return { name: cat.name, icon: cat.icon };
+    }
+    return null;
+  }, [categoryId, groups]);
+
+  const hasConfirmedMerchant = payeeId !== null;
+  const dateValid = date !== '' && /^\d{4}-\d{2}-\d{2}$/.test(date) && isValidDate(parseISO(date));
+  const isValid = amount > 0 && hasConfirmedMerchant && dateValid && accountId !== '';
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (payeeRef.current && !payeeRef.current.contains(e.target as Node)) {
         setShowPayeeList(false);
+        if (!payeeId) {
+          setPayeeQuery('');
+          setPayeeName('');
+        }
+      }
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
+        setShowAccountPicker(false);
       }
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
+  }, [payeeId]);
 
   useEffect(() => {
     if (isOpen) {
@@ -71,7 +108,9 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
       setShowPayeeList(false);
       setDate(format(new Date(), 'yyyy-MM-dd'));
       setAccountId('');
+      setShowAccountPicker(false);
       setCategoryId(null);
+      setShowCategoryPicker(false);
       setNotes('');
     }
   }, [isOpen]);
@@ -85,7 +124,7 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
         date,
         amount: finalAmount,
         payeeId,
-        payeeName: payeeName || null,
+        payeeName,
         categoryId,
         notes: notes || null,
       },
@@ -140,7 +179,7 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
               onChange={(e) => {
                 const name = e.target.value;
                 setPayeeQuery(name);
-                setPayeeName(name);
+                setPayeeName('');
                 setPayeeId(null);
                 setShowPayeeList(true);
               }}
@@ -163,7 +202,7 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
                         setPayeeQuery(p.name);
                         setShowPayeeList(false);
                       }}
-                      className="w-full text-left px-3 py-2 text-sm flex items-center gap-2.5 hover:bg-hover"
+                      className="w-full text-left px-3 py-2 text-sm flex items-center gap-2.5 hover:bg-hover cursor-pointer"
                     >
                       <div
                         className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
@@ -171,18 +210,38 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
                       >
                         {p.name.charAt(0).toUpperCase()}
                       </div>
-                      <span className="truncate">{p.name}</span>
+                      <span className="truncate flex-1">{p.name}</span>
+                      <span className="flex items-center gap-1 text-xs text-text-tertiary shrink-0">
+                        <CreditCard size={11} />
+                        {p.transactionCount}
+                      </span>
                     </button>
                   );
                 })}
-                {payeeQuery &&
-                  !payees.find(
-                    (p) => p.name.toLowerCase() === payeeQuery.toLowerCase(),
-                  ) && (
-                    <div className="px-3 py-2 text-xs text-text-tertiary border-t border-border-light">
-                      New merchant: &ldquo;{payeeQuery}&rdquo;
-                    </div>
-                  )}
+                {payeeQuery.trim() && !exactMatch && (
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      const name = payeeQuery.trim();
+                      createPayee.mutate(
+                        { name },
+                        {
+                          onSuccess: (created) => {
+                            setPayeeName(created.name);
+                            setPayeeId(created.id);
+                            setPayeeQuery(created.name);
+                            setShowPayeeList(false);
+                          },
+                        },
+                      );
+                    }}
+                    className="w-full text-left px-3 py-2.5 text-sm text-brand-600 font-medium flex items-center gap-1.5 hover:bg-surface-alt cursor-pointer border-t border-border-light"
+                  >
+                    <Plus size={14} />
+                    Create new merchant: &ldquo;{payeeQuery.trim()}&rdquo;
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -202,23 +261,100 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
         {/* Account */}
         <div>
           <label className="block text-sm font-medium text-text mb-1">Account *</label>
-          <div className="relative">
-            <select
-              value={accountId}
-              onChange={(e) => setAccountId(e.target.value)}
-              className={`${selectClass} ${accountId === '' ? 'text-text-disabled' : ''}`}
+          <div ref={accountRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setShowAccountPicker(!showAccountPicker)}
+              className={`${inputClass} text-left flex items-center justify-between cursor-pointer`}
             >
-              <option value="">Select account...</option>
-              {openAccounts.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              size={14}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none"
-            />
+              <span className="flex items-center gap-2 truncate">
+                {selectedAccount ? (
+                  <>
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
+                      style={{ backgroundColor: ACCOUNT_TYPE_COLORS[selectedAccount.type] || '#6B7280' }}
+                    >
+                      {selectedAccount.name.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-text">{selectedAccount.name}</span>
+                  </>
+                ) : (
+                  <span className="text-text-disabled">Select account...</span>
+                )}
+              </span>
+              <ChevronDown size={14} className="text-text-tertiary shrink-0" />
+            </button>
+            {showAccountPicker && (
+              <div
+                className="absolute z-50 top-full left-0 right-0 mt-1 bg-surface border border-border rounded-lg shadow-lg overflow-hidden max-h-56 overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {onBudgetAccounts.length > 0 && (
+                  <>
+                    <div className="px-3 py-1.5 text-xs font-medium text-text-tertiary bg-surface-alt">
+                      On Budget
+                    </div>
+                    {onBudgetAccounts.map((a) => (
+                      <button
+                        key={a.id}
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setAccountId(a.id);
+                          setShowAccountPicker(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2.5 hover:bg-hover cursor-pointer ${
+                          accountId === a.id ? 'bg-brand-50 text-brand-700' : 'text-text'
+                        }`}
+                      >
+                        <div
+                          className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
+                          style={{ backgroundColor: ACCOUNT_TYPE_COLORS[a.type] || '#6B7280' }}
+                        >
+                          {a.name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="truncate flex-1">{a.name}</span>
+                        <span className={`text-xs tabular-nums shrink-0 ${a.balance >= 0 ? 'text-text-tertiary' : 'text-negative'}`}>
+                          {formatCurrency(a.balance)}
+                        </span>
+                      </button>
+                    ))}
+                  </>
+                )}
+                {offBudgetAccounts.length > 0 && (
+                  <>
+                    <div className="px-3 py-1.5 text-xs font-medium text-text-tertiary bg-surface-alt">
+                      Off Budget
+                    </div>
+                    {offBudgetAccounts.map((a) => (
+                      <button
+                        key={a.id}
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setAccountId(a.id);
+                          setShowAccountPicker(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2.5 hover:bg-hover cursor-pointer ${
+                          accountId === a.id ? 'bg-brand-50 text-brand-700' : 'text-text'
+                        }`}
+                      >
+                        <div
+                          className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
+                          style={{ backgroundColor: ACCOUNT_TYPE_COLORS[a.type] || '#6B7280' }}
+                        >
+                          {a.name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="truncate flex-1">{a.name}</span>
+                        <span className={`text-xs tabular-nums shrink-0 ${a.balance >= 0 ? 'text-text-tertiary' : 'text-negative'}`}>
+                          {formatCurrency(a.balance)}
+                        </span>
+                      </button>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -226,27 +362,35 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
         <div>
           <label className="block text-sm font-medium text-text mb-1">Category</label>
           <div className="relative">
-            <select
-              value={categoryId ?? ''}
-              onChange={(e) => setCategoryId(e.target.value || null)}
-              className={`${selectClass} ${categoryId === null ? 'text-text-disabled' : ''}`}
+            <button
+              type="button"
+              onClick={() => setShowCategoryPicker(!showCategoryPicker)}
+              className={`${inputClass} text-left flex items-center justify-between cursor-pointer`}
             >
-              <option value="">Uncategorized</option>
-              {(groups as CategoryGroup[]).map((g) => (
-                <optgroup key={g.id} label={g.name}>
-                  {g.categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.icon ? `${c.icon} ` : ''}
-                      {c.name}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-            <ChevronDown
-              size={14}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none"
-            />
+              <span className="flex items-center gap-2 truncate">
+                {categoryEntry ? (
+                  <>
+                    {categoryEntry.icon && <span className="text-base">{categoryEntry.icon}</span>}
+                    <span className="text-text">{categoryEntry.name}</span>
+                  </>
+                ) : (
+                  <span className="text-text-disabled">Search categories...</span>
+                )}
+              </span>
+              <ChevronDown size={14} className="text-text-tertiary shrink-0" />
+            </button>
+            {showCategoryPicker && (
+              <CategoryPicker
+                value={categoryId}
+                onChange={(id) => {
+                  setCategoryId(id);
+                  setShowCategoryPicker(false);
+                }}
+                groups={groups as CategoryGroup[]}
+                onClose={() => setShowCategoryPicker(false)}
+                position="above"
+              />
+            )}
           </div>
         </div>
 
