@@ -149,7 +149,7 @@ function SmallFeature({
 
 function FeaturesSection(): ReactNode {
   return (
-    <section className={styles.featuresSection}>
+    <section id="community" className={styles.featuresSection}>
       <img
         src="/img/homepage/footer-bg.svg"
         className={styles.footerBg}
@@ -208,6 +208,11 @@ export default function Home(): ReactNode {
     <Layout description={siteConfig.tagline}>
       <HeroSection />
       <main>
+        <section id="features" className={styles.featureHighlights}>
+          <div className={styles.featureHighlightsContainer}>
+            <p>Feature Start</p>
+          </div>
+        </section>
         <FeaturesSection />
       </main>
     </Layout>

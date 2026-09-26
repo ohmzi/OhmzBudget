@@ -189,14 +189,33 @@
 
 
 /* ============================================================
-   Features Section (forked from Actual Budget)
+   Feature Highlights (white section)
+   ============================================================ */
+
+.featureHighlights {
+  background: var(--ifm-background-color);
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.featureHighlightsContainer {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.featureHighlightsContainer p {
+  font-size: 1.25rem;
+  color: var(--ifm-font-color-base);
+}
+
+/* ============================================================
+   Features Section
    ============================================================ */
 
 .featuresSection {
   background: linear-gradient(180deg, #152035 0%, #111a2e 100%);
   color: white;
   fill: currentColor;
-  margin-top: 6rem;
   padding-top: 8rem;
   padding-bottom: 20rem;
   position: relative;
@@ -208,7 +227,7 @@
   right: 0;
   width: 100%;
   bottom: 0;
-  height: 200px;
+  height: 140px;
   pointer-events: none;
 }
 

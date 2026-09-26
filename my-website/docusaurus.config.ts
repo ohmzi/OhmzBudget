@@ -96,6 +96,8 @@ const config: Config = {
         src: 'img/logo.png',
       },
       items: [
+        {to: '/#features', label: 'Features', position: 'left', activeBaseRegex: '$^'},
+        {to: '/tour', label: 'Tour', position: 'left'},
         {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
@@ -103,6 +105,9 @@ const config: Config = {
           label: 'Docs',
         },
         {to: '/blog', label: 'Blog', position: 'left'},
+        {to: '/community', label: 'Community', position: 'left'},
+        {to: '/contributing', label: 'Contributing', position: 'left'},
+        {to: '/download', label: 'Download', position: 'left'},
         {
           href: 'https://github.com/dtymoszenko/budgeting-project',
           label: 'GitHub',
