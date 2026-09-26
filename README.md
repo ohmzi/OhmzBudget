@@ -1,3 +1,15 @@
+<p align="center">
+  <img src="client/public/logo.png" alt="FlyBudget" width="80" />
+</p>
+
+<h1 align="center">FlyBudget</h1>
+
+<p align="center">
+  A fast and powerful open-source budgeting app that gives you complete control over your financial data.
+</p>
+
+---
+
 ## Commit Message Guidelines
 
 | Type       | Description                                 |
