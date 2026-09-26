@@ -123,6 +123,7 @@ reportsRouter.get('/spending-by-category', (req, res) => {
       categoryId: transactions.categoryId,
       categoryName: categories.name,
       categoryIcon: categories.icon,
+      groupId: categoryGroups.id,
       groupName: categoryGroups.name,
       totalSpent: sql<number>`coalesce(sum(${transactions.amount}), 0)`,
     })
@@ -213,6 +214,7 @@ reportsRouter.get('/income-by-category', (req, res) => {
       categoryId: transactions.categoryId,
       categoryName: categories.name,
       categoryIcon: categories.icon,
+      groupId: categoryGroups.id,
       groupName: categoryGroups.name,
       totalReceived: sql<number>`coalesce(sum(${transactions.amount}), 0)`,
     })

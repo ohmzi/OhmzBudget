@@ -77,6 +77,7 @@ export interface TransactionQueryParams {
   from?: string;
   to?: string;
   categoryId?: string;
+  categoryGroupId?: string;
   search?: string;
   reconciled?: 0 | 1;
   limit?: number;
@@ -146,6 +147,7 @@ export interface SpendingByCategory {
   categoryId: string | null;
   categoryName: string | null;
   categoryIcon: string | null;
+  groupId: string | null;
   groupName: string | null;
   totalSpent: number;
 }
@@ -153,6 +155,7 @@ export interface IncomeByCategoryItem {
   categoryId: string | null;
   categoryName: string | null;
   categoryIcon: string | null;
+  groupId: string | null;
   groupName: string | null;
   totalReceived: number;
 }

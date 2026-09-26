@@ -24,6 +24,7 @@ import type { CreateTransactionData } from '../../api/transactions';
 interface Props {
   accountId?: string;
   categoryId?: string;
+  categoryGroupId?: string;
   month?: string;
   onClearMonth?: () => void;
   overlayDetail?: boolean;
@@ -32,13 +33,14 @@ interface Props {
 export function TransactionTable({
   accountId,
   categoryId,
+  categoryGroupId,
   month,
   onClearMonth,
   overlayDetail,
 }: Props) {
   const [filters, setFilters] = useState<FilterState>(() => ({
     ...DEFAULT_FILTERS,
-    datePreset: categoryId ? 'all' : DEFAULT_FILTERS.datePreset,
+    datePreset: categoryId || categoryGroupId ? 'all' : DEFAULT_FILTERS.datePreset,
   }));
   const [showAdd, setShowAdd] = useState(false);
   const [detailId, setDetailId] = useState<string | null>(null);
@@ -49,13 +51,14 @@ export function TransactionTable({
   const params = useMemo(() => {
     const base = filtersToParams(filters, accountId);
     if (categoryId && !base.categoryId) base.categoryId = categoryId;
+    if (categoryGroupId) base.categoryGroupId = categoryGroupId;
     if (month) {
       delete base.from;
       delete base.to;
       base.month = month;
     }
     return base;
-  }, [filters, accountId, categoryId, month]);
+  }, [filters, accountId, categoryId, categoryGroupId, month]);
   const { data: transactions = [], isLoading } = useTransactions(params);
   const { data: groups = [] } = useCategories();
   const { data: payees = [] } = usePayees();

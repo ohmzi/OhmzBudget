@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db/index.js';
-import { transactions, payees, accounts } from '../db/schema.js';
+import { transactions, payees, accounts, categories } from '../db/schema.js';
 import { eq, and, like, gte, lte, sql, isNull, inArray } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
@@ -47,7 +47,7 @@ const importRowSchema = z.object({
 
 // GET /transactions — excludes split children; attaches children array to parents
 transactionsRouter.get('/', (req, res) => {
-  const { account_id, month, from, to, category_id, search, reconciled } = req.query as Record<
+  const { account_id, month, from, to, category_id, category_group_id, search, reconciled } = req.query as Record<
     string,
     string
   >;
@@ -63,6 +63,14 @@ transactionsRouter.get('/', (req, res) => {
   if (from) conditions.push(gte(transactions.date, from));
   if (to) conditions.push(lte(transactions.date, to));
   if (category_id) conditions.push(eq(transactions.categoryId, category_id));
+  if (category_group_id) {
+    const catIds = db.select({ id: categories.id })
+      .from(categories)
+      .where(eq(categories.groupId, category_group_id))
+      .all()
+      .map((r) => r.id);
+    if (catIds.length) conditions.push(inArray(transactions.categoryId, catIds));
+  }
   if (search) conditions.push(like(transactions.payeeName, `%${search}%`));
   if (reconciled === '0' || reconciled === '1')
     conditions.push(eq(transactions.reconciled, Number(reconciled)));
