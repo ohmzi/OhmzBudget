@@ -61,6 +61,17 @@ const config: Config = {
           'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
       },
     ],
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'contributing',
+        path: 'contributing',
+        routeBasePath: 'contributing',
+        sidebarPath: './sidebarsContributing.ts',
+        editUrl:
+          'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
+      },
+    ],
   ],
 
   presets: [
@@ -122,7 +133,13 @@ const config: Config = {
         },
         {to: '/blog', label: 'Blog', position: 'left'},
         {to: '/community', label: 'Community', position: 'left'},
-        {to: '/contributing', label: 'Contributing', position: 'left'},
+        {
+          type: 'docSidebar',
+          sidebarId: 'contributingSidebar',
+          docsPluginId: 'contributing',
+          position: 'left',
+          label: 'Contributing',
+        },
         {to: '/download', label: 'Download', position: 'left'},
         {
           href: 'https://github.com/dtymoszenko/budgeting-project',
