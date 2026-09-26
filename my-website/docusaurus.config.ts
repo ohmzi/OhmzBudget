@@ -71,6 +71,16 @@ const config: Config = {
         editUrl: 'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
       },
     ],
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'community',
+        path: 'community',
+        routeBasePath: 'community',
+        sidebarPath: './sidebarsCommunity.ts',
+        editUrl: 'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
+      },
+    ],
   ],
 
   presets: [
@@ -129,7 +139,13 @@ const config: Config = {
           label: 'Docs',
         },
         { to: '/blog', label: 'Blog', position: 'left' },
-        { to: '/community', label: 'Community', position: 'left' },
+        {
+          type: 'docSidebar',
+          sidebarId: 'communitySidebar',
+          docsPluginId: 'community',
+          position: 'left',
+          label: 'Community',
+        },
         {
           type: 'docSidebar',
           sidebarId: 'contributingSidebar',
