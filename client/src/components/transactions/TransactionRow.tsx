@@ -6,6 +6,7 @@ import { CategoryPicker } from './CategoryPicker';
 import { PayeePicker } from './PayeePicker';
 import { payeeColor, ACCOUNT_TYPE_COLORS } from '../../utils/transactionColors';
 import { formatCurrency } from '../../utils/currency';
+import { usePreferencesStore } from '../../store/preferencesStore';
 import type { Transaction, CategoryGroup, PayeeWithCount } from '../../types';
 
 interface Props {
@@ -42,6 +43,9 @@ export function TransactionRow({
   const [showPayeePicker, setShowPayeePicker] = useState(false);
   const updateTx = useUpdateTransaction();
   const navigate = useNavigate();
+  const showMerchantIcons = usePreferencesStore((s) => s.showMerchantIcons);
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
+  const showAccountIcons = usePreferencesStore((s) => s.showAccountIcons);
 
   const isTransfer = !!tx.transferTransactionId;
   const isSplitParent = tx.isParent === 1 && tx.children && tx.children.length > 0;
@@ -76,12 +80,14 @@ export function TransactionRow({
       >
         {/* Payee */}
         <div className="group/payee flex items-center gap-1 flex-[3] min-w-0 relative mr-3">
-          <div
-            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[11px] font-semibold shrink-0"
-            style={{ backgroundColor: bgColor }}
-          >
-            {isTransfer ? <ArrowLeftRight size={12} /> : initial}
-          </div>
+          {showMerchantIcons && (
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[11px] font-semibold shrink-0"
+              style={{ backgroundColor: bgColor }}
+            >
+              {isTransfer ? <ArrowLeftRight size={12} /> : initial}
+            </div>
+          )}
           {canEditPayee ? (
             <button
               className="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all group-hover/payee:border group-hover/payee:border-border group-hover/payee:bg-surface cursor-pointer border border-transparent min-w-0"
@@ -156,7 +162,7 @@ export function TransactionRow({
                 }
                 disabled={!canEditCategory}
               >
-                {categoryEntry?.icon && (
+                {showCategoryIcons && categoryEntry?.icon && (
                   <span className="text-base shrink-0">{categoryEntry.icon}</span>
                 )}
                 <span
@@ -200,12 +206,14 @@ export function TransactionRow({
         {showAccountCol && (
           <div className="group/acct flex items-center gap-1 flex-[2] min-w-0">
             <div className="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-transparent group-hover/acct:border-border group-hover/acct:bg-surface transition-all min-w-0">
-              <div
-                className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
-                style={{ backgroundColor: acctColor }}
-              >
-                {accountName ? accountName.charAt(0).toUpperCase() : '?'}
-              </div>
+              {showAccountIcons && (
+                <div
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
+                  style={{ backgroundColor: acctColor }}
+                >
+                  {accountName ? accountName.charAt(0).toUpperCase() : '?'}
+                </div>
+              )}
               <span className="text-sm text-text-secondary truncate">{accountName || '—'}</span>
             </div>
             <button
@@ -258,7 +266,7 @@ export function TransactionRow({
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 {childCat ? (
                   <>
-                    {childCat.icon && <span className="text-sm shrink-0">{childCat.icon}</span>}
+                    {showCategoryIcons && childCat.icon && <span className="text-sm shrink-0">{childCat.icon}</span>}
                     <span className="text-xs text-text-tertiary truncate">{childCat.name}</span>
                   </>
                 ) : (

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Check, X } from 'lucide-react';
 import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
+import { usePreferencesStore } from '../../store/preferencesStore';
 import {
   DndContext,
   closestCenter,
@@ -118,6 +119,7 @@ function SortableCategoryRow({
   cat: Category;
   onOpenEditModal: (id: string) => void;
 }) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: cat.id,
   });
@@ -136,9 +138,11 @@ function SortableCategoryRow({
       onClick={() => onOpenEditModal(cat.id)}
       className="flex items-center gap-3 px-3 py-2.5 bg-surface rounded-lg hover:bg-hover cursor-pointer hover:shadow-sm transition-all mx-2"
     >
-      <div className="shrink-0 text-base w-7 h-7 flex items-center justify-center">
-        {cat.icon || '📦'}
-      </div>
+      {showCategoryIcons && (
+        <div className="shrink-0 text-base w-7 h-7 flex items-center justify-center">
+          {cat.icon || '📦'}
+        </div>
+      )}
       <div className="flex-1 min-w-0">
         <span className="text-sm text-text truncate block">{cat.name}</span>
       </div>
@@ -186,6 +190,7 @@ function GroupCard({
   dragListeners?: Record<string, any>;
 }) {
   const [localCats, setLocalCats] = useState(group.categories);
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const [showNewCatEmojiPicker, setShowNewCatEmojiPicker] = useState(false);
   const isEditingGroup = editingId === group.id;
   const isAddingCategory = addingCategoryGroupId === group.id;
@@ -275,6 +280,7 @@ function GroupCard({
       {isAddingCategory && (
         <div className="px-4 py-3 border-t border-border-light">
           <div className="flex items-center gap-2">
+            {showCategoryIcons && (
             <div className="relative shrink-0">
               <button
                 onClick={() => setShowNewCatEmojiPicker(!showNewCatEmojiPicker)}
@@ -291,6 +297,7 @@ function GroupCard({
                 />
               )}
             </div>
+            )}
             <input
               autoFocus
               value={newCategoryName}

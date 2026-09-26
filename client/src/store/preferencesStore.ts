@@ -11,11 +11,17 @@ interface PreferencesState {
   dateFormat: DateFormatOption;
   savingsGoal: number;
   sidebarMode: SidebarMode;
+  showMerchantIcons: boolean;
+  showCategoryIcons: boolean;
+  showAccountIcons: boolean;
   setTheme: (theme: Theme) => void;
   setCurrencySymbol: (symbol: string) => void;
   setDateFormat: (format: DateFormatOption) => void;
   setSavingsGoal: (goal: number) => void;
   setSidebarMode: (mode: SidebarMode) => void;
+  setShowMerchantIcons: (show: boolean) => void;
+  setShowCategoryIcons: (show: boolean) => void;
+  setShowAccountIcons: (show: boolean) => void;
 }
 
 export const usePreferencesStore = create<PreferencesState>()(
@@ -26,11 +32,17 @@ export const usePreferencesStore = create<PreferencesState>()(
       dateFormat: 'MMM d, yyyy',
       savingsGoal: 20,
       sidebarMode: 'persistent',
+      showMerchantIcons: true,
+      showCategoryIcons: true,
+      showAccountIcons: true,
       setTheme: (theme) => set({ theme }),
       setCurrencySymbol: (currencySymbol) => set({ currencySymbol }),
       setDateFormat: (dateFormat) => set({ dateFormat }),
       setSavingsGoal: (savingsGoal) => set({ savingsGoal }),
       setSidebarMode: (sidebarMode) => set({ sidebarMode }),
+      setShowMerchantIcons: (showMerchantIcons) => set({ showMerchantIcons }),
+      setShowCategoryIcons: (showCategoryIcons) => set({ showCategoryIcons }),
+      setShowAccountIcons: (showAccountIcons) => set({ showAccountIcons }),
     }),
     { name: 'budget-preferences' },
   ),

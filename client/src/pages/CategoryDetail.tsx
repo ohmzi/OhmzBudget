@@ -15,6 +15,7 @@ import {
 import { useBudget, useCategoryHistory } from '../hooks/useBudget';
 import { useTransactions } from '../hooks/useTransactions';
 import { useAppStore } from '../store/appStore';
+import { usePreferencesStore } from '../store/preferencesStore';
 import { formatCurrency } from '../utils/currency';
 import { chartColors } from '../utils/chartColors';
 import { TransactionTable } from '../components/transactions/TransactionTable';
@@ -238,6 +239,7 @@ export default function CategoryDetailPage() {
   const selectedMonth = useAppStore((s) => s.selectedMonth);
   const [selectedBarMonth, setSelectedBarMonth] = useState<string | null>(selectedMonth);
 
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const { data: budgetData } = useBudget(selectedMonth);
   const { data: historyData } = useCategoryHistory(id ?? null, selectedMonth);
 
@@ -274,7 +276,7 @@ export default function CategoryDetailPage() {
           </Link>
           <ChevronRight size={14} className="text-text-tertiary" />
           <span className="font-semibold text-text">
-            {cat?.icon ? `${cat.icon} ` : ''}
+            {showCategoryIcons && cat?.icon ? `${cat.icon} ` : ''}
             {categoryName}
           </span>
         </div>

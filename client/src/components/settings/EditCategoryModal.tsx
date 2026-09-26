@@ -3,6 +3,7 @@ import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { useUpdateCategory } from '../../hooks/useCategories';
+import { usePreferencesStore } from '../../store/preferencesStore';
 import type { BudgetType, Category, CategoryGroup } from '../../types';
 
 const BUDGET_TYPE_OPTIONS: { value: BudgetType; label: string; description: string }[] = [
@@ -62,6 +63,7 @@ interface Props {
 }
 
 export function EditCategoryModal({ category, groups, isIncome, onClose, onDelete }: Props) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const updateCategory = useUpdateCategory();
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('');
@@ -107,18 +109,20 @@ export function EditCategoryModal({ category, groups, isIncome, onClose, onDelet
         <div>
           <label className="block text-sm font-medium text-text mb-1.5">Icon & Name</label>
           <div className="flex items-center gap-3">
-            <div className="relative shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className="text-xl w-10 h-10 flex items-center justify-center rounded-lg border border-border hover:bg-hover transition-colors"
-              >
-                {icon || '📦'}
-              </button>
-              {showEmojiPicker && (
-                <EmojiPickerPopover onSelect={setIcon} onClose={() => setShowEmojiPicker(false)} />
-              )}
-            </div>
+            {showCategoryIcons && (
+              <div className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className="text-xl w-10 h-10 flex items-center justify-center rounded-lg border border-border hover:bg-hover transition-colors"
+                >
+                  {icon || '📦'}
+                </button>
+                {showEmojiPicker && (
+                  <EmojiPickerPopover onSelect={setIcon} onClose={() => setShowEmojiPicker(false)} />
+                )}
+              </div>
+            )}
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useSpendingByCategory } from '../../hooks/useReports';
 import { formatCurrency } from '../../utils/currency';
+import { usePreferencesStore } from '../../store/preferencesStore';
 import { Card } from '../ui/Card';
 import { CATEGORY_COLORS } from '../../utils/chartColors';
 
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function SpendingBreakdown({ currentMonth }: Props) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const { data = [], isLoading } = useSpendingByCategory(currentMonth, currentMonth);
 
   const topCategories = useMemo(() => {
@@ -58,7 +60,7 @@ export default function SpendingBreakdown({ currentMonth }: Props) {
               <div key={cat.categoryId ?? i}>
                 <div className="flex items-center justify-between mb-0.5">
                   <span className="text-sm text-text-secondary truncate mr-2">
-                    {cat.categoryIcon ? `${cat.categoryIcon} ` : ''}
+                    {showCategoryIcons && cat.categoryIcon ? `${cat.categoryIcon} ` : ''}
                     {cat.categoryName || 'Uncategorized'}
                   </span>
                   <span className="text-xs text-text-tertiary tabular-nums whitespace-nowrap">

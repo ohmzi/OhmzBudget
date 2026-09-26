@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { useCategories } from '../../hooks/useCategories';
+import { usePreferencesStore } from '../../store/preferencesStore';
 
 interface Props {
   selectedCategoryIds: string[];
@@ -15,6 +16,7 @@ export default function CategoryTreePicker({
   onCategoryChange,
   onGroupChange,
 }: Props) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const { data: groups = [] } = useCategories();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
@@ -111,7 +113,7 @@ export default function CategoryTreePicker({
                     className="rounded border-border text-brand-600 focus:ring-brand-600"
                   />
                   <span className="text-sm text-text-secondary">
-                    {c.icon ? `${c.icon} ` : ''}
+                    {showCategoryIcons && c.icon ? `${c.icon} ` : ''}
                     {c.name}
                   </span>
                 </label>

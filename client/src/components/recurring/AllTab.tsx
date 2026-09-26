@@ -5,6 +5,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
 import { useUpdateSchedule, useDeleteSchedule } from '../../hooks/useSchedules';
 import { ConfirmModal } from '../ui/ConfirmModal';
+import { usePreferencesStore } from '../../store/preferencesStore';
 import { RECURRENCE_TYPE_LABELS, type Schedule } from '../../types';
 
 const FREQ_MAP = new Map(RECURRENCE_TYPE_LABELS.map((f) => [f.value, f.label]));
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export default function AllTab({ allRecurring, onEdit }: Props) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const [canceledOpen, setCanceledOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -27,9 +29,9 @@ export default function AllTab({ allRecurring, onEdit }: Props) {
   const categoryMap = useMemo(() => {
     const map = new Map<string, string>();
     for (const g of groups)
-      for (const c of g.categories) map.set(c.id, `${c.icon ? c.icon + ' ' : ''}${c.name}`);
+      for (const c of g.categories) map.set(c.id, `${showCategoryIcons && c.icon ? c.icon + ' ' : ''}${c.name}`);
     return map;
-  }, [groups]);
+  }, [groups, showCategoryIcons]);
 
   const active = allRecurring.filter((r) => r.status === 'active' || r.status === 'paused');
   const canceled = allRecurring.filter((r) => r.status === 'canceled');

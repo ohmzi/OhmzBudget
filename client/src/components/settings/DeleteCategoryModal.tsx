@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { usePreferencesStore } from '../../store/preferencesStore';
 import type { CategoryGroup } from '../../types';
 
 interface Props {
@@ -22,6 +23,7 @@ export function DeleteCategoryModal({
   transactionCount,
   groups,
 }: Props) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const [reassignTo, setReassignTo] = useState('');
 
   function handleConfirm() {
@@ -54,7 +56,7 @@ export function DeleteCategoryModal({
                 .filter((c) => c.id !== categoryId)
                 .map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.icon ? `${c.icon} ` : ''}
+                    {showCategoryIcons && c.icon ? `${c.icon} ` : ''}
                     {c.name}
                   </option>
                 ))}

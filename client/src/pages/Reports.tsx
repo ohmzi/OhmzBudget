@@ -23,6 +23,7 @@ import {
   useSpendingTrends,
 } from '../hooks/useReports';
 import { useCategories } from '../hooks/useCategories';
+import { usePreferencesStore } from '../store/preferencesStore';
 import { formatCurrency, formatCentsAxis } from '../utils/currency';
 import { downloadCsv } from '../utils/exportCsv';
 import { chartColors, CATEGORY_COLORS } from '../utils/chartColors';
@@ -221,6 +222,7 @@ function IncomeExpensesChart({ from, to }: { from: string; to: string }) {
 }
 
 function SpendingChart({ from, to }: { from: string; to: string }) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const { data = [], isLoading } = useSpendingByCategory(from, to);
   const chartData = useMemo(
     () =>
@@ -228,10 +230,10 @@ function SpendingChart({ from, to }: { from: string; to: string }) {
         .sort((a, b) => b.totalSpent - a.totalSpent)
         .slice(0, 10)
         .map((d) => {
-          const full = `${d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`;
+          const full = `${showCategoryIcons && d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`;
           return { name: full.length > 22 ? full.slice(0, 21) + '…' : full, value: d.totalSpent };
         }),
-    [data],
+    [data, showCategoryIcons],
   );
 
   if (isLoading) return <ChartSkeleton />;
@@ -294,6 +296,7 @@ function SpendingTrendsChart({
   compact?: boolean;
   topCategoryIds?: string[];
 }) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const activeIds = compact && topCategoryIds?.length ? topCategoryIds : selectedIds;
   const { data: groups = [] } = useCategories();
@@ -313,21 +316,21 @@ function SpendingTrendsChart({
       for (const point of trendData) {
         if (point.month === month) {
           const key = point.categoryName
-            ? `${point.categoryIcon ? point.categoryIcon + ' ' : ''}${point.categoryName}`
+            ? `${showCategoryIcons && point.categoryIcon ? point.categoryIcon + ' ' : ''}${point.categoryName}`
             : point.categoryId;
           row[key] = point.total;
         }
       }
       return row;
     });
-  }, [trendData]);
+  }, [trendData, showCategoryIcons]);
 
   const selectedNames = useMemo(() => {
     return activeIds.map((id) => {
       const cat = expenseCategories.find((c: any) => c.id === id);
-      return cat ? `${cat.icon ? cat.icon + ' ' : ''}${cat.name}` : id;
+      return cat ? `${showCategoryIcons && cat.icon ? cat.icon + ' ' : ''}${cat.name}` : id;
     });
-  }, [activeIds, expenseCategories]);
+  }, [activeIds, expenseCategories, showCategoryIcons]);
 
   function toggleCategory(id: string) {
     setSelectedIds((prev) =>
@@ -354,7 +357,7 @@ function SpendingTrendsChart({
                       : 'bg-surface border-border text-text-secondary hover:border-text-tertiary'
                 }`}
               >
-                {cat.icon ? `${cat.icon} ` : ''}
+                {showCategoryIcons && cat.icon ? `${cat.icon} ` : ''}
                 {cat.name}
               </button>
             );
@@ -463,6 +466,7 @@ function OverviewGrid({
 }
 
 export default function ReportsPage() {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const today = new Date();
   const [preset, setPreset] = useState<Preset>('6m');
   const [from, setFrom] = useState(() => format(subMonths(today, 5), 'yyyy-MM'));
@@ -569,7 +573,7 @@ export default function ReportsPage() {
         downloadCsv(
           filename,
           spData.map((d) => ({
-            category: `${d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`,
+            category: `${showCategoryIcons && d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`,
             group: d.groupName ?? '',
             total_cents: d.totalSpent,
           })),

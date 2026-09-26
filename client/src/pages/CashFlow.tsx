@@ -4,6 +4,7 @@ import { ResponsiveContainer, Sankey } from 'recharts';
 import { useSpendingByCategory, useIncomeByCategory } from '../hooks/useReports';
 import { formatCurrency, formatCentsAxis } from '../utils/currency';
 import { downloadCsv } from '../utils/exportCsv';
+import { usePreferencesStore } from '../store/preferencesStore';
 import { chartColors, CATEGORY_COLORS } from '../utils/chartColors';
 import { Button } from '../components/ui/Button';
 import { Download } from 'lucide-react';
@@ -30,6 +31,7 @@ const PRESETS: { id: Preset; label: string }[] = [
 const MIN_SAVINGS_CENTS = 500;
 
 function SankeyDiagram({ from, to }: { from: string; to: string }) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const { data: incomeData = [], isLoading: il } = useIncomeByCategory(from, to);
   const { data: spendingData = [], isLoading: sl } = useSpendingByCategory(from, to);
   const [tooltip, setTooltip] = useState<{
@@ -54,7 +56,7 @@ function SankeyDiagram({ from, to }: { from: string; to: string }) {
     const savings = totalIncome - totalExpenses;
 
     const incomeNodes = incomeData.map((c) => ({
-      name: `${c.categoryIcon ? c.categoryIcon + ' ' : ''}${c.categoryName ?? 'Income'}`,
+      name: `${showCategoryIcons && c.categoryIcon ? c.categoryIcon + ' ' : ''}${c.categoryName ?? 'Income'}`,
       nodeType: 'income' as NodeType,
       amount: c.totalReceived,
       color: chartColors.positive,
@@ -101,7 +103,7 @@ function SankeyDiagram({ from, to }: { from: string; to: string }) {
     ].filter((l) => l.value > 0);
 
     return links.length ? { nodes, links } : null;
-  }, [incomeData, spendingData]);
+  }, [incomeData, spendingData, showCategoryIcons]);
 
   const renderNode = useCallback(
     (props: any) => {
@@ -226,6 +228,7 @@ function SankeyDiagram({ from, to }: { from: string; to: string }) {
 }
 
 export default function CashFlowPage() {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const today = new Date();
   const [preset, setPreset] = useState<Preset>('6m');
   const [from, setFrom] = useState(() => format(subMonths(today, 5), 'yyyy-MM'));
@@ -268,7 +271,7 @@ export default function CashFlowPage() {
     downloadCsv(
       filename,
       spData.map((d) => ({
-        category: `${d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`,
+        category: `${showCategoryIcons && d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`,
         group: d.groupName ?? '',
         total_cents: d.totalSpent,
       })),

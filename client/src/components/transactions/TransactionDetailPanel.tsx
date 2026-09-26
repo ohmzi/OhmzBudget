@@ -7,6 +7,7 @@ import { PayeeCombobox } from './PayeeCombobox';
 import { Button } from '../ui/Button';
 import { ConfirmModal } from '../ui/ConfirmModal';
 import { payeeColor, ACCOUNT_TYPE_COLORS } from '../../utils/transactionColors';
+import { usePreferencesStore } from '../../store/preferencesStore';
 import { formatCurrency } from '../../utils/currency';
 import { RECURRENCE_TYPE_LABELS } from '../../types';
 import type { Transaction, CategoryGroup, Payee, Account } from '../../types';
@@ -34,6 +35,9 @@ export function TransactionDetailPanel({
 }: Props) {
   const updateTx = useUpdateTransaction();
   const deleteTx = useDeleteTransaction();
+  const showMerchantIcons = usePreferencesStore((s) => s.showMerchantIcons);
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
+  const showAccountIcons = usePreferencesStore((s) => s.showAccountIcons);
   const { data: schedules = [] } = useSchedules();
   const unmatchByTx = useUnmatchByTransaction();
   const linkedSchedule = tx.scheduleId ? schedules.find((s) => s.id === tx.scheduleId) : null;
@@ -127,22 +131,26 @@ export function TransactionDetailPanel({
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-semibold shrink-0"
-              style={{ backgroundColor: bgColor }}
-            >
-              {isTransfer ? <ArrowLeftRight size={20} /> : initial}
-            </div>
+            {showMerchantIcons && (
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-semibold shrink-0"
+                style={{ backgroundColor: bgColor }}
+              >
+                {isTransfer ? <ArrowLeftRight size={20} /> : initial}
+              </div>
+            )}
             <div>
               <div className="text-base font-semibold text-text">{payeeName}</div>
               {accountName && (
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <div
-                    className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[8px] font-bold"
-                    style={{ backgroundColor: acctColor }}
-                  >
-                    {accountName.charAt(0).toUpperCase()}
-                  </div>
+                  {showAccountIcons && (
+                    <div
+                      className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[8px] font-bold"
+                      style={{ backgroundColor: acctColor }}
+                    >
+                      {accountName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <span className="text-xs text-text-tertiary">{accountName}</span>
                 </div>
               )}
@@ -186,7 +194,7 @@ export function TransactionDetailPanel({
                 return (
                   <div key={child.id} className="flex items-center justify-between text-sm pl-2">
                     <div className="flex items-center gap-1.5">
-                      {childCat?.icon && <span className="text-sm">{childCat.icon}</span>}
+                      {showCategoryIcons && childCat?.icon && <span className="text-sm">{childCat.icon}</span>}
                       <span className="text-text-secondary">
                         {childCat?.name ?? 'Uncategorized'}
                       </span>
@@ -209,7 +217,7 @@ export function TransactionDetailPanel({
                 disabled={isReconciled}
                 className={`${inputCls} text-left flex items-center gap-2 ${canEditCategory ? 'cursor-pointer' : ''}`}
               >
-                {categoryEntry?.icon && <span className="text-base">{categoryEntry.icon}</span>}
+                {showCategoryIcons && categoryEntry?.icon && <span className="text-base">{categoryEntry.icon}</span>}
                 <span className={categoryEntry ? '' : 'text-text-tertiary'}>
                   {categoryEntry?.name ?? 'Uncategorized'}
                 </span>

@@ -26,6 +26,7 @@ import {
   useRunRules,
 } from '../hooks/useRules';
 import { useCategories } from '../hooks/useCategories';
+import { usePreferencesStore } from '../store/preferencesStore';
 import { usePayees } from '../hooks/usePayees';
 import { previewRules } from '../api/rules';
 import { formatCurrency } from '../utils/currency';
@@ -44,13 +45,13 @@ function conditionSummary(conditions: RuleCondition[]): string {
   return conditions.length > 1 ? `${summary} +${conditions.length - 1} more` : summary;
 }
 
-function actionSummary(actions: RuleAction[], categories: any[], payees: any[]): string {
+function actionSummary(actions: RuleAction[], categories: any[], payees: any[], showCategoryIcons = true): string {
   if (!actions.length) return 'No actions';
   const a = actions[0];
   let val = a.value;
   if (a.field === 'category_id') {
     const cat = categories.find((c: any) => c.id === a.value);
-    val = cat ? `${cat.icon ? cat.icon + ' ' : ''}${cat.name}` : a.value;
+    val = cat ? `${showCategoryIcons && cat.icon ? cat.icon + ' ' : ''}${cat.name}` : a.value;
   } else if (a.field === 'payee_id') {
     val = payees.find((p: any) => p.id === a.value)?.name ?? a.value;
   }
@@ -167,6 +168,7 @@ function SortableRuleRow({
   onEdit: (rule: Rule) => void;
   onDelete: (id: string) => void;
 }) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: rule.id,
   });
@@ -201,7 +203,7 @@ function SortableRuleRow({
         <div>
           <p className="text-xs text-text-tertiary mb-0.5">Then</p>
           <p className="text-sm text-text truncate">
-            {actionSummary(rule.actions, categories, payees)}
+            {actionSummary(rule.actions, categories, payees, showCategoryIcons)}
           </p>
         </div>
       </div>

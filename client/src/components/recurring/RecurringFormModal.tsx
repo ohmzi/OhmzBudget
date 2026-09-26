@@ -7,6 +7,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
 import { usePayees } from '../../hooks/usePayees';
 import { format } from 'date-fns';
+import { usePreferencesStore } from '../../store/preferencesStore';
 import {
   RECURRENCE_TYPE_LABELS,
   type Schedule,
@@ -36,6 +37,7 @@ const WEEKEND_ADJUST_OPTIONS: { value: WeekendAdjust; label: string }[] = [
 ];
 
 export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }: Props) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const { data: accounts = [] } = useAccounts();
   const { data: groups = [] } = useCategories();
   const { data: payees = [] } = usePayees();
@@ -275,7 +277,7 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
               <optgroup key={g.id} label={g.name}>
                 {g.categories.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.icon ? `${c.icon} ` : ''}
+                    {showCategoryIcons && c.icon ? `${c.icon} ` : ''}
                     {c.name}
                   </option>
                 ))}

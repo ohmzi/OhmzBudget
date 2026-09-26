@@ -6,6 +6,7 @@ import { usePayees } from '../../hooks/usePayees';
 import { testConditions } from '../../api/rules';
 import { formatCurrency } from '../../utils/currency';
 import { format, parseISO } from 'date-fns';
+import { usePreferencesStore } from '../../store/preferencesStore';
 import type { Rule, RuleCondition, RuleAction } from '../../types';
 
 interface Props {
@@ -39,6 +40,7 @@ const emptyCondition = (): RuleCondition => ({ field: 'payee_name', op: 'contain
 const emptyAction = (): RuleAction => ({ field: 'category_id', value: '' });
 
 export function AddRuleModal({ isOpen, onClose, onSave, editRule }: Props) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const [conditions, setConditions] = useState<RuleCondition[]>(
     editRule?.conditions.length ? editRule.conditions : [emptyCondition()],
   );
@@ -210,7 +212,7 @@ export function AddRuleModal({ isOpen, onClose, onSave, editRule }: Props) {
                     <option value="">Select category…</option>
                     {allCategories.map((c: any) => (
                       <option key={c.id} value={c.id}>
-                        {c.groupName} → {c.icon ? `${c.icon} ` : ''}
+                        {c.groupName} → {showCategoryIcons && c.icon ? `${c.icon} ` : ''}
                         {c.name}
                       </option>
                     ))}

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { format, parseISO, addMonths, subMonths } from 'date-fns';
 import { ChevronLeft, ChevronRight, ChevronDown, Eye } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
+import { usePreferencesStore } from '../store/preferencesStore';
 import { useBudget, useBudgetSummary, useSetBudget, useSetBudgetBulk } from '../hooks/useBudget';
 import { formatCurrency, parseCents, centsToInput } from '../utils/currency';
 import { BudgetSummaryWidget } from '../components/budget/BudgetSummaryWidget';
@@ -111,6 +112,7 @@ function CategoryRow({
   onCancel,
   onApplyBulk,
 }: CategoryRowProps) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const isEditing = editingId === cat.id;
   const actual = isIncome ? cat.balance - cat.carryOver - cat.budgeted : cat.spent;
   const rawRemaining = cat.budgeted - actual;
@@ -130,7 +132,7 @@ function CategoryRow({
     <tr className="border-b border-border-light">
       <td className="py-1.5 pb-2 pl-10 pr-3">
         <div className="text-sm text-text">
-          {cat.icon && <span className="text-xs mr-1">{cat.icon}</span>}
+          {showCategoryIcons && cat.icon && <span className="text-xs mr-1">{cat.icon}</span>}
           {cat.name}
         </div>
         <SpentBar spent={actual} budgeted={cat.budgeted} isIncome={isIncome} />

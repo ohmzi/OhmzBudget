@@ -5,6 +5,7 @@ import { GoalFormModal } from '../components/goals/GoalFormModal';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { Button } from '../components/ui/Button';
 import { formatCurrency } from '../utils/currency';
+import { usePreferencesStore } from '../store/preferencesStore';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import type { Goal } from '../types';
 
@@ -17,6 +18,7 @@ function GoalCard({
   onEdit: (g: Goal) => void;
   onDelete: (id: string) => void;
 }) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const pct =
     goal.targetAmount > 0
       ? Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100))
@@ -38,7 +40,7 @@ function GoalCard({
       <div className="px-5 py-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2.5">
-            <span className="text-2xl leading-none">{goal.icon}</span>
+            {showCategoryIcons && <span className="text-2xl leading-none">{goal.icon}</span>}
             <div>
               <h3 className="text-sm font-semibold text-text">{goal.name}</h3>
               {dateLabel && (

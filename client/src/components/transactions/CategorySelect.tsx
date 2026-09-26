@@ -1,3 +1,4 @@
+import { usePreferencesStore } from '../../store/preferencesStore';
 import type { Account, CategoryGroup } from '../../types';
 
 interface Props {
@@ -17,6 +18,7 @@ export function CategorySelect({
   currentAccountId,
   className = '',
 }: Props) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const transferAccounts = accounts?.filter((a) => a.id !== currentAccountId && !a.closedAt) ?? [];
 
   return (
@@ -30,7 +32,7 @@ export function CategorySelect({
         <optgroup key={g.id} label={g.name}>
           {g.categories.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.icon ? `${c.icon} ` : ''}
+              {showCategoryIcons && c.icon ? `${c.icon} ` : ''}
               {c.name}
             </option>
           ))}

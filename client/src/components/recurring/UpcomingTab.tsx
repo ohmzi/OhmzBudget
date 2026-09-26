@@ -9,6 +9,7 @@ import {
 } from '../../hooks/useSchedules';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
+import { usePreferencesStore } from '../../store/preferencesStore';
 import type { Schedule } from '../../types';
 
 interface Props {
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export default function UpcomingTab({ onEdit, allRecurring, onMatchOccurrence }: Props) {
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const today = format(new Date(), 'yyyy-MM-dd');
   const sixtyDaysOut = format(addDays(new Date(), 60), 'yyyy-MM-dd');
 
@@ -32,9 +34,9 @@ export default function UpcomingTab({ onEdit, allRecurring, onMatchOccurrence }:
   const categoryMap = useMemo(() => {
     const map = new Map<string, string>();
     for (const g of groups)
-      for (const c of g.categories) map.set(c.id, `${c.icon ? c.icon + ' ' : ''}${c.name}`);
+      for (const c of g.categories) map.set(c.id, `${showCategoryIcons && c.icon ? c.icon + ' ' : ''}${c.name}`);
     return map;
-  }, [groups]);
+  }, [groups, showCategoryIcons]);
 
   const recMap = useMemo(() => new Map(allRecurring.map((r) => [r.id, r])), [allRecurring]);
 

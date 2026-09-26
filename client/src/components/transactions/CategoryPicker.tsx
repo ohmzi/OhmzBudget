@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Search, Check, Plus, X } from 'lucide-react';
 import { useCreateCategory } from '../../hooks/useCategories';
+import { usePreferencesStore } from '../../store/preferencesStore';
 import type { BudgetType, CategoryGroup } from '../../types';
 
 interface Props {
@@ -20,6 +21,7 @@ export function CategoryPicker({ value, onChange, groups, onClose, position = 'b
   const containerRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const createCategory = useCreateCategory();
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
 
   useEffect(() => {
     searchRef.current?.focus();
@@ -111,7 +113,7 @@ export function CategoryPicker({ value, onChange, groups, onClose, position = 'b
                 onClick={() => onChange(cat.id)}
                 className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-hover ${value === cat.id ? 'bg-brand-50 text-brand-700' : 'text-text'}`}
               >
-                {cat.icon && <span className="text-base shrink-0">{cat.icon}</span>}
+                {showCategoryIcons && cat.icon && <span className="text-base shrink-0">{cat.icon}</span>}
                 <span className="truncate flex-1">{cat.name}</span>
                 {value === cat.id && <Check size={14} className="text-brand-600 shrink-0" />}
               </button>

@@ -12,6 +12,7 @@ import { useCategories } from '../../hooks/useCategories';
 import { useCreateTransaction } from '../../hooks/useTransactions';
 import { CategoryPicker } from './CategoryPicker';
 import { payeeColor, ACCOUNT_TYPE_COLORS } from '../../utils/transactionColors';
+import { usePreferencesStore } from '../../store/preferencesStore';
 import type { CategoryGroup } from '../../types';
 
 interface Props {
@@ -26,6 +27,9 @@ const selectClass =
   'block w-full rounded-md border border-border px-3 py-2 text-sm bg-surface focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 appearance-none cursor-pointer';
 
 export function AddTransactionModal({ isOpen, onClose }: Props) {
+  const showMerchantIcons = usePreferencesStore((s) => s.showMerchantIcons);
+  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
+  const showAccountIcons = usePreferencesStore((s) => s.showAccountIcons);
   const [type, setType] = useState<'debit' | 'credit'>('debit');
   const [amount, setAmount] = useState(0);
   const [payeeName, setPayeeName] = useState('');
@@ -204,12 +208,14 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
                       }}
                       className="w-full text-left px-3 py-2 text-sm flex items-center gap-2.5 hover:bg-hover cursor-pointer"
                     >
-                      <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
-                        style={{ backgroundColor: color }}
-                      >
-                        {p.name.charAt(0).toUpperCase()}
-                      </div>
+                      {showMerchantIcons && (
+                        <div
+                          className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+                          style={{ backgroundColor: color }}
+                        >
+                          {p.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       <span className="truncate flex-1">{p.name}</span>
                       <span className="flex items-center gap-1 text-xs text-text-tertiary shrink-0">
                         <CreditCard size={11} />
@@ -270,12 +276,14 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
               <span className="flex items-center gap-2 truncate">
                 {selectedAccount ? (
                   <>
-                    <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
-                      style={{ backgroundColor: ACCOUNT_TYPE_COLORS[selectedAccount.type] || '#6B7280' }}
-                    >
-                      {selectedAccount.name.charAt(0).toUpperCase()}
-                    </div>
+                    {showAccountIcons && (
+                      <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
+                        style={{ backgroundColor: ACCOUNT_TYPE_COLORS[selectedAccount.type] || '#6B7280' }}
+                      >
+                        {selectedAccount.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <span className="text-text">{selectedAccount.name}</span>
                   </>
                 ) : (
@@ -307,12 +315,14 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
                           accountId === a.id ? 'bg-brand-50 text-brand-700' : 'text-text'
                         }`}
                       >
-                        <div
-                          className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
-                          style={{ backgroundColor: ACCOUNT_TYPE_COLORS[a.type] || '#6B7280' }}
-                        >
-                          {a.name.charAt(0).toUpperCase()}
-                        </div>
+                        {showAccountIcons && (
+                          <div
+                            className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
+                            style={{ backgroundColor: ACCOUNT_TYPE_COLORS[a.type] || '#6B7280' }}
+                          >
+                            {a.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
                         <span className="truncate flex-1">{a.name}</span>
                         <span className={`text-xs tabular-nums shrink-0 ${a.balance >= 0 ? 'text-text-tertiary' : 'text-negative'}`}>
                           {formatCurrency(a.balance)}
@@ -339,12 +349,14 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
                           accountId === a.id ? 'bg-brand-50 text-brand-700' : 'text-text'
                         }`}
                       >
-                        <div
-                          className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
-                          style={{ backgroundColor: ACCOUNT_TYPE_COLORS[a.type] || '#6B7280' }}
-                        >
-                          {a.name.charAt(0).toUpperCase()}
-                        </div>
+                        {showAccountIcons && (
+                          <div
+                            className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
+                            style={{ backgroundColor: ACCOUNT_TYPE_COLORS[a.type] || '#6B7280' }}
+                          >
+                            {a.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
                         <span className="truncate flex-1">{a.name}</span>
                         <span className={`text-xs tabular-nums shrink-0 ${a.balance >= 0 ? 'text-text-tertiary' : 'text-negative'}`}>
                           {formatCurrency(a.balance)}
@@ -370,7 +382,7 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
               <span className="flex items-center gap-2 truncate">
                 {categoryEntry ? (
                   <>
-                    {categoryEntry.icon && <span className="text-base">{categoryEntry.icon}</span>}
+                    {showCategoryIcons && categoryEntry.icon && <span className="text-base">{categoryEntry.icon}</span>}
                     <span className="text-text">{categoryEntry.name}</span>
                   </>
                 ) : (

@@ -31,10 +31,16 @@ export function PreferencesPanel() {
     currencySymbol,
     dateFormat,
     sidebarMode,
+    showMerchantIcons,
+    showCategoryIcons,
+    showAccountIcons,
     setTheme,
     setCurrencySymbol,
     setDateFormat,
     setSidebarMode,
+    setShowMerchantIcons,
+    setShowCategoryIcons,
+    setShowAccountIcons,
   } = usePreferencesStore();
   const [resetOpen, setResetOpen] = useState(false);
 
@@ -43,6 +49,9 @@ export function PreferencesPanel() {
     setSidebarMode('persistent');
     setCurrencySymbol('$');
     setDateFormat('MMM d, yyyy');
+    setShowMerchantIcons(true);
+    setShowCategoryIcons(true);
+    setShowAccountIcons(true);
     setResetOpen(false);
   }
 
@@ -112,6 +121,40 @@ export function PreferencesPanel() {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="bg-surface-alt rounded-lg p-5 space-y-5">
+        <h3 className="text-sm font-medium text-text">Icons</h3>
+        {([
+          { label: 'Merchant', description: 'Colored initials next to merchant names', value: showMerchantIcons, setter: setShowMerchantIcons },
+          { label: 'Category', description: 'Emoji icons next to category names', value: showCategoryIcons, setter: setShowCategoryIcons },
+          { label: 'Account', description: 'Colored initials next to account names', value: showAccountIcons, setter: setShowAccountIcons },
+        ] as const).map((row) => (
+          <div key={row.label} className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <div className="text-sm text-text">{row.label}</div>
+              <div className="text-xs text-text-tertiary mt-0.5">{row.description}</div>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              {[
+                { v: true, l: 'Show' },
+                { v: false, l: 'Hide' },
+              ].map((opt) => (
+                <button
+                  key={String(opt.v)}
+                  onClick={() => row.setter(opt.v)}
+                  className={`px-3 py-1.5 text-xs rounded-md border transition-colors cursor-pointer ${
+                    row.value === opt.v
+                      ? 'border-brand-500 bg-brand-50 text-brand-700 font-medium'
+                      : 'border-border bg-surface text-text-secondary hover:border-border'
+                  }`}
+                >
+                  {opt.l}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="bg-surface-alt rounded-lg p-5 space-y-4">
