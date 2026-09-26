@@ -47,9 +47,27 @@ The same arrow button trick works for payees. Hovering over a payee name reveals
 
 ## Adding a Transaction
 
-When viewing an account's transactions, two buttons appear above the list: "Add Transaction" and "Import CSV."
+You can add transactions from two places:
 
-Clicking "Add Transaction" opens an inline form row at the top of the transaction list. The form has the following fields:
+### From the All Transactions page
+
+The All Transactions page has an **+ Add** button in the top-right corner of the header. Clicking it opens a modal dialog with the following fields:
+
+- **Debit / Credit toggle** at the top controls whether the transaction is an expense (debit) or income (credit). Debit is selected by default.
+- **Amount** is a currency input field. This is required.
+- **Merchant** is a searchable text input. As you type, it suggests up to 8 matching merchants from your existing list. If there is no exact match, it offers to create a new merchant. This is required.
+- **Date** defaults to today's date. This is required.
+- **Account** is a dropdown listing all of your open accounts. Since the All Transactions page shows transactions across all accounts, you need to pick which account this transaction belongs to. This is required.
+- **Category** is a dropdown organized by category group. This is optional.
+- **Notes** is a free text field for any additional details. This is optional.
+
+The "Add transaction" button at the bottom of the dialog stays disabled until all four required fields (amount, merchant, date, and account) are filled in.
+
+### From an account page
+
+When viewing a single account's transactions, two buttons appear above the list: "Add Transaction" and "Import CSV."
+
+Clicking "Add Transaction" opens an inline form row at the top of the transaction list. Since you are already viewing a specific account, no account selector is needed. The inline form has the following fields:
 
 - **Date** defaults to today's date.
 - **Payee** is an autocomplete input. As you type, it suggests up to 8 matching payees from your existing list. If there is no exact match, it offers to create a new payee.
