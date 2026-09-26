@@ -6,12 +6,12 @@ const sidebars: SidebarsConfig = {
     {
       type: 'link',
       label: 'Current Bug Reports',
-      href: 'https://github.com/dtymoszenko/budgeting-project/issues?q=label%3Abug',
+      href: 'https://github.com/dtymoszenko/flybudget/issues?q=label%3Abug',
     },
     {
       type: 'link',
       label: 'New Feature Requests',
-      href: 'https://github.com/dtymoszenko/budgeting-project/issues?q=label%3Aenhancement',
+      href: 'https://github.com/dtymoszenko/flybudget/issues?q=label%3Aenhancement',
     },
   ],
 };

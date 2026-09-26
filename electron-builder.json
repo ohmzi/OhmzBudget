@@ -1,6 +1,6 @@
 {
-  "appId": "com.budget.app",
-  "productName": "Budget",
+  "appId": "com.flybudget.app",
+  "productName": "FlyBudget",
   "asar": false,
   "directories": {
     "output": "dist-electron"

@@ -94,13 +94,13 @@ export function Sidebar() {
         <div className="w-[208px] h-full flex flex-col bg-sidebar-bg">
           {/* Logo */}
           <div className="flex items-center gap-2.5 px-4 py-3 border-b border-sidebar-border">
-            <img src={logoUrl} alt="Budget" className="w-7 h-7 shrink-0" />
+            <img src={logoUrl} alt="FlyBudget" className="w-7 h-7 shrink-0" />
             <span
               className={`text-sm font-semibold text-sidebar-text-hi tracking-tight transition-opacity duration-200 ${
                 isExpanded ? 'opacity-100' : 'opacity-0'
               }`}
             >
-              Budget
+              FlyBudget
             </span>
           </div>
 

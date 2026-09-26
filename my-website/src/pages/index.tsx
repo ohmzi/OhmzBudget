@@ -30,7 +30,7 @@ function HeroSection(): ReactNode {
               </Link>
               <Link
                 className={styles.ctaSecondary}
-                href="https://github.com/dtymoszenko/budgeting-project"
+                href="https://github.com/dtymoszenko/flybudget"
               >
                 <svg
                   className={styles.githubIcon}

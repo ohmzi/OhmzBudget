@@ -1,7 +1,7 @@
 {
-  "name": "budgeting-project",
+  "name": "flybudget",
   "version": "1.0.0",
-  "description": "",
+  "description": "A fast, open-source budgeting app that gives you complete control over your financial data.",
   "main": "electron/dist/main.js",
   "scripts": {
     "dev": "concurrently --names client,server --prefix-colors cyan,yellow \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
@@ -16,15 +16,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dtymoszenko/budgeting-project.git"
+    "url": "git+https://github.com/dtymoszenko/flybudget.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "David Tymoszenko",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dtymoszenko/budgeting-project/issues"
+    "url": "https://github.com/dtymoszenko/flybudget/issues"
   },
-  "homepage": "https://github.com/dtymoszenko/budgeting-project#readme",
+  "homepage": "https://github.com/dtymoszenko/flybudget#readme",
   "devDependencies": {
     "@electron/rebuild": "^4.0.4",
     "concurrently": "^9.2.1",

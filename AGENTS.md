@@ -49,7 +49,7 @@ No test suite currently exists.
 
 ## Architecture
 
-This is a **local-first single-user budgeting app** — zero-based envelope budgeting (like Actual Budget / YNAB). No auth, no cloud. The entire app runs on `localhost`. Also packaged as an Electron desktop app.
+**FlyBudget** is a **local-first single-user budgeting app** — zero-based envelope budgeting (like Actual Budget / YNAB). No auth, no cloud. The entire app runs on `localhost`. Also packaged as an Electron desktop app.
 
 ### Monorepo layout
 

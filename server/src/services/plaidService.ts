@@ -56,7 +56,7 @@ export async function createLinkToken(itemId?: string): Promise<string> {
 
   const request: any = {
     user: { client_user_id: 'local-user' },
-    client_name: 'Budget App',
+    client_name: 'FlyBudget',
     language: 'en',
     country_codes: [CountryCode.Us],
   };
@@ -75,7 +75,7 @@ export async function createUpdateLinkToken(accessToken: string): Promise<string
   const client = getPlaidClient();
   const response = await client.linkTokenCreate({
     user: { client_user_id: 'local-user' },
-    client_name: 'Budget App',
+    client_name: 'FlyBudget',
     language: 'en',
     country_codes: [CountryCode.Us],
     access_token: accessToken,

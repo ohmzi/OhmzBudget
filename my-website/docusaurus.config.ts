@@ -18,7 +18,7 @@ const config: Config = {
   baseUrl: '/',
 
   organizationName: 'dtymoszenko',
-  projectName: 'budgeting-project',
+  projectName: 'flybudget',
 
   stylesheets: [
     {
@@ -58,7 +58,7 @@ const config: Config = {
         path: 'tour',
         routeBasePath: 'tour',
         sidebarPath: './sidebarsTour.ts',
-        editUrl: 'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
+        editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/my-website/',
       },
     ],
     [
@@ -68,7 +68,7 @@ const config: Config = {
         path: 'contributing',
         routeBasePath: 'contributing',
         sidebarPath: './sidebarsContributing.ts',
-        editUrl: 'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
+        editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/my-website/',
       },
     ],
     [
@@ -78,7 +78,7 @@ const config: Config = {
         path: 'community',
         routeBasePath: 'community',
         sidebarPath: './sidebarsCommunity.ts',
-        editUrl: 'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
+        editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/my-website/',
       },
     ],
   ],
@@ -89,7 +89,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
+          editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/my-website/',
         },
         blog: {
           blogSidebarTitle: 'All Posts',
@@ -98,7 +98,7 @@ const config: Config = {
             type: ['rss', 'atom'],
             xslt: true,
           },
-          editUrl: 'https://github.com/dtymoszenko/budgeting-project/tree/main/my-website/',
+          editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/my-website/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -155,7 +155,7 @@ const config: Config = {
         },
         { to: '/download', label: 'Download', position: 'left' },
         {
-          href: 'https://github.com/dtymoszenko/budgeting-project',
+          href: 'https://github.com/dtymoszenko/flybudget',
           label: 'GitHub',
           position: 'right',
         },
@@ -164,8 +164,8 @@ const config: Config = {
     footer: {
       style: 'dark',
       links: [
-        { label: 'GitHub', href: 'https://github.com/dtymoszenko/budgeting-project' },
-        { label: 'Website Source', href: 'https://github.com/dtymoszenko/budgeting-project' },
+        { label: 'GitHub', href: 'https://github.com/dtymoszenko/flybudget' },
+        { label: 'Website Source', href: 'https://github.com/dtymoszenko/flybudget' },
         { label: 'Privacy Policy', to: '/docs/intro' },
         { label: 'Blog', to: '/blog' },
       ],

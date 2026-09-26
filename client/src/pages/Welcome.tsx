@@ -37,9 +37,9 @@ export default function WelcomePage() {
   return (
     <div className="h-screen flex items-center justify-center bg-page p-6">
       <div className="max-w-2xl w-full text-center">
-        <img src={logoUrl} alt="Budget" className="w-16 h-16 mx-auto mb-6" />
+        <img src={logoUrl} alt="FlyBudget" className="w-16 h-16 mx-auto mb-6" />
 
-        <h1 className="text-2xl font-semibold text-text">Welcome to your budget</h1>
+        <h1 className="text-2xl font-semibold text-text">Welcome to FlyBudget</h1>
         <p className="text-sm text-text-secondary mt-2 max-w-md mx-auto">
           Get started by connecting your bank for automatic imports, or add your accounts manually.
         </p>
