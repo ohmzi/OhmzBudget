@@ -1,0 +1,93 @@
+---
+sidebar_label: Commit & PR Guidelines
+sidebar_position: 3
+---
+
+# Commit & PR Guidelines
+
+Consistent commit messages and pull request titles make the project history easy to read, search, and automate. Please follow the conventions below when contributing to FlyBudget.
+
+## Commit message format
+
+Every commit message should start with a **type prefix** followed by a colon and a short description:
+
+```
+type: short description of the change
+```
+
+Use lowercase for the type and keep the description short and clear. Write as if completing the sentence "This commit will..." ("add feature" not "added feature").
+
+**Examples:**
+
+```
+feat: add monthly spending breakdown chart
+fix: correct off-by-one error in budget carry-over calculation
+docs: update installation instructions for Windows
+refactor: extract payee resolution into shared helper
+```
+
+### Accepted types
+
+| Type       | When to use                                              |
+| ---------- | -------------------------------------------------------- |
+| `feat`     | A new feature or user-facing functionality               |
+| `fix`      | A bug fix                                                |
+| `docs`     | Documentation-only changes                               |
+| `style`    | Formatting, whitespace, or styling changes (no logic)    |
+| `refactor` | Code restructuring without changing behavior             |
+| `perf`     | Performance improvements                                 |
+| `test`     | Adding or updating tests                                 |
+| `build`    | Changes to the build system or dependencies              |
+| `ci`       | Changes to CI/CD configuration                           |
+| `chore`    | General maintenance (config files, tooling, cleanup)     |
+| `revert`   | Reverting a previous commit                              |
+
+### Multi-line commit messages
+
+For more complex changes, add a blank line after the summary and then a longer description:
+
+```
+feat: add recurring transaction auto-create on startup
+
+Transactions with autoCreate=1 are now automatically created when the
+server starts if their next occurrence date is today or earlier. Linked
+via recurringTransactionId for proper tracking.
+```
+
+## Pull request titles
+
+PR titles follow the same format as commit messages:
+
+```
+type: short description
+```
+
+If a PR addresses a GitHub issue, reference it in the PR description body rather than the title:
+
+```
+feat: add account reconciliation flow
+
+Closes #42
+```
+
+## Scope (optional)
+
+You may optionally add a scope in parentheses to indicate the area of the codebase affected:
+
+```
+feat(reports): add custom date range picker
+fix(server): handle null payeeId in transaction creation
+style(dashboard): align summary stat cards on mobile
+```
+
+Common scopes include `client`, `server`, `electron`, `reports`, `budget`, `dashboard`, `plaid`, and `docs`.
+
+## Quick checklist
+
+Before committing, make sure your message:
+
+- [ ] Starts with a valid type from the table above
+- [ ] Uses lowercase for the type prefix
+- [ ] Is written as "This commit will..." ("add" not "added")
+- [ ] Keeps the summary line short and clear
+- [ ] Describes **what** the change does, not **how**
