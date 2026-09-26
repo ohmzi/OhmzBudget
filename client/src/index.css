@@ -123,6 +123,13 @@
   --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
+button,
+select,
+[type="checkbox"],
+[type="radio"] {
+  cursor: pointer;
+}
+
 body {
   font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;

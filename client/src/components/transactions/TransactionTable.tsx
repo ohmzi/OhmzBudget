@@ -283,7 +283,7 @@ export function TransactionTable({
         panelTx &&
         overlayDetail &&
         createPortal(
-          <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setDetailId(null)}>
+          <div className="fixed inset-0 z-50 flex justify-end cursor-pointer" onClick={() => setDetailId(null)}>
             <div
               className={`absolute inset-0 bg-black/20 transition-opacity duration-200 ${panelVisible ? 'opacity-100' : 'opacity-0'}`}
             />
