@@ -49,7 +49,7 @@ No test suite currently exists.
 
 ## Architecture
 
-This is a **local-first single-user budgeting app** — zero-based envelope budgeting (like Actual Budget / YNAB). No auth, no cloud. The entire app runs on `localhost`. Also packaged as an Electron desktop app.
+This is a **local-first single-user budgeting app**. No auth, no cloud (for now). The entire app runs on `localhost`. Also packaged as an Electron desktop app.
 
 ### Monorepo layout
 
@@ -159,9 +159,11 @@ The dashboard at `/dashboard` (default landing page) has 8 widget components in 
 - `UpcomingBills` — next 7 upcoming/overdue recurring bills within 30 days
 - `RecentTransactions` — last 8 transactions
 
-### Bank Sync (Plaid)
+### Bank Sync (Plaid, SimpleFin)
 
 The app integrates with **Plaid** for automatic bank transaction import. Plaid credentials are stored in the `plaid_config` SQLite table (entered via Settings → Connected Banks), not in environment variables.
+
+We also integrate with **SimpleFin**, and may consider supporting other connections in the future!
 
 **Architecture:**
 
