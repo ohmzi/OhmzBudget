@@ -14,7 +14,7 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://your-docusaurus-site.example.com',
+  url: 'https://flybudget.org',
   baseUrl: '/',
 
   organizationName: 'dtymoszenko',
@@ -58,7 +58,7 @@ const config: Config = {
         path: 'tour',
         routeBasePath: 'tour',
         sidebarPath: './sidebarsTour.ts',
-        editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/my-website/',
+        editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/website/',
       },
     ],
     [
@@ -68,7 +68,7 @@ const config: Config = {
         path: 'contributing',
         routeBasePath: 'contributing',
         sidebarPath: './sidebarsContributing.ts',
-        editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/my-website/',
+        editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/website/',
       },
     ],
     [
@@ -78,7 +78,7 @@ const config: Config = {
         path: 'community',
         routeBasePath: 'community',
         sidebarPath: './sidebarsCommunity.ts',
-        editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/my-website/',
+        editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/website/',
       },
     ],
   ],
@@ -89,7 +89,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/my-website/',
+          editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/website/',
         },
         blog: {
           blogSidebarTitle: 'All Posts',
@@ -98,7 +98,7 @@ const config: Config = {
             type: ['rss', 'atom'],
             xslt: true,
           },
-          editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/my-website/',
+          editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/website/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
