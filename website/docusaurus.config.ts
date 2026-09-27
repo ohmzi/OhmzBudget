@@ -64,16 +64,6 @@ const config: Config = {
     [
       '@docusaurus/plugin-content-docs',
       {
-        id: 'contributing',
-        path: 'contributing',
-        routeBasePath: 'contributing',
-        sidebarPath: './sidebarsContributing.ts',
-        editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/website/',
-      },
-    ],
-    [
-      '@docusaurus/plugin-content-docs',
-      {
         id: 'community',
         path: 'community',
         routeBasePath: 'community',
@@ -145,13 +135,6 @@ const config: Config = {
           docsPluginId: 'community',
           position: 'left',
           label: 'Community',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'contributingSidebar',
-          docsPluginId: 'contributing',
-          position: 'left',
-          label: 'Contributing',
         },
         { to: '/download', label: 'Download', position: 'left' },
         {

@@ -4,6 +4,14 @@ const sidebars: SidebarsConfig = {
   communitySidebar: [
     'intro',
     {
+      type: 'category',
+      label: 'Contributing',
+      // The category itself opens the contributing overview (community/contributing/index.mdx)
+      link: { type: 'doc', id: 'contributing/index' },
+      collapsed: false,
+      items: ['contributing/ai-usage', 'contributing/commit-conventions'],
+    },
+    {
       type: 'link',
       label: 'Current Bug Reports',
       href: 'https://github.com/dtymoszenko/flybudget/issues?q=label%3Abug',
