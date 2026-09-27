@@ -246,7 +246,7 @@ function buildSankeyGraph(
     subcatNodes.push(...subs);
   }
 
-  // Assemble nodes (Savings leads layer 2, like Monarch's "Net Income")
+  // Assemble nodes (Savings leads layer 2, above the expense groups)
   const nodes: SankeyNode[] = [
     ...incomeNodes, hubNode, ...savingsNodes, ...groupNodes, ...subcatNodes,
   ];
@@ -743,11 +743,13 @@ export default function CashFlowPage() {
   const statCards = useMemo((): StatCard[] => {
     const totalIncome = incData.reduce((s, d) => s + d.totalReceived, 0);
     const totalExpenses = spData.reduce((s, d) => s + d.totalSpent, 0);
-    const savings = totalIncome - totalExpenses;
+    const net = totalIncome - totalExpenses;
+    const savingsRate = totalIncome > 0 ? (net / totalIncome) * 100 : 0;
     return [
-      { label: 'Total Income', value: formatCurrency(totalIncome) },
-      { label: 'Total Expenses', value: formatCurrency(totalExpenses) },
-      { label: 'Savings', value: formatCurrency(Math.max(savings, 0)) },
+      { label: 'Total income', value: formatCurrency(totalIncome), tone: 'positive' },
+      { label: 'Total expenses', value: formatCurrency(totalExpenses), tone: 'negative' },
+      { label: 'Total net income', value: formatCurrency(net), tone: net < 0 ? 'negative' : undefined },
+      { label: 'Savings rate', value: `${savingsRate.toFixed(1)}%`, tone: savingsRate < 0 ? 'negative' : undefined },
     ];
   }, [incData, spData]);
 
@@ -811,7 +813,7 @@ export default function CashFlowPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
-        <StatCardRow cards={statCards} />
+        <StatCardRow cards={statCards} variant="hero" />
         <div className="w-full">
           <SankeyDiagram
             from={from}

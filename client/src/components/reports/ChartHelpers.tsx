@@ -51,16 +51,39 @@ const TONE_CLASS = {
   neutral: 'text-text-tertiary',
 } as const;
 
-export function StatCardRow({ cards, stretch }: { cards: StatCard[]; stretch?: boolean }) {
+export function StatCardRow({
+  cards,
+  variant = 'default',
+}: {
+  cards: StatCard[];
+  /** 'hero': white raised cards with a centered large value above the label, always full width */
+  variant?: 'default' | 'hero';
+}) {
   if (!cards.length) return null;
+  if (variant === 'hero') {
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {cards.map((c) => (
+          <div
+            key={c.label}
+            className="rounded-xl bg-surface border border-border-light shadow-card px-4 py-6 text-center"
+          >
+            <p className={`text-xl font-semibold tabular-nums ${c.tone ? TONE_CLASS[c.tone] : 'text-text'}`}>
+              {c.value}
+            </p>
+            <p className="text-sm text-text-secondary mt-1.5">{c.label}</p>
+            {c.sub && <p className="text-xs text-text-tertiary mt-0.5">{c.sub}</p>}
+          </div>
+        ))}
+      </div>
+    );
+  }
   return (
     <div className="flex gap-3 mb-5 flex-wrap">
       {cards.map((c) => (
         <div
           key={c.label}
-          className={`rounded-lg bg-surface-alt border border-border-light px-4 py-3 min-w-[110px] ${
-            stretch ? 'flex-1 basis-0 min-w-[160px]' : ''
-          }`}
+          className="rounded-lg bg-surface-alt border border-border-light px-4 py-3 min-w-[110px]"
         >
           <p className="text-xs text-text-tertiary">{c.label}</p>
           {c.sub && <p className="text-[11px] text-text-tertiary/80">{c.sub}</p>}

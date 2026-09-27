@@ -1,6 +1,6 @@
 # FlyBudget — Master Project Planning Document
 
-Open-source local-first budgeting app. Alternative to Monarch/YNAB. Modeled after Actual Budget.
+Open-source local-first budgeting app. Alternative to YNAB. Modeled after Actual Budget.
 Runs as a web app (local) and desktop app (Electron). No subscription fee. Bank sync deferred.
 
 ---

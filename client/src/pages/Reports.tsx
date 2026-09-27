@@ -665,7 +665,7 @@ export default function ReportsPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
-        <StatCardRow cards={statCards} stretch={activeTab === 'all'} />
+        <StatCardRow cards={statCards} variant={activeTab === 'all' ? 'hero' : 'default'} />
         {activeTab === 'all' ? (
           <OverviewGrid from={from} to={to} onSelectTab={setActiveTab} />
         ) : (
