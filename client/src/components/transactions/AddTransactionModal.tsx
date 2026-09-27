@@ -9,8 +9,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useCreateTransaction } from '../../hooks/useTransactions';
 import { MerchantSelect } from './MerchantSelect';
 import { CategorySelectButton } from './CategorySelectButton';
-import { ACCOUNT_TYPE_COLORS } from '../../utils/transactionColors';
-import { usePreferencesStore } from '../../store/preferencesStore';
+import { AccountIcon } from '../accounts/AccountIcon';
 
 interface Props {
   isOpen: boolean;
@@ -24,7 +23,6 @@ const selectClass =
   'block w-full rounded-md border border-border px-3 py-2 text-sm bg-surface focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 appearance-none cursor-pointer';
 
 export function AddTransactionModal({ isOpen, onClose }: Props) {
-  const showAccountIcons = usePreferencesStore((s) => s.showAccountIcons);
   const [type, setType] = useState<'debit' | 'credit'>('debit');
   const [amount, setAmount] = useState(0);
   const [payeeName, setPayeeName] = useState('');
@@ -98,10 +96,10 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
           <button
             type="button"
             onClick={() => setType('debit')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium rounded-md transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium rounded-md transition-all cursor-pointer ${
               type === 'debit'
-                ? 'bg-surface text-text shadow-xs ring-1 ring-brand-400'
-                : 'text-text-tertiary hover:text-text-secondary'
+                ? 'bg-negative-subtle text-negative ring-1 ring-negative/20'
+                : 'text-text-tertiary hover:text-text-secondary hover:bg-hover'
             }`}
           >
             <MinusCircle size={15} />
@@ -110,10 +108,10 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
           <button
             type="button"
             onClick={() => setType('credit')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium rounded-md transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium rounded-md transition-all cursor-pointer ${
               type === 'credit'
-                ? 'bg-surface text-text shadow-xs ring-1 ring-brand-400'
-                : 'text-text-tertiary hover:text-text-secondary'
+                ? 'bg-positive-subtle text-positive ring-1 ring-positive/20'
+                : 'text-text-tertiary hover:text-text-secondary hover:bg-hover'
             }`}
           >
             <PlusCircle size={15} />
@@ -162,14 +160,7 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
               <span className="flex items-center gap-2 truncate">
                 {selectedAccount ? (
                   <>
-                    {showAccountIcons && (
-                      <div
-                        className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
-                        style={{ backgroundColor: ACCOUNT_TYPE_COLORS[selectedAccount.type] || '#6B7280' }}
-                      >
-                        {selectedAccount.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
+                    <AccountIcon name={selectedAccount.name} type={selectedAccount.type} logo={selectedAccount.logo} />
                     <span className="text-text">{selectedAccount.name}</span>
                   </>
                 ) : (
@@ -201,14 +192,7 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
                           accountId === a.id ? 'bg-brand-50 text-brand-700' : 'text-text'
                         }`}
                       >
-                        {showAccountIcons && (
-                          <div
-                            className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
-                            style={{ backgroundColor: ACCOUNT_TYPE_COLORS[a.type] || '#6B7280' }}
-                          >
-                            {a.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                        <AccountIcon name={a.name} type={a.type} logo={a.logo} />
                         <span className="truncate flex-1">{a.name}</span>
                         <span className={`text-xs tabular-nums shrink-0 ${a.balance >= 0 ? 'text-text-tertiary' : 'text-negative'}`}>
                           {formatCurrency(a.balance)}
@@ -235,14 +219,7 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
                           accountId === a.id ? 'bg-brand-50 text-brand-700' : 'text-text'
                         }`}
                       >
-                        {showAccountIcons && (
-                          <div
-                            className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
-                            style={{ backgroundColor: ACCOUNT_TYPE_COLORS[a.type] || '#6B7280' }}
-                          >
-                            {a.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                        <AccountIcon name={a.name} type={a.type} logo={a.logo} />
                         <span className="truncate flex-1">{a.name}</span>
                         <span className={`text-xs tabular-nums shrink-0 ${a.balance >= 0 ? 'text-text-tertiary' : 'text-negative'}`}>
                           {formatCurrency(a.balance)}

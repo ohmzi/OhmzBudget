@@ -9,6 +9,8 @@ export const accounts = sqliteTable('accounts', {
   isOffBudget: integer('is_off_budget').notNull().default(0),
   sortOrder: integer('sort_order').notNull().default(0),
   closedAt: text('closed_at'),
+  /** Custom logo as a small image data URL; null = colored initials */
+  logo: text('logo'),
   createdAt: text('created_at')
     .notNull()
     .default(sql`(datetime('now'))`),

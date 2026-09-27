@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { useUpdateTransaction } from '../../hooks/useTransactions';
 import { CategoryPicker } from './CategoryPicker';
 import { PayeePicker } from './PayeePicker';
-import { payeeColor, ACCOUNT_TYPE_COLORS } from '../../utils/transactionColors';
+import { payeeColor } from '../../utils/transactionColors';
 import { formatCurrency } from '../../utils/currency';
 import { usePreferencesStore } from '../../store/preferencesStore';
+import { AccountIcon } from '../accounts/AccountIcon';
 import type { Transaction, CategoryGroup, PayeeWithCount } from '../../types';
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
   payees: PayeeWithCount[];
   accountName?: string;
   accountType?: string;
+  accountLogo?: string | null;
   showAccountCol?: boolean;
   isSelected?: boolean;
   onOpenDetail: (id: string) => void;
@@ -32,6 +34,7 @@ export function TransactionRow({
   payees,
   accountName,
   accountType,
+  accountLogo,
   showAccountCol,
   isSelected,
   onOpenDetail,
@@ -45,7 +48,6 @@ export function TransactionRow({
   const navigate = useNavigate();
   const showMerchantIcons = usePreferencesStore((s) => s.showMerchantIcons);
   const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
-  const showAccountIcons = usePreferencesStore((s) => s.showAccountIcons);
 
   const isTransfer = !!tx.transferTransactionId;
   const isSplitParent = tx.isParent === 1 && tx.children && tx.children.length > 0;
@@ -55,7 +57,6 @@ export function TransactionRow({
   const payeeName = tx.payeeName || (isTransfer ? 'Transfer' : '—');
   const initial = payeeName.charAt(0).toUpperCase();
   const bgColor = payeeColor(payeeName);
-  const acctColor = ACCOUNT_TYPE_COLORS[accountType || ''] || '#6B7280';
 
   function handleCategoryChange(catId: string | null) {
     updateTx.mutate({ id: tx.id, data: { categoryId: catId } });
@@ -206,14 +207,7 @@ export function TransactionRow({
         {showAccountCol && (
           <div className="group/acct flex items-center gap-1 flex-[2] min-w-0">
             <div className="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-transparent group-hover/acct:border-border group-hover/acct:bg-surface transition-all min-w-0">
-              {showAccountIcons && (
-                <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
-                  style={{ backgroundColor: acctColor }}
-                >
-                  {accountName ? accountName.charAt(0).toUpperCase() : '?'}
-                </div>
-              )}
+              <AccountIcon name={accountName} type={accountType} logo={accountLogo} size="sm" />
               <span className="text-sm text-text-secondary truncate">{accountName || '—'}</span>
             </div>
             <button

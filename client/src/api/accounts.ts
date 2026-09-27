@@ -12,7 +12,13 @@ export const createAccount = (data: {
 
 export const updateAccount = (
   id: string,
-  data: Partial<{ name: string; type: AccountType; startingBalance: number; isOffBudget: number }>,
+  data: Partial<{
+    name: string;
+    type: AccountType;
+    startingBalance: number;
+    isOffBudget: number;
+    logo: string | null;
+  }>,
 ) => apiFetch<Account>(`/accounts/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 
 export const closeAccount = (id: string) => apiFetch<void>(`/accounts/${id}`, { method: 'DELETE' });

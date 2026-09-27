@@ -10,6 +10,7 @@ import { formatCurrency } from '../utils/currency';
 import NetWorthMini from '../components/dashboard/NetWorthMini';
 import type { Account } from '../types';
 import { ACCOUNT_TYPES } from '../types';
+import { AccountIcon } from '../components/accounts/AccountIcon';
 
 const TYPE_LABELS: Record<string, string> = {
   checking: 'Cash',
@@ -90,12 +91,15 @@ function AccountGroup({ label, accounts, balancesAgo }: AccountGroupProps) {
               className="flex items-center justify-between px-5 py-4 hover:bg-hover cursor-pointer group transition-colors last:rounded-b-lg"
             >
               <div className="min-w-0">
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-text truncate">{account.name}</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <AccountIcon name={account.name} type={account.type} logo={account.logo} size="md" />
+                  <div className="min-w-0">
+                    <span className="text-sm font-medium text-text truncate block">{account.name}</span>
+                    <span className="text-xs text-text-tertiary mt-0.5 block">
+                      {ACCOUNT_TYPE_LABEL[account.type] ?? account.type}
+                    </span>
+                  </div>
                 </div>
-                <span className="text-xs text-text-tertiary mt-0.5 block">
-                  {ACCOUNT_TYPE_LABEL[account.type] ?? account.type}
-                </span>
               </div>
               <span className="text-sm font-medium tabular-nums text-text">
                 {formatCurrency(account.balance)}

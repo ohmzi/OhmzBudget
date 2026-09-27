@@ -110,7 +110,9 @@ budgeting-project/
 
 ### DB schema summary
 
-- `accounts` — type: `checking | savings | credit | cash | investment`; `isOffBudget` excludes from budget calculations; `closedAt` for soft-delete
+> **Pending legacy cleanup:** migration `0011_unified_schedules` copied `recurring_transactions` into `schedules` but intentionally kept the old table and `transactions.recurring_transaction_id`. The drizzle snapshot still records them, so `db:generate` will propose dropping both — review that as its own migration rather than letting it ride along with unrelated schema changes.
+
+- `accounts` — type: `checking | savings | credit | cash | investment`; `isOffBudget` excludes from budget calculations; `closedAt` for soft-delete; `logo` (nullable PNG/JPEG/WebP data URL, cropped client-side to 128px) replaces the colored initials in `AccountIcon`, which is hidden entirely when the "Account icons" preference is off
 - `category_groups` — `isIncome=1` marks income groups (affects budget math and report filtering)
 - `categories` — belong to a group; used as budget envelopes
 - `transactions` — `payeeName` (denormalized string) + `payeeId` (FK, nullable); `reconciled=-1` means excluded from balance

@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Modal } from '../ui/Modal';
 import { ConfirmModal } from '../ui/ConfirmModal';
 import { CurrencyInput } from '../ui/CurrencyInput';
 import { useUpdateAccount, useCloseAccount } from '../../hooks/useAccounts';
 import { ACCOUNT_TYPES, type Account, type AccountType } from '../../types';
+import { AccountIcon } from './AccountIcon';
+import { fileToSquareDataUrl } from '../../utils/imageResize';
+import { usePreferencesStore } from '../../store/preferencesStore';
 
 interface Props {
   account: Account | null;
@@ -16,6 +19,10 @@ export function EditAccountModal({ account, onClose }: Props) {
   const [startingBalance, setStartingBalance] = useState(0);
   const [isOffBudget, setIsOffBudget] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
+  const [logo, setLogo] = useState<string | null>(null);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const showAccountIcons = usePreferencesStore((s) => s.showAccountIcons);
 
   const updateAccount = useUpdateAccount();
   const closeAccount = useCloseAccount();
@@ -26,6 +33,8 @@ export function EditAccountModal({ account, onClose }: Props) {
       setType(account.type);
       setStartingBalance(account.startingBalance);
       setIsOffBudget(account.isOffBudget === 1);
+      setLogo(account.logo ?? null);
+      setLogoError(null);
     }
   }, [account]);
 
@@ -34,9 +43,27 @@ export function EditAccountModal({ account, onClose }: Props) {
     if (!account || !name.trim()) return;
     await updateAccount.mutateAsync({
       id: account.id,
-      data: { name: name.trim(), type, startingBalance, isOffBudget: isOffBudget ? 1 : 0 },
+      data: {
+        name: name.trim(),
+        type,
+        startingBalance,
+        isOffBudget: isOffBudget ? 1 : 0,
+        ...(logo !== (account.logo ?? null) ? { logo } : {}),
+      },
     });
     onClose();
+  }
+
+  async function handleLogoFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file
+    if (!file) return;
+    try {
+      setLogo(await fileToSquareDataUrl(file));
+      setLogoError(null);
+    } catch (err) {
+      setLogoError(err instanceof Error ? err.message : 'Could not use that image.');
+    }
   }
 
   async function handleCloseAccount() {
@@ -49,6 +76,40 @@ export function EditAccountModal({ account, onClose }: Props) {
     <>
       <Modal isOpen={!!account} onClose={onClose} title="Edit Account" size="sm">
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">Logo</label>
+            <div className="flex items-center gap-3">
+              <AccountIcon name={name} type={type} logo={logo} size="lg" force />
+              <div className="flex flex-col gap-1.5">
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    className="px-3 py-1.5 text-xs font-medium text-text-secondary bg-surface border border-border rounded-md hover:bg-hover transition-colors cursor-pointer"
+                  >
+                    {logo ? 'Change image' : 'Upload image'}
+                  </button>
+                  {logo && (
+                    <button
+                      type="button"
+                      onClick={() => setLogo(null)}
+                      className="px-3 py-1.5 text-xs font-medium text-text-tertiary hover:text-negative transition-colors cursor-pointer"
+                    >
+                      Use initials
+                    </button>
+                  )}
+                </div>
+                <p className={`text-xs ${logoError ? 'text-negative' : 'text-text-tertiary'}`}>
+                  {logoError ?? (logo ? 'Cropped to a square.' : 'Showing initials. Upload a bank logo or any image.')}
+                </p>
+                {!showAccountIcons && (
+                  <p className="text-xs text-caution">Account icons are turned off in Settings → Preferences.</p>
+                )}
+              </div>
+              <input ref={fileRef} type="file" accept="image/*" onChange={handleLogoFile} className="hidden" />
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-1">
               Account Name

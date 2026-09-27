@@ -14,7 +14,14 @@ const createSchema = z.object({
   isOffBudget: z.number().int().min(0).max(1).default(0),
 });
 
-const updateSchema = createSchema.partial();
+// Logos are resized client-side to a small square; cap size defensively
+const logoSchema = z
+  .string()
+  .max(200_000)
+  .regex(/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/, 'Logo must be a PNG, JPEG, or WebP data URL')
+  .nullable();
+
+const updateSchema = createSchema.partial().extend({ logo: logoSchema.optional() });
 
 function withBalance(account: typeof accounts.$inferSelect) {
   const row = db

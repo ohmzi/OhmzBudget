@@ -6,8 +6,9 @@ import { CategoryPicker } from './CategoryPicker';
 import { PayeeCombobox } from './PayeeCombobox';
 import { Button } from '../ui/Button';
 import { ConfirmModal } from '../ui/ConfirmModal';
-import { payeeColor, ACCOUNT_TYPE_COLORS } from '../../utils/transactionColors';
+import { payeeColor } from '../../utils/transactionColors';
 import { usePreferencesStore } from '../../store/preferencesStore';
+import { AccountIcon } from '../accounts/AccountIcon';
 import { formatCurrency } from '../../utils/currency';
 import { RECURRENCE_TYPE_LABELS } from '../../types';
 import type { Transaction, CategoryGroup, Payee, Account } from '../../types';
@@ -20,6 +21,7 @@ interface Props {
   accounts: Account[];
   accountName?: string;
   accountType?: string;
+  accountLogo?: string | null;
   onClose: () => void;
 }
 
@@ -31,13 +33,13 @@ export function TransactionDetailPanel({
   accounts,
   accountName,
   accountType,
+  accountLogo,
   onClose,
 }: Props) {
   const updateTx = useUpdateTransaction();
   const deleteTx = useDeleteTransaction();
   const showMerchantIcons = usePreferencesStore((s) => s.showMerchantIcons);
   const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
-  const showAccountIcons = usePreferencesStore((s) => s.showAccountIcons);
   const { data: schedules = [] } = useSchedules();
   const unmatchByTx = useUnmatchByTransaction();
   const linkedSchedule = tx.scheduleId ? schedules.find((s) => s.id === tx.scheduleId) : null;
@@ -72,7 +74,6 @@ export function TransactionDetailPanel({
   const payeeName = tx.payeeName || (isTransfer ? 'Transfer' : '—');
   const initial = payeeName.charAt(0).toUpperCase();
   const bgColor = payeeColor(payeeName);
-  const acctColor = ACCOUNT_TYPE_COLORS[accountType || ''] || '#6B7280';
   const categoryEntry = tx.categoryId ? (categoryMap.get(tx.categoryId) ?? null) : null;
 
   function saveDate() {
@@ -143,14 +144,7 @@ export function TransactionDetailPanel({
               <div className="text-base font-semibold text-text">{payeeName}</div>
               {accountName && (
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  {showAccountIcons && (
-                    <div
-                      className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[8px] font-bold"
-                      style={{ backgroundColor: acctColor }}
-                    >
-                      {accountName.charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  <AccountIcon name={accountName} type={accountType} logo={accountLogo} size="xs" />
                   <span className="text-xs text-text-tertiary">{accountName}</span>
                 </div>
               )}

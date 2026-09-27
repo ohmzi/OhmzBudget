@@ -1,16 +1,20 @@
+import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { CheckSquare, ChevronRight } from 'lucide-react';
+import { CheckSquare, ChevronRight, Pencil } from 'lucide-react';
 import { useAccounts } from '../hooks/useAccounts';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { formatCurrency } from '../utils/currency';
 import { TransactionTable } from '../components/transactions/TransactionTable';
+import { AccountIcon } from '../components/accounts/AccountIcon';
+import { EditAccountModal } from '../components/accounts/EditAccountModal';
 
 export default function AccountTransactionsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: accounts = [] } = useAccounts();
   const account = accounts.find((a) => a.id === id);
+  const [editOpen, setEditOpen] = useState(false);
 
   if (!account) return null;
 
@@ -26,6 +30,7 @@ export default function AccountTransactionsPage() {
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
+            <AccountIcon name={account.name} type={account.type} logo={account.logo} size="md" />
             <h1 className="text-lg font-semibold text-text">{account.name}</h1>
             <Badge variant={account.type} />
             <span
@@ -34,16 +39,22 @@ export default function AccountTransactionsPage() {
               {formatCurrency(account.balance)}
             </span>
           </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => navigate(`/accounts/${account.id}/reconcile`)}
-          >
-            <CheckSquare size={13} /> Reconcile
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
+              <Pencil size={13} /> Edit
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => navigate(`/accounts/${account.id}/reconcile`)}
+            >
+              <CheckSquare size={13} /> Reconcile
+            </Button>
+          </div>
         </div>
       </div>
       <TransactionTable accountId={account.id} />
+      <EditAccountModal account={editOpen ? account : null} onClose={() => setEditOpen(false)} />
     </div>
   );
 }

@@ -128,7 +128,7 @@ export function PreferencesPanel() {
         {([
           { label: 'Merchant', description: 'Colored initials next to merchant names', value: showMerchantIcons, setter: setShowMerchantIcons },
           { label: 'Category', description: 'Emoji icons next to category names', value: showCategoryIcons, setter: setShowCategoryIcons },
-          { label: 'Account', description: 'Colored initials next to account names', value: showAccountIcons, setter: setShowAccountIcons },
+          { label: 'Account', description: 'Account logos (or colored initials) next to account names', value: showAccountIcons, setter: setShowAccountIcons },
         ] as const).map((row) => (
           <div key={row.label} className="flex items-center justify-between gap-4">
             <div className="min-w-0">

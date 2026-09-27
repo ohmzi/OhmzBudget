@@ -640,7 +640,7 @@ export default function ReportsPage() {
             </Button>
             <Link
               to="/reports/custom"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-brand-600 border border-brand-200 rounded-md hover:bg-brand-50 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 shadow-xs transition-colors"
             >
               <Plus size={13} />
               Custom Report

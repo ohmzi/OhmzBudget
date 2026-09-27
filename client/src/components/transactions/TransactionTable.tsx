@@ -79,7 +79,7 @@ export function TransactionTable({
   }, [groups]);
 
   const accountInfoMap = useMemo(
-    () => new Map(accounts.map((a) => [a.id, { name: a.name, type: a.type }])),
+    () => new Map(accounts.map((a) => [a.id, { name: a.name, type: a.type, logo: a.logo }])),
     [accounts],
   );
 
@@ -240,6 +240,9 @@ export function TransactionTable({
                     accountType={
                       showAccountCol ? accountInfoMap.get(tx.accountId)?.type : undefined
                     }
+                    accountLogo={
+                      showAccountCol ? accountInfoMap.get(tx.accountId)?.logo : undefined
+                    }
                     showAccountCol={showAccountCol}
                     isSelected={detailId === tx.id}
                     onOpenDetail={setDetailId}
@@ -270,6 +273,7 @@ export function TransactionTable({
                 accounts={accounts}
                 accountName={accountInfoMap.get(panelTx.accountId)?.name}
                 accountType={accountInfoMap.get(panelTx.accountId)?.type}
+                accountLogo={accountInfoMap.get(panelTx.accountId)?.logo}
                 onClose={() => setDetailId(null)}
               />
             </div>
@@ -306,6 +310,7 @@ export function TransactionTable({
                 accounts={accounts}
                 accountName={accountInfoMap.get(panelTx.accountId)?.name}
                 accountType={accountInfoMap.get(panelTx.accountId)?.type}
+                accountLogo={accountInfoMap.get(panelTx.accountId)?.logo}
                 onClose={() => setDetailId(null)}
               />
             </div>

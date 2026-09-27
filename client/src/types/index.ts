@@ -124,6 +124,8 @@ export interface Account {
   isOffBudget: number;
   sortOrder: number;
   closedAt: string | null;
+  /** Custom logo image (data URL); null = colored initials */
+  logo: string | null;
   createdAt: string;
   balance: number;
 }

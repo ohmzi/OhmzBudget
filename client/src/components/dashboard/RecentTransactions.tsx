@@ -24,7 +24,7 @@ export default function RecentTransactions() {
   }, [groups]);
 
   const accountInfoMap = useMemo(
-    () => new Map(accounts.map((a) => [a.id, { name: a.name, type: a.type }])),
+    () => new Map(accounts.map((a) => [a.id, { name: a.name, type: a.type, logo: a.logo }])),
     [accounts],
   );
 
@@ -67,6 +67,7 @@ export default function RecentTransactions() {
               payees={payees}
               accountName={accountInfoMap.get(tx.accountId)?.name}
               accountType={accountInfoMap.get(tx.accountId)?.type}
+              accountLogo={accountInfoMap.get(tx.accountId)?.logo}
               isSelected={false}
               onOpenDetail={() => navigate('/transactions')}
             />

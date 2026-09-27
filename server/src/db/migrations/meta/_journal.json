@@ -85,6 +85,13 @@
       "when": 1790200000000,
       "tag": "0011_unified_schedules",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1790495118117,
+      "tag": "0012_account_logo",
+      "breakpoints": true
     }
   ]
 }
