@@ -55,7 +55,9 @@ function AccountGroup({ label, accounts, balancesAgo }: AccountGroupProps) {
     <Card padding="none">
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-hover transition-colors rounded-t-lg"
+        className={`w-full flex items-center justify-between px-5 py-3.5 hover:bg-hover transition-colors ${
+          collapsed ? 'rounded-lg' : 'rounded-t-lg border-b border-border'
+        }`}
       >
         <div className="flex items-center gap-2.5">
           <span className="text-text-tertiary">
