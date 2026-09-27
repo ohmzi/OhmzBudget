@@ -35,8 +35,10 @@ const NODE_CAP_OPTIONS = [10, 15, 20, 30];
 const MIN_SAVINGS_CENTS = 500;
 const NODE_W = 12;
 const MIN_NODE_H = 2;
-const LABEL_GAP = 20;
-const NODE_PAD = 8;
+const MIN_SLOT = 30; // vertical room reserved per node so its two-line label fits
+const NODE_GAP = 10;
+const SANKEY_MARGIN_Y = 32;
+const SANKEY_MIN_H = 420;
 
 interface SankeyNode {
   name: string;
@@ -68,7 +70,8 @@ interface SankeyGraph {
 }
 
 interface LayoutNode extends SankeyNode {
-  x: number; y: number; w: number; h: number; labelY: number; idx: number; showLabel: boolean;
+  x: number; y: number; w: number; h: number; labelY: number; idx: number;
+  slotY: number; slotH: number;
 }
 
 interface LayoutLink {
@@ -148,26 +151,19 @@ function highlightPath(
   return { hn, hl };
 }
 
-function resolveCollisions(
-  labels: { idealY: number; resolvedY: number; h: number }[],
-  gap: number, minY: number, maxY: number,
-) {
-  if (labels.length < 2) { labels.forEach(l => { l.resolvedY = l.idealY; }); return; }
-  labels.sort((a, b) => a.idealY - b.idealY);
-  labels.forEach(l => { l.resolvedY = l.idealY; });
-  for (let i = 1; i < labels.length; i++) {
-    const prev = labels[i - 1].resolvedY + labels[i - 1].h;
-    if (labels[i].resolvedY < prev + gap) labels[i].resolvedY = prev + gap;
+/** Largest scale where every node's slot (max(value·s, MIN_SLOT)) plus gaps fits in `avail`. */
+function fitLayerScale(amounts: number[], avail: number): number {
+  const used = (s: number) =>
+    amounts.reduce((sum, a) => sum + Math.max(a * s, MIN_SLOT), 0) + (amounts.length - 1) * NODE_GAP;
+  const total = amounts.reduce((s, a) => s + a, 0);
+  if (total <= 0) return Infinity;
+  let lo = 0, hi = avail / total;
+  if (used(lo) > avail) return lo;
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    if (used(mid) <= avail) lo = mid; else hi = mid;
   }
-  for (let i = labels.length - 1; i >= 0; i--) {
-    if (labels[i].resolvedY + labels[i].h > maxY) labels[i].resolvedY = maxY - labels[i].h;
-    if (i > 0) {
-      const thisTop = labels[i].resolvedY;
-      const prevBot = labels[i - 1].resolvedY + labels[i - 1].h;
-      if (prevBot + gap > thisTop) labels[i - 1].resolvedY = thisTop - gap - labels[i - 1].h;
-    }
-  }
-  for (const l of labels) l.resolvedY = Math.max(minY, Math.min(maxY - l.h, l.resolvedY));
+  return lo;
 }
 
 // ─── Build Sankey Graph ──────────────────────────────────────────────────────
@@ -278,15 +274,15 @@ function buildSankeyGraph(
     subcatNodes.push(...subs);
   }
 
-  // Assemble nodes
+  // Assemble nodes (Savings leads layer 2, like Monarch's "Net Income")
   const nodes: SankeyNode[] = [
-    ...incomeNodes, hubNode, ...groupNodes, ...savingsNodes, ...subcatNodes,
+    ...incomeNodes, hubNode, ...savingsNodes, ...groupNodes, ...subcatNodes,
   ];
 
   const hubIdx = incomeNodes.length;
-  const grpStart = hubIdx + 1;
-  const savStart = grpStart + groupNodes.length;
-  const subStart = savStart + savingsNodes.length;
+  const savStart = hubIdx + 1;
+  const grpStart = savStart + savingsNodes.length;
+  const subStart = grpStart + groupNodes.length;
 
   // Build links
   const links: SankeyLink[] = [];
@@ -312,7 +308,7 @@ function buildSankeyGraph(
 function computeLayout(
   graph: SankeyGraph, width: number, height: number,
 ): { nodes: LayoutNode[]; links: LayoutLink[] } | null {
-  const mT = 16, mB = 16, lmL = 170, lmR = 180;
+  const mT = SANKEY_MARGIN_Y / 2, mB = SANKEY_MARGIN_Y / 2, lmL = 170, lmR = 180;
   const dW = width - lmL - lmR;
   const dH = height - mT - mB;
   if (dW <= 0 || dH <= 0) return null;
@@ -333,49 +329,29 @@ function computeLayout(
   // Global scale: constrained by most-crowded layer
   let scale = Infinity;
   for (const [, idxs] of layers) {
-    const total = idxs.reduce((s, i) => s + graph.nodes[i].amount, 0);
-    if (total <= 0) continue;
-    const avail = dH - Math.max(0, (idxs.length - 1) * NODE_PAD);
-    if (avail > 0) scale = Math.min(scale, avail / total);
+    scale = Math.min(scale, fitLayerScale(idxs.map(i => graph.nodes[i].amount), dH));
   }
   if (!isFinite(scale) || scale <= 0) scale = 1;
 
   // Create layout nodes
-  const ln: LayoutNode[] = graph.nodes.map((n, i) => ({
-    ...n, x: colX[n.layer] ?? 0, y: 0, w: NODE_W,
-    h: Math.max(n.amount * scale, MIN_NODE_H), labelY: 0, idx: i, showLabel: true,
-  }));
+  const ln: LayoutNode[] = graph.nodes.map((n, i) => {
+    const h = Math.max(n.amount * scale, MIN_NODE_H);
+    return {
+      ...n, x: colX[n.layer] ?? 0, y: 0, w: NODE_W, h, labelY: 0, idx: i,
+      slotY: 0, slotH: Math.max(h, MIN_SLOT),
+    };
+  });
 
-  // Stack & center per layer
+  // Stack evenly spaced, top-aligned slots per layer; bar and label centered in each slot
   for (const [, idxs] of layers) {
     const layerN = idxs.map(i => ln[i]);
-    const totalH = layerN.reduce((s, n) => s + n.h, 0);
-    const totalP = Math.max(0, (layerN.length - 1) * NODE_PAD);
-    let y = mT + (dH - totalH - totalP) / 2;
-    for (const n of layerN) { n.y = y; n.labelY = y + n.h / 2; y += n.h + NODE_PAD; }
-  }
-
-  // Label collision avoidance per layer
-  const LABEL_H = 28;
-  for (const [, idxs] of layers) {
-    if (idxs.length < 2) continue;
-    const maxLabels = Math.max(2, Math.floor(dH / (LABEL_H + LABEL_GAP)));
-    // If too many labels to fit, only show the largest by value
-    if (idxs.length > maxLabels) {
-      const sorted = [...idxs].sort((a, b) => ln[b].amount - ln[a].amount);
-      const shown = new Set(sorted.slice(0, maxLabels));
-      for (const i of idxs) if (!shown.has(i)) ln[i].showLabel = false;
+    let y = mT;
+    for (const n of layerN) {
+      n.slotY = y;
+      n.y = y + (n.slotH - n.h) / 2;
+      n.labelY = n.y + n.h / 2;
+      y += n.slotH + NODE_GAP;
     }
-    const visible = idxs.filter(i => ln[i].showLabel);
-    if (visible.length < 2) continue;
-    const items = visible.map(i => ({
-      idealY: ln[i].y + ln[i].h / 2 - 10,
-      resolvedY: 0,
-      h: LABEL_H,
-      ref: ln[i],
-    }));
-    resolveCollisions(items, LABEL_GAP, mT, mT + dH);
-    for (const it of items) it.ref.labelY = it.resolvedY + it.h / 2;
   }
 
   // Link port allocation
@@ -454,23 +430,27 @@ function SankeyDiagram({ from, to, maxNodeCap, selectedNode, onNodeClick }: Sank
   const { data: incomeData = [], isLoading: il } = useIncomeByCategory(from, to);
   const { data: spendingData = [], isLoading: sl } = useSpendingByCategory(from, to);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { width, height } = useContainerSize(containerRef);
+  const { width } = useContainerSize(containerRef);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; node: SankeyNode } | null>(null);
 
-  const effectiveMax = useMemo(() => {
-    if (height <= 0) return maxNodeCap;
-    const fits = Math.floor((height - 32) / 28);
-    return Math.min(maxNodeCap, Math.max(3, fits));
-  }, [height, maxNodeCap]);
-
   const graph = useMemo(
-    () => buildSankeyGraph(incomeData, spendingData, effectiveMax, showIcons),
-    [incomeData, spendingData, effectiveMax, showIcons],
+    () => buildSankeyGraph(incomeData, spendingData, maxNodeCap, showIcons),
+    [incomeData, spendingData, maxNodeCap, showIcons],
   );
 
+  // Height derived from the graph itself: the most crowded column gets one MIN_SLOT row
+  // per node, so every slot is guaranteed to fit (fitLayerScale never hits zero).
+  const height = useMemo(() => {
+    if (!graph) return SANKEY_MIN_H;
+    const counts = new Map<number, number>();
+    for (const n of graph.nodes) counts.set(n.layer, (counts.get(n.layer) ?? 0) + 1);
+    const maxCol = Math.max(...counts.values());
+    return Math.max(SANKEY_MIN_H, maxCol * (MIN_SLOT + NODE_GAP) + SANKEY_MARGIN_Y);
+  }, [graph]);
+
   const layout = useMemo(
-    () => graph && width > 0 && height > 0 ? computeLayout(graph, width, height) : null,
+    () => graph && width > 0 ? computeLayout(graph, width, height) : null,
     [graph, width, height],
   );
 
@@ -540,18 +520,20 @@ function SankeyDiagram({ from, to, maxNodeCap, selectedNode, onNodeClick }: Sank
     }});
   }, [layout]);
 
-  if (il || sl) return <div ref={containerRef} className="w-full h-full"><ChartSkeleton /></div>;
-  if (!graph) return <div ref={containerRef} className="w-full h-full"><EmptyState /></div>;
+  if (il || sl) return <div ref={containerRef} className="w-full" style={{ height: SANKEY_MIN_H }}><ChartSkeleton /></div>;
+  if (!graph) return <div ref={containerRef} className="w-full" style={{ height: SANKEY_MIN_H }}><EmptyState /></div>;
 
   return (
-    <div ref={containerRef} className="relative w-full h-full">
-      {width > 0 && height > 0 && layout && (
+    <div ref={containerRef} className="relative w-full">
+      {width > 0 && layout && (
         <svg width={width} height={height} className="select-none">
           {/* Links */}
           <g>
             {layout.links.map((l, i) => {
               const srcX = layout.nodes[l.si].x + NODE_W;
               const tgtX = layout.nodes[l.ti].x;
+              const tgtNode = layout.nodes[l.ti];
+              const clickable = tgtNode.nodeType === 'subcategory' || tgtNode.nodeType === 'expense-group';
               let opacity = 0.22;
               if (highlighted) {
                 opacity = highlighted.hl.has(l.idx) ? 0.6 : 0.07;
@@ -562,11 +544,14 @@ function SankeyDiagram({ from, to, maxNodeCap, selectedNode, onNodeClick }: Sank
                   d={linkPath(srcX, l.sy, tgtX, l.ty, l.lw)}
                   fill={l.color}
                   fillOpacity={opacity}
-                  stroke="none"
-                  style={{ transition: 'fill-opacity 0.2s ease', cursor: 'default' }}
+                  // Transparent stroke widens the hit area of thin flows to ≥ 8px
+                  stroke="transparent"
+                  strokeWidth={l.lw < 8 ? 8 - l.lw : 0}
+                  style={{ transition: 'fill-opacity 0.2s ease', cursor: clickable ? 'pointer' : 'default' }}
                   onMouseEnter={e => handleLinkEnter(e, l)}
                   onMouseMove={e => setTooltip(prev => prev ? { ...prev, x: e.clientX, y: e.clientY } : null)}
                   onMouseLeave={handleLeave}
+                  onClick={clickable ? () => handleClick(tgtNode) : undefined}
                 />
               );
             })}
@@ -603,7 +588,7 @@ function SankeyDiagram({ from, to, maxNodeCap, selectedNode, onNodeClick }: Sank
           {/* Labels */}
           <g>
             {layout.nodes.map((n, i) => {
-              if (n.h < 0.5 || !n.showLabel) return null;
+              if (n.h < 0.5) return null;
               const isLeft = n.nodeType === 'income';
               const lx = isLeft ? n.x - 8 : n.x + NODE_W + 8;
               const anchor = isLeft ? 'end' : 'start';
@@ -629,6 +614,7 @@ function SankeyDiagram({ from, to, maxNodeCap, selectedNode, onNodeClick }: Sank
               } else if (n.nodeType === 'savings' && n.savingsRate != null) {
                 pctStr = ` · ${n.savingsRate.toFixed(1)}%`;
               }
+              const hitW = NODE_W + 8 + Math.max(n.name.length * fontSize * 0.6, (amtStr.length + pctStr.length) * 5.5);
 
               return (
                 <g
@@ -643,17 +629,25 @@ function SankeyDiagram({ from, to, maxNodeCap, selectedNode, onNodeClick }: Sank
                   onMouseLeave={handleLeave}
                   onClick={() => handleClick(n)}
                 >
+                  {/* Hit area spanning bar through label (label-height only, so big nodes don't block flows) */}
+                  {clickable && (
+                    <rect
+                      x={n.x} y={n.labelY - MIN_SLOT / 2}
+                      width={hitW} height={MIN_SLOT}
+                      fill="transparent"
+                    />
+                  )}
                   <text
                     x={lx} y={n.labelY - 3}
                     textAnchor={anchor} fontSize={fontSize} fontWeight={fontWeight}
-                    fill={chartColors.label}
+                    fill={chartColors.label} pointerEvents="none"
                   >
                     {n.name}
                   </text>
                   <text
                     x={lx} y={n.labelY + 10}
                     textAnchor={anchor} fontSize={9}
-                    fill={chartColors.axis}
+                    fill={chartColors.axis} pointerEvents="none"
                   >
                     {amtStr}{pctStr}
                   </text>
@@ -676,7 +670,7 @@ function SankeyDiagram({ from, to, maxNodeCap, selectedNode, onNodeClick }: Sank
 
       {/* Negative flow info */}
       {graph.hasNegativeFlows && (
-        <div className="absolute bottom-1 left-4 right-4 flex items-center gap-1.5 text-xs text-text-tertiary">
+        <div className="mt-1 px-4 flex items-center gap-1.5 text-xs text-text-tertiary">
           <Info size={12} className="shrink-0" />
           <span>Some flows excluded — Sankey diagrams cannot represent negative values (e.g. refunds). Summary totals may differ slightly.</span>
         </div>
@@ -809,15 +803,6 @@ export default function CashFlowPage() {
     ];
   }, [incData, spData]);
 
-  const sankeyHeight = useMemo(() => {
-    const groupCount = new Set(spData.map(d => d.groupName ?? 'Uncategorized')).size;
-    const totalIncome = incData.reduce((s, d) => s + d.totalReceived, 0);
-    const totalExpenses = spData.reduce((s, d) => s + d.totalSpent, 0);
-    const hasSavings = totalIncome - totalExpenses > MIN_SAVINGS_CENTS ? 1 : 0;
-    const maxCol = Math.max(incData.length, groupCount + hasSavings, Math.min(userNodeCap, spData.length));
-    return Math.max(420, Math.min(680, maxCol * 28 + 60));
-  }, [incData, spData, userNodeCap]);
-
   const handleNodeClick = useCallback((node: SelectedNode | null) => {
     setSelectedNode(node);
     if (node) {
@@ -893,7 +878,7 @@ export default function CashFlowPage() {
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
         <StatCardRow cards={statCards} />
-        <div className="w-full" style={{ height: sankeyHeight }}>
+        <div className="w-full">
           <SankeyDiagram
             from={from}
             to={to}
