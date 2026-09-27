@@ -6,6 +6,7 @@ import { downloadCsv } from '../utils/exportCsv';
 import { usePreferencesStore } from '../store/preferencesStore';
 import { chartColors } from '../utils/chartColors';
 import { Button } from '../components/ui/Button';
+import { MonthRangePicker } from '../components/ui/MonthRangePicker';
 import { Download, X, Info } from 'lucide-react';
 import { TransactionTable } from '../components/transactions/TransactionTable';
 import {
@@ -792,20 +793,15 @@ export default function CashFlowPage() {
               ))}
             </div>
             {preset === 'custom' && (
-              <>
-                <span className="text-xs text-text-tertiary">From</span>
-                <input
-                  type="month" value={from} max={to}
-                  onChange={e => setFrom(e.target.value)}
-                  className="text-sm border border-border rounded-md px-2 py-1 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
-                />
-                <span className="text-xs text-text-tertiary">to</span>
-                <input
-                  type="month" value={to} min={from} max={format(today, 'yyyy-MM')}
-                  onChange={e => setTo(e.target.value)}
-                  className="text-sm border border-border rounded-md px-2 py-1 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
-                />
-              </>
+              <MonthRangePicker
+                from={from}
+                to={to}
+                onChange={(f, t) => {
+                  setFrom(f);
+                  setTo(t);
+                }}
+                defaultOpen
+              />
             )}
             <Button variant="secondary" size="sm" onClick={handleExport}>
               <Download size={13} /> Export CSV
