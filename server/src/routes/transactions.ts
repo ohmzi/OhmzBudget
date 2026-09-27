@@ -47,7 +47,7 @@ const importRowSchema = z.object({
 
 // GET /transactions — excludes split children; attaches children array to parents
 transactionsRouter.get('/', (req, res) => {
-  const { account_id, month, from, to, category_id, category_group_id, search, reconciled } = req.query as Record<
+  const { account_id, month, from, to, category_id, category_ids, category_group_id, search, reconciled } = req.query as Record<
     string,
     string
   >;
@@ -62,7 +62,12 @@ transactionsRouter.get('/', (req, res) => {
   }
   if (from) conditions.push(gte(transactions.date, from));
   if (to) conditions.push(lte(transactions.date, to));
-  if (category_id) conditions.push(eq(transactions.categoryId, category_id));
+  if (category_ids) {
+    const ids = category_ids.split(',').filter(Boolean);
+    if (ids.length) conditions.push(inArray(transactions.categoryId, ids));
+  } else if (category_id) {
+    conditions.push(eq(transactions.categoryId, category_id));
+  }
   if (category_group_id) {
     const catIds = db.select({ id: categories.id })
       .from(categories)

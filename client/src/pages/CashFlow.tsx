@@ -1,13 +1,12 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { format, subMonths, startOfYear, endOfYear, subYears } from 'date-fns';
-import { ResponsiveContainer, Sankey } from 'recharts';
 import { useSpendingByCategory, useIncomeByCategory } from '../hooks/useReports';
-import { formatCurrency, formatCentsAxis } from '../utils/currency';
+import { formatCurrency } from '../utils/currency';
 import { downloadCsv } from '../utils/exportCsv';
 import { usePreferencesStore } from '../store/preferencesStore';
-import { chartColors, CATEGORY_COLORS } from '../utils/chartColors';
+import { chartColors } from '../utils/chartColors';
 import { Button } from '../components/ui/Button';
-import { Download, X } from 'lucide-react';
+import { Download, X, Info } from 'lucide-react';
 import { TransactionTable } from '../components/transactions/TransactionTable';
 import {
   ChartSkeleton,
@@ -16,6 +15,9 @@ import {
   EXPENSE_COLORS,
 } from '../components/reports/ChartHelpers';
 import type { StatCard } from '../components/reports/ChartHelpers';
+import type { SpendingByCategory as SpendingByCat, IncomeByCategoryItem } from '../types';
+
+// ─── Types & Constants ───────────────────────────────────────────────────────
 
 type Preset = '1m' | '3m' | '6m' | 'ytd' | 'last-year' | 'custom';
 type NodeType = 'income' | 'hub' | 'expense-group' | 'subcategory' | 'savings';
@@ -29,22 +31,56 @@ const PRESETS: { id: Preset; label: string }[] = [
   { id: 'custom', label: 'Custom' },
 ];
 
+const NODE_CAP_OPTIONS = [10, 15, 20, 30];
 const MIN_SAVINGS_CENTS = 500;
+const NODE_W = 12;
+const MIN_NODE_H = 2;
+const LABEL_GAP = 20;
+const NODE_PAD = 8;
 
 interface SankeyNode {
   name: string;
   nodeType: NodeType;
   amount: number;
   color: string;
+  layer: number;
   categoryId?: string | null;
+  categoryIds?: string[];
   groupId?: string | null;
   groupName?: string;
-  percentage?: number;
+  pctOfIncome?: number;
+  pctOfGroup?: number;
+  pctOfSpending?: number;
+  savingsRate?: number;
+  isOther?: boolean;
+  otherBreakdown?: { name: string; amount: number }[];
+}
+
+interface SankeyLink { source: number; target: number; value: number }
+
+interface SankeyGraph {
+  nodes: SankeyNode[];
+  links: SankeyLink[];
+  totalIncome: number;
+  totalExpenses: number;
+  savings: number;
+  hasNegativeFlows: boolean;
+}
+
+interface LayoutNode extends SankeyNode {
+  x: number; y: number; w: number; h: number; labelY: number; idx: number; showLabel: boolean;
+}
+
+interface LayoutLink {
+  si: number; ti: number; value: number;
+  sy: number; ty: number; lw: number; color: string; idx: number;
 }
 
 interface SelectedNode {
   categoryId?: string | null;
+  categoryIds?: string[];
   groupId?: string | null;
+  groupName?: string;
   name: string;
   nodeType: NodeType;
 }
@@ -52,385 +88,691 @@ interface SelectedNode {
 interface SankeyDiagramProps {
   from: string;
   to: string;
+  maxNodeCap: number;
   selectedNode: SelectedNode | null;
   onNodeClick: (node: SelectedNode | null) => void;
 }
 
-function SankeyDiagram({ from, to, selectedNode, onNodeClick }: SankeyDiagramProps) {
-  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function formatDollars(cents: number): string {
+  const sym = usePreferencesStore.getState().currencySymbol || '$';
+  const abs = Math.abs(cents);
+  const dollars = Math.round(abs / 100);
+  const f = dollars.toLocaleString('en-US');
+  return cents < 0 ? `-${sym}${f}` : `${sym}${f}`;
+}
+
+function lighten(hex: string, amt: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const nr = Math.round(r + (255 - r) * amt);
+  const ng = Math.round(g + (255 - g) * amt);
+  const nb = Math.round(b + (255 - b) * amt);
+  return `#${nr.toString(16).padStart(2, '0')}${ng.toString(16).padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
+}
+
+function highlightPath(
+  ni: number, nodes: SankeyNode[], links: SankeyLink[],
+): { hn: Set<number>; hl: Set<number> } {
+  const node = nodes[ni];
+  const hn = new Set([ni]);
+  const hl = new Set<number>();
+
+  if (node.nodeType === 'hub') {
+    nodes.forEach((_, i) => hn.add(i));
+    links.forEach((_, i) => hl.add(i));
+    return { hn, hl };
+  }
+
+  function up(idx: number) {
+    links.forEach((l, li) => {
+      if (l.target === idx && !hl.has(li)) { hl.add(li); hn.add(l.source); up(l.source); }
+    });
+  }
+  function down(idx: number) {
+    links.forEach((l, li) => {
+      if (l.source === idx && !hl.has(li)) { hl.add(li); hn.add(l.target); down(l.target); }
+    });
+  }
+
+  if (node.nodeType === 'income') {
+    links.forEach((l, li) => { if (l.source === ni) { hl.add(li); hn.add(l.target); } });
+  } else if (node.nodeType === 'expense-group' || node.nodeType === 'savings') {
+    links.forEach((l, li) => { if (l.target === ni) { hl.add(li); hn.add(l.source); } });
+    down(ni);
+  } else {
+    up(ni); down(ni);
+  }
+  return { hn, hl };
+}
+
+function resolveCollisions(
+  labels: { idealY: number; resolvedY: number; h: number }[],
+  gap: number, minY: number, maxY: number,
+) {
+  if (labels.length < 2) { labels.forEach(l => { l.resolvedY = l.idealY; }); return; }
+  labels.sort((a, b) => a.idealY - b.idealY);
+  labels.forEach(l => { l.resolvedY = l.idealY; });
+  for (let i = 1; i < labels.length; i++) {
+    const prev = labels[i - 1].resolvedY + labels[i - 1].h;
+    if (labels[i].resolvedY < prev + gap) labels[i].resolvedY = prev + gap;
+  }
+  for (let i = labels.length - 1; i >= 0; i--) {
+    if (labels[i].resolvedY + labels[i].h > maxY) labels[i].resolvedY = maxY - labels[i].h;
+    if (i > 0) {
+      const thisTop = labels[i].resolvedY;
+      const prevBot = labels[i - 1].resolvedY + labels[i - 1].h;
+      if (prevBot + gap > thisTop) labels[i - 1].resolvedY = thisTop - gap - labels[i - 1].h;
+    }
+  }
+  for (const l of labels) l.resolvedY = Math.max(minY, Math.min(maxY - l.h, l.resolvedY));
+}
+
+// ─── Build Sankey Graph ──────────────────────────────────────────────────────
+
+function buildSankeyGraph(
+  incomeData: IncomeByCategoryItem[],
+  spendingData: SpendingByCat[],
+  maxNodes: number,
+  showIcons: boolean,
+): SankeyGraph | null {
+  const validIncome = incomeData.filter(c => c.totalReceived > 0);
+  const validSpending = spendingData.filter(c => c.totalSpent > 0);
+  const hasNeg = validIncome.length < incomeData.length || validSpending.length < spendingData.length;
+  if (!validIncome.length && !validSpending.length) return null;
+
+  const totalIncome = validIncome.reduce((s, c) => s + c.totalReceived, 0);
+  const totalExpenses = validSpending.reduce((s, c) => s + c.totalSpent, 0);
+  const savings = totalIncome - totalExpenses;
+
+  const icon = (c: { categoryIcon?: string | null }) =>
+    showIcons && c.categoryIcon ? c.categoryIcon + ' ' : '';
+
+  // Layer 0: Income sources
+  const incomeNodes: SankeyNode[] = validIncome
+    .sort((a, b) => b.totalReceived - a.totalReceived)
+    .map(c => ({
+      name: `${icon(c)}${c.categoryName ?? 'Income'}`,
+      nodeType: 'income', amount: c.totalReceived, color: chartColors.positive, layer: 0,
+      pctOfIncome: validIncome.length > 1 ? (c.totalReceived / totalIncome) * 100 : undefined,
+    }));
+
+  // Layer 1: Hub
+  const hubNode: SankeyNode = {
+    name: 'Total Income', nodeType: 'hub', amount: totalIncome, color: chartColors.brand, layer: 1,
+  };
+
+  // Build group aggregates
+  const groupMap = new Map<string, { total: number; groupId: string | null; items: SpendingByCat[] }>();
+  for (const item of validSpending) {
+    const key = item.groupName ?? 'Uncategorized';
+    const ex = groupMap.get(key);
+    if (ex) { ex.total += item.totalSpent; ex.items.push(item); }
+    else groupMap.set(key, { total: item.totalSpent, groupId: item.groupId, items: [item] });
+  }
+  const sortedGroups = [...groupMap.entries()].sort((a, b) => b[1].total - a[1].total);
+
+  // Assign group colors
+  const gColorMap = new Map<string, string>();
+  sortedGroups.forEach(([name], i) => {
+    gColorMap.set(name, name === 'Uncategorized' ? chartColors.axis : EXPENSE_COLORS[i % EXPENSE_COLORS.length]);
+  });
+
+  // Layer 2: Expense groups
+  const groupNodes: SankeyNode[] = sortedGroups.map(([name, { total, groupId }]) => ({
+    name, nodeType: 'expense-group', amount: total,
+    color: gColorMap.get(name) ?? chartColors.axis, layer: 2,
+    groupId, groupName: name,
+    pctOfIncome: totalIncome > 0 ? (total / totalIncome) * 100 : 0,
+    pctOfSpending: totalExpenses > 0 ? (total / totalExpenses) * 100 : 0,
+  }));
+
+  // Layer 2: Savings
+  const savingsNodes: SankeyNode[] = savings > MIN_SAVINGS_CENTS
+    ? [{ name: 'Savings', nodeType: 'savings', amount: savings, color: chartColors.positive,
+         layer: 2, savingsRate: totalIncome > 0 ? (savings / totalIncome) * 100 : 0 }]
+    : [];
+
+  // Layer 3: Subcategories per group (with Other aggregation)
+  const subcatNodes: SankeyNode[] = [];
+  const groupSubMap = new Map<string, SankeyNode[]>();
+
+  for (const [gName, { items }] of sortedGroups) {
+    const gColor = gColorMap.get(gName) ?? chartColors.axis;
+    const gTotal = items.reduce((s, i) => s + i.totalSpent, 0);
+    const sorted = [...items].sort((a, b) => b.totalSpent - a.totalSpent);
+
+    let visible: typeof sorted;
+    let otherNode: SankeyNode | null = null;
+
+    if (sorted.length > maxNodes) {
+      visible = sorted.slice(0, maxNodes - 1);
+      const hidden = sorted.slice(maxNodes - 1);
+      const otherTotal = hidden.reduce((s, i) => s + i.totalSpent, 0);
+      otherNode = {
+        name: 'Other', nodeType: 'subcategory', amount: otherTotal,
+        color: lighten(gColor, 0.3), layer: 3, groupName: gName, isOther: true,
+        categoryIds: hidden.map(i => i.categoryId).filter((id): id is string => id != null),
+        otherBreakdown: hidden.map(i => ({
+          name: `${icon(i)}${i.categoryName ?? 'Uncategorized'}`, amount: i.totalSpent,
+        })),
+        pctOfGroup: gTotal > 0 ? (otherTotal / gTotal) * 100 : 0,
+        pctOfSpending: totalExpenses > 0 ? (otherTotal / totalExpenses) * 100 : 0,
+      };
+    } else {
+      visible = sorted;
+    }
+
+    const subs: SankeyNode[] = visible.map((item, ci) => ({
+      name: `${icon(item)}${item.categoryName ?? 'Uncategorized'}`,
+      nodeType: 'subcategory' as NodeType, amount: item.totalSpent,
+      color: lighten(gColor, visible.length > 1 ? Math.min(ci * 0.12, 0.4) : 0),
+      layer: 3, categoryId: item.categoryId, groupName: gName,
+      pctOfGroup: gTotal > 0 ? (item.totalSpent / gTotal) * 100 : 0,
+      pctOfSpending: totalExpenses > 0 ? (item.totalSpent / totalExpenses) * 100 : 0,
+    }));
+    if (otherNode) subs.push(otherNode);
+    groupSubMap.set(gName, subs);
+    subcatNodes.push(...subs);
+  }
+
+  // Assemble nodes
+  const nodes: SankeyNode[] = [
+    ...incomeNodes, hubNode, ...groupNodes, ...savingsNodes, ...subcatNodes,
+  ];
+
+  const hubIdx = incomeNodes.length;
+  const grpStart = hubIdx + 1;
+  const savStart = grpStart + groupNodes.length;
+  const subStart = savStart + savingsNodes.length;
+
+  // Build links
+  const links: SankeyLink[] = [];
+  incomeNodes.forEach((_, i) => links.push({ source: i, target: hubIdx, value: validIncome[i].totalReceived }));
+  sortedGroups.forEach(([, { total }], i) => links.push({ source: hubIdx, target: grpStart + i, value: total }));
+  if (savingsNodes.length) links.push({ source: hubIdx, target: savStart, value: savings });
+
+  let si = subStart;
+  for (const [gName] of sortedGroups) {
+    const subs = groupSubMap.get(gName) ?? [];
+    const gi = grpStart + sortedGroups.findIndex(([n]) => n === gName);
+    for (const sub of subs) { links.push({ source: gi, target: si, value: sub.amount }); si++; }
+  }
+
+  const validLinks = links.filter(l => l.value > 0);
+  return validLinks.length
+    ? { nodes, links: validLinks, totalIncome, totalExpenses, savings, hasNegativeFlows: hasNeg }
+    : null;
+}
+
+// ─── Compute Layout ──────────────────────────────────────────────────────────
+
+function computeLayout(
+  graph: SankeyGraph, width: number, height: number,
+): { nodes: LayoutNode[]; links: LayoutLink[] } | null {
+  const mT = 16, mB = 16, lmL = 170, lmR = 180;
+  const dW = width - lmL - lmR;
+  const dH = height - mT - mB;
+  if (dW <= 0 || dH <= 0) return null;
+
+  // Group by layer
+  const layers = new Map<number, number[]>();
+  graph.nodes.forEach((n, i) => {
+    if (!layers.has(n.layer)) layers.set(n.layer, []);
+    layers.get(n.layer)!.push(i);
+  });
+
+  // Column X — adaptive to income count
+  const incCount = (layers.get(0) ?? []).length;
+  const colX = incCount <= 1
+    ? [0.05, 0.20, 0.55, 0.92].map(p => lmL + p * dW)
+    : [0.02, 0.28, 0.58, 0.92].map(p => lmL + p * dW);
+
+  // Global scale: constrained by most-crowded layer
+  let scale = Infinity;
+  for (const [, idxs] of layers) {
+    const total = idxs.reduce((s, i) => s + graph.nodes[i].amount, 0);
+    if (total <= 0) continue;
+    const avail = dH - Math.max(0, (idxs.length - 1) * NODE_PAD);
+    if (avail > 0) scale = Math.min(scale, avail / total);
+  }
+  if (!isFinite(scale) || scale <= 0) scale = 1;
+
+  // Create layout nodes
+  const ln: LayoutNode[] = graph.nodes.map((n, i) => ({
+    ...n, x: colX[n.layer] ?? 0, y: 0, w: NODE_W,
+    h: Math.max(n.amount * scale, MIN_NODE_H), labelY: 0, idx: i, showLabel: true,
+  }));
+
+  // Stack & center per layer
+  for (const [, idxs] of layers) {
+    const layerN = idxs.map(i => ln[i]);
+    const totalH = layerN.reduce((s, n) => s + n.h, 0);
+    const totalP = Math.max(0, (layerN.length - 1) * NODE_PAD);
+    let y = mT + (dH - totalH - totalP) / 2;
+    for (const n of layerN) { n.y = y; n.labelY = y + n.h / 2; y += n.h + NODE_PAD; }
+  }
+
+  // Label collision avoidance per layer
+  const LABEL_H = 28;
+  for (const [, idxs] of layers) {
+    if (idxs.length < 2) continue;
+    const maxLabels = Math.max(2, Math.floor(dH / (LABEL_H + LABEL_GAP)));
+    // If too many labels to fit, only show the largest by value
+    if (idxs.length > maxLabels) {
+      const sorted = [...idxs].sort((a, b) => ln[b].amount - ln[a].amount);
+      const shown = new Set(sorted.slice(0, maxLabels));
+      for (const i of idxs) if (!shown.has(i)) ln[i].showLabel = false;
+    }
+    const visible = idxs.filter(i => ln[i].showLabel);
+    if (visible.length < 2) continue;
+    const items = visible.map(i => ({
+      idealY: ln[i].y + ln[i].h / 2 - 10,
+      resolvedY: 0,
+      h: LABEL_H,
+      ref: ln[i],
+    }));
+    resolveCollisions(items, LABEL_GAP, mT, mT + dH);
+    for (const it of items) it.ref.labelY = it.resolvedY + it.h / 2;
+  }
+
+  // Link port allocation
+  const outPort = ln.map(n => n.y);
+  const inPort = ln.map(n => n.y);
+
+  // Group links by source, sort by target Y
+  const bySource = new Map<number, number[]>();
+  const byTarget = new Map<number, number[]>();
+  graph.links.forEach((l, i) => {
+    if (!bySource.has(l.source)) bySource.set(l.source, []);
+    bySource.get(l.source)!.push(i);
+    if (!byTarget.has(l.target)) byTarget.set(l.target, []);
+    byTarget.get(l.target)!.push(i);
+  });
+  for (const [, li] of bySource) li.sort((a, b) => ln[graph.links[a].target].y - ln[graph.links[b].target].y);
+  for (const [, li] of byTarget) li.sort((a, b) => ln[graph.links[a].source].y - ln[graph.links[b].source].y);
+
+  const linkSy = new Float64Array(graph.links.length);
+  const linkTy = new Float64Array(graph.links.length);
+  const linkW = new Float64Array(graph.links.length);
+
+  for (const [ni, lis] of bySource) {
+    let py = ln[ni].y;
+    for (const li of lis) {
+      const w = graph.links[li].value * scale;
+      linkSy[li] = py + w / 2; linkW[li] = w; py += w;
+    }
+  }
+  for (const [ni, lis] of byTarget) {
+    let py = ln[ni].y;
+    for (const li of lis) {
+      const w = graph.links[li].value * scale;
+      linkTy[li] = py + w / 2; py += w;
+    }
+  }
+
+  const ll: LayoutLink[] = graph.links.map((l, i) => ({
+    si: l.source, ti: l.target, value: l.value,
+    sy: linkSy[i], ty: linkTy[i], lw: linkW[i],
+    color: ln[l.source].nodeType === 'income' ? ln[l.source].color : ln[l.target].color,
+    idx: i,
+  }));
+
+  return { nodes: ln, links: ll };
+}
+
+// ─── Sankey Diagram Component ────────────────────────────────────────────────
+
+function linkPath(sx: number, sy: number, tx: number, ty: number, w: number) {
+  const hw = w / 2;
+  const cx = (sx + tx) / 2;
+  return `M${sx},${sy - hw} C${cx},${sy - hw} ${cx},${ty - hw} ${tx},${ty - hw} ` +
+    `L${tx},${ty + hw} C${cx},${ty + hw} ${cx},${sy + hw} ${sx},${sy + hw} Z`;
+}
+
+function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(entries => {
+      const e = entries[0];
+      if (e) setSize({ width: e.contentRect.width, height: e.contentRect.height });
+    });
+    ro.observe(el);
+    const r = el.getBoundingClientRect();
+    setSize({ width: r.width, height: r.height });
+    return () => ro.disconnect();
+  }, [ref]);
+  return size;
+}
+
+function SankeyDiagram({ from, to, maxNodeCap, selectedNode, onNodeClick }: SankeyDiagramProps) {
+  const showIcons = usePreferencesStore(s => s.showCategoryIcons);
   const { data: incomeData = [], isLoading: il } = useIncomeByCategory(from, to);
   const { data: spendingData = [], isLoading: sl } = useSpendingByCategory(from, to);
-  const [tooltip, setTooltip] = useState<{
-    x: number;
-    y: number;
-    title: string;
-    value: string;
-  } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { width, height } = useContainerSize(containerRef);
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; node: SankeyNode } | null>(null);
 
-  const sankeyData = useMemo(() => {
-    if (!incomeData.length && !spendingData.length) return null;
+  const effectiveMax = useMemo(() => {
+    if (height <= 0) return maxNodeCap;
+    const fits = Math.floor((height - 32) / 28);
+    return Math.min(maxNodeCap, Math.max(3, fits));
+  }, [height, maxNodeCap]);
 
-    const totalIncome = incomeData.reduce((sum, c) => sum + c.totalReceived, 0);
-    const totalExpenses = spendingData.reduce((sum, c) => sum + c.totalSpent, 0);
-    const savings = totalIncome - totalExpenses;
+  const graph = useMemo(
+    () => buildSankeyGraph(incomeData, spendingData, effectiveMax, showIcons),
+    [incomeData, spendingData, effectiveMax, showIcons],
+  );
 
-    // Column 1: Income sources
-    const incomeNodes: SankeyNode[] = incomeData.map((c) => ({
-      name: `${showCategoryIcons && c.categoryIcon ? c.categoryIcon + ' ' : ''}${c.categoryName ?? 'Income'}`,
-      nodeType: 'income',
-      amount: c.totalReceived,
-      color: chartColors.positive,
-      percentage: totalIncome > 0 ? (c.totalReceived / totalIncome) * 100 : 0,
-    }));
+  const layout = useMemo(
+    () => graph && width > 0 && height > 0 ? computeLayout(graph, width, height) : null,
+    [graph, width, height],
+  );
 
-    const hubIdx = incomeNodes.length;
-
-    // Build group data with colors
-    const groupTotals = new Map<string, { total: number; groupId: string | null }>();
-    for (const item of spendingData) {
-      const key = item.groupName ?? 'Uncategorized';
-      const existing = groupTotals.get(key);
-      groupTotals.set(key, {
-        total: (existing?.total ?? 0) + item.totalSpent,
-        groupId: existing?.groupId ?? item.groupId,
-      });
-    }
-    const sortedGroups = [...groupTotals.entries()].sort((a, b) => b[1].total - a[1].total);
-
-    // Map group names to colors for inheritance
-    const groupColorMap = new Map<string, string>();
-    sortedGroups.forEach(([name], i) => {
-      groupColorMap.set(name, EXPENSE_COLORS[i % EXPENSE_COLORS.length]);
+  // Map selectedNode to graph index
+  const selectedIdx = useMemo(() => {
+    if (!selectedNode || !graph) return -1;
+    return graph.nodes.findIndex(n => {
+      if (selectedNode.categoryIds?.length && n.isOther && n.groupName === selectedNode.groupName)
+        return true;
+      if (selectedNode.nodeType === 'subcategory' && n.nodeType === 'subcategory')
+        return n.categoryId != null && n.categoryId === selectedNode.categoryId;
+      if (selectedNode.nodeType === 'expense-group' && n.nodeType === 'expense-group')
+        return n.groupName === selectedNode.name;
+      if (selectedNode.nodeType === 'savings') return n.nodeType === 'savings';
+      return false;
     });
+  }, [selectedNode, graph]);
 
-    // Column 3: Expense groups
-    const expenseGroupNodes: SankeyNode[] = sortedGroups.map(([name, { total, groupId }], i) => ({
-      name,
-      nodeType: 'expense-group',
-      amount: total,
-      color: EXPENSE_COLORS[i % EXPENSE_COLORS.length],
-      groupId,
-      groupName: name,
-      percentage: totalExpenses > 0 ? (total / totalExpenses) * 100 : 0,
-    }));
+  // Compute highlighted sets
+  const highlighted = useMemo(() => {
+    if (!graph) return null;
+    const active = hoveredIdx != null ? hoveredIdx : selectedIdx >= 0 ? selectedIdx : null;
+    if (active == null) return null;
+    return highlightPath(active, graph.nodes, graph.links);
+  }, [graph, hoveredIdx, selectedIdx]);
 
-    // Column 4: Subcategories (sorted by group, then by amount within group)
-    const subcategoryNodes: SankeyNode[] = [];
-    const groupCategoryMap = new Map<string, typeof spendingData>();
-    for (const item of spendingData) {
-      const key = item.groupName ?? 'Uncategorized';
-      if (!groupCategoryMap.has(key)) groupCategoryMap.set(key, []);
-      groupCategoryMap.get(key)!.push(item);
-    }
+  const handleNodeEnter = useCallback((e: React.MouseEvent, idx: number, node: SankeyNode) => {
+    setHoveredIdx(idx);
+    setTooltip({ x: e.clientX, y: e.clientY, node });
+  }, []);
 
-    // Build subcategories in group order (matching sortedGroups order)
-    for (const [groupName] of sortedGroups) {
-      const items = groupCategoryMap.get(groupName) ?? [];
-      const sorted = [...items].sort((a, b) => b.totalSpent - a.totalSpent);
-      for (const item of sorted) {
-        subcategoryNodes.push({
-          name: `${showCategoryIcons && item.categoryIcon ? item.categoryIcon + ' ' : ''}${item.categoryName ?? 'Uncategorized'}`,
-          nodeType: 'subcategory',
-          amount: item.totalSpent,
-          color: groupColorMap.get(groupName) ?? chartColors.axis,
-          categoryId: item.categoryId,
-          groupName,
-          percentage: totalExpenses > 0 ? (item.totalSpent / totalExpenses) * 100 : 0,
-        });
-      }
-    }
+  const handleNodeMove = useCallback((e: React.MouseEvent, node: SankeyNode) => {
+    setTooltip(prev => prev ? { x: e.clientX, y: e.clientY, node } : null);
+  }, []);
 
-    const savingsNode: SankeyNode[] =
-      savings > MIN_SAVINGS_CENTS
-        ? [{
-            name: 'Savings',
-            nodeType: 'savings',
-            amount: savings,
-            color: '#8b5cf6',
-            percentage: totalIncome > 0 ? (savings / totalIncome) * 100 : 0,
-          }]
-        : [];
+  const handleLeave = useCallback(() => {
+    setHoveredIdx(null); setTooltip(null);
+  }, []);
 
-    // Column 2: Hub
-    const hubNode: SankeyNode = {
-      name: 'Total Income',
-      nodeType: 'hub',
-      amount: totalIncome,
-      color: chartColors.brand,
-    };
-
-    const nodes: SankeyNode[] = [
-      ...incomeNodes,
-      hubNode,
-      ...expenseGroupNodes,
-      ...subcategoryNodes,
-      ...savingsNode,
-    ];
-
-    // Links
-    const groupStartIdx = hubIdx + 1;
-    const subcatStartIdx = groupStartIdx + expenseGroupNodes.length;
-
-    // Income -> Hub
-    const incomeLinks = incomeNodes.map((_, i) => ({
-      source: i,
-      target: hubIdx,
-      value: incomeData[i].totalReceived,
-    }));
-
-    // Hub -> Groups
-    const groupLinks = sortedGroups.map(([, { total }], i) => ({
-      source: hubIdx,
-      target: groupStartIdx + i,
-      value: total,
-    }));
-
-    // Groups -> Subcategories
-    const subcatLinks: { source: number; target: number; value: number }[] = [];
-    let subcatIdx = subcatStartIdx;
-    for (let gi = 0; gi < sortedGroups.length; gi++) {
-      const groupName = sortedGroups[gi][0];
-      const items = groupCategoryMap.get(groupName) ?? [];
-      const sorted = [...items].sort((a, b) => b.totalSpent - a.totalSpent);
-      for (const item of sorted) {
-        subcatLinks.push({
-          source: groupStartIdx + gi,
-          target: subcatIdx,
-          value: item.totalSpent,
-        });
-        subcatIdx++;
-      }
-    }
-
-    // Hub -> Savings
-    const savingsLinks = savingsNode.length
-      ? [{ source: hubIdx, target: nodes.length - 1, value: savings }]
-      : [];
-
-    const links = [...incomeLinks, ...groupLinks, ...subcatLinks, ...savingsLinks].filter(
-      (l) => l.value > 0,
+  const handleClick = useCallback((node: SankeyNode) => {
+    const isClickable = node.nodeType === 'subcategory' || node.nodeType === 'expense-group';
+    if (!isClickable) return;
+    // Check if already selected
+    const isSame = selectedNode && (
+      (node.isOther && selectedNode.categoryIds?.length && node.groupName === selectedNode.groupName) ||
+      (node.categoryId != null && node.categoryId === selectedNode.categoryId) ||
+      (node.nodeType === 'expense-group' && node.groupName === selectedNode.name)
     );
+    if (isSame) { onNodeClick(null); return; }
+    onNodeClick({
+      categoryId: node.categoryId,
+      categoryIds: node.categoryIds,
+      groupId: node.groupId,
+      groupName: node.groupName,
+      name: node.name,
+      nodeType: node.nodeType,
+    });
+  }, [selectedNode, onNodeClick]);
 
-    return links.length ? { nodes, links } : null;
-  }, [incomeData, spendingData, showCategoryIcons]);
+  const handleLinkEnter = useCallback((e: React.MouseEvent, link: LayoutLink) => {
+    if (!layout) return;
+    const src = layout.nodes[link.si];
+    const tgt = layout.nodes[link.ti];
+    setHoveredIdx(link.ti);
+    setTooltip({ x: e.clientX, y: e.clientY, node: {
+      ...tgt, name: `${src.name} → ${tgt.name}`,
+    }});
+  }, [layout]);
 
-  const isNodeSelected = useCallback(
-    (node: SankeyNode) => {
-      if (!selectedNode) return false;
-      if (selectedNode.nodeType === 'subcategory' && node.nodeType === 'subcategory') {
-        return node.categoryId === selectedNode.categoryId;
-      }
-      if (selectedNode.nodeType === 'expense-group' && node.nodeType === 'expense-group') {
-        return node.groupName === selectedNode.name;
-      }
-      return false;
-    },
-    [selectedNode],
-  );
-
-  const isNodeRelated = useCallback(
-    (node: SankeyNode) => {
-      if (!selectedNode) return true;
-      if (isNodeSelected(node)) return true;
-      if (selectedNode.nodeType === 'expense-group') {
-        return node.groupName === selectedNode.name && node.nodeType === 'subcategory';
-      }
-      if (selectedNode.nodeType === 'subcategory') {
-        return node.nodeType === 'expense-group' && node.groupName === selectedNode.groupId;
-      }
-      return false;
-    },
-    [selectedNode, isNodeSelected],
-  );
-
-  const renderNode = useCallback(
-    (props: any) => {
-      const { x, y, width, height, payload } = props;
-      if (!payload || height < 1) return null;
-
-      const node = payload as SankeyNode;
-      const { name, nodeType, amount, color, percentage } = node;
-      const isClickable = nodeType === 'subcategory' || nodeType === 'expense-group';
-      const isLeft = nodeType === 'income';
-      const labelX = isLeft ? x - 8 : x + width + 8;
-      const anchor = isLeft ? 'end' : 'start';
-      const midY = y + height / 2;
-
-      const dimmed = selectedNode && !isNodeSelected(node) && !isNodeRelated(node);
-      const nodeOpacity = dimmed ? 0.3 : 1;
-
-      const handleClick = () => {
-        if (!isClickable) return;
-        if (isNodeSelected(node)) {
-          onNodeClick(null);
-        } else {
-          onNodeClick({
-            categoryId: node.categoryId,
-            groupId: node.groupId,
-            name: node.name,
-            nodeType: node.nodeType,
-          });
-        }
-      };
-
-      const pctStr = percentage != null && percentage > 0 ? ` (${percentage.toFixed(1)}%)` : '';
-      const amountLabel = `${formatCurrency(amount)}${pctStr}`;
-
-      return (
-        <g
-          onMouseEnter={(e: React.MouseEvent) =>
-            setTooltip({ x: e.clientX, y: e.clientY, title: name, value: formatCurrency(amount) })
-          }
-          onMouseLeave={() => setTooltip(null)}
-          onClick={handleClick}
-          style={{ cursor: isClickable ? 'pointer' : 'default', opacity: nodeOpacity }}
-        >
-          <rect x={x} y={y} width={width} height={height} fill={color} rx={3} />
-          {/* Colored indicator square for subcategories */}
-          {nodeType === 'subcategory' && (
-            <rect
-              x={labelX + (isLeft ? -9 : 0)}
-              y={midY - 3}
-              width={7}
-              height={7}
-              fill={color}
-              rx={1.5}
-            />
-          )}
-          <text
-            x={nodeType === 'subcategory' ? labelX + 12 : labelX}
-            y={height > 18 ? midY - 5 : midY + 1}
-            textAnchor={anchor}
-            fontSize={10}
-            fill={chartColors.label}
-            fontWeight="500"
-          >
-            {name}
-          </text>
-          {height > 18 && (
-            <text
-              x={nodeType === 'subcategory' ? labelX + 12 : labelX}
-              y={midY + 8}
-              textAnchor={anchor}
-              fontSize={9}
-              fill={chartColors.axis}
-            >
-              {amountLabel}
-            </text>
-          )}
-        </g>
-      );
-    },
-    [setTooltip, selectedNode, isNodeSelected, isNodeRelated, onNodeClick],
-  );
-
-  const renderLink = useCallback(
-    (props: any) => {
-      const {
-        sourceX,
-        sourceY,
-        sourceControlX,
-        targetX,
-        targetY,
-        targetControlX,
-        linkWidth,
-        payload,
-      } = props;
-      if (!linkWidth || linkWidth < 1) return null;
-
-      const halfW = linkWidth / 2;
-      const color = payload?.target?.color ?? chartColors.axis;
-      const d = [
-        `M${sourceX},${sourceY - halfW}`,
-        `C${sourceControlX},${sourceY - halfW} ${targetControlX},${targetY - halfW} ${targetX},${targetY - halfW}`,
-        `L${targetX},${targetY + halfW}`,
-        `C${targetControlX},${targetY + halfW} ${sourceControlX},${sourceY + halfW} ${sourceX},${sourceY + halfW}`,
-        'Z',
-      ].join(' ');
-
-      const srcNode = payload?.source as SankeyNode | undefined;
-      const tgtNode = payload?.target as SankeyNode | undefined;
-      const srcName = srcNode?.name ?? '';
-      const tgtName = tgtNode?.name ?? '';
-      const value = payload?.value ?? 0;
-
-      let linkOpacity = 0.2;
-      if (selectedNode) {
-        const srcRelated = srcNode ? isNodeSelected(srcNode) || isNodeRelated(srcNode) : false;
-        const tgtRelated = tgtNode ? isNodeSelected(tgtNode) || isNodeRelated(tgtNode) : false;
-        linkOpacity = srcRelated && tgtRelated ? 0.35 : 0.05;
-      }
-
-      return (
-        <path
-          d={d}
-          fill={color}
-          fillOpacity={linkOpacity}
-          stroke={color}
-          strokeWidth={0.5}
-          strokeOpacity={selectedNode ? linkOpacity : 0.4}
-          onMouseEnter={(e: React.MouseEvent) =>
-            setTooltip({
-              x: e.clientX,
-              y: e.clientY,
-              title: `${srcName} → ${tgtName}`,
-              value: formatCurrency(value),
-            })
-          }
-          onMouseLeave={() => setTooltip(null)}
-          style={{ cursor: 'default' }}
-        />
-      );
-    },
-    [setTooltip, selectedNode, isNodeSelected, isNodeRelated],
-  );
-
-  if (il || sl) return <ChartSkeleton />;
-  if (!sankeyData) return <EmptyState />;
-
-  const maxCol = Math.max(
-    incomeData.length,
-    1,
-    new Set(spendingData.map((d) => d.groupName ?? 'Uncategorized')).size +
-      (sankeyData.nodes.some((n) => n.nodeType === 'savings') ? 1 : 0),
-    spendingData.length,
-  );
-  const nodePad = maxCol > 15 ? 6 : maxCol > 10 ? 8 : 10;
+  if (il || sl) return <div ref={containerRef} className="w-full h-full"><ChartSkeleton /></div>;
+  if (!graph) return <div ref={containerRef} className="w-full h-full"><EmptyState /></div>;
 
   return (
-    <div className="relative w-full h-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <Sankey
-          data={sankeyData}
-          nodePadding={nodePad}
-          nodeWidth={12}
-          linkCurvature={0.5}
-          iterations={0}
-          margin={{ top: 16, right: 200, left: 180, bottom: 16 }}
-          node={renderNode as any}
-          link={renderLink as any}
-        />
-      </ResponsiveContainer>
+    <div ref={containerRef} className="relative w-full h-full">
+      {width > 0 && height > 0 && layout && (
+        <svg width={width} height={height} className="select-none">
+          {/* Links */}
+          <g>
+            {layout.links.map((l, i) => {
+              const srcX = layout.nodes[l.si].x + NODE_W;
+              const tgtX = layout.nodes[l.ti].x;
+              let opacity = 0.22;
+              if (highlighted) {
+                opacity = highlighted.hl.has(l.idx) ? 0.6 : 0.07;
+              }
+              return (
+                <path
+                  key={i}
+                  d={linkPath(srcX, l.sy, tgtX, l.ty, l.lw)}
+                  fill={l.color}
+                  fillOpacity={opacity}
+                  stroke="none"
+                  style={{ transition: 'fill-opacity 0.2s ease', cursor: 'default' }}
+                  onMouseEnter={e => handleLinkEnter(e, l)}
+                  onMouseMove={e => setTooltip(prev => prev ? { ...prev, x: e.clientX, y: e.clientY } : null)}
+                  onMouseLeave={handleLeave}
+                />
+              );
+            })}
+          </g>
+
+          {/* Nodes */}
+          <g>
+            {layout.nodes.map((n, i) => {
+              if (n.h < 0.5) return null;
+              const clickable = n.nodeType === 'subcategory' || n.nodeType === 'expense-group';
+              let nodeOpacity = 1;
+              if (highlighted) {
+                nodeOpacity = highlighted.hn.has(n.idx) ? 1 : 0.25;
+              }
+              return (
+                <rect
+                  key={i}
+                  x={n.x} y={n.y} width={n.w} height={n.h}
+                  fill={n.color} rx={3}
+                  style={{
+                    opacity: nodeOpacity,
+                    transition: 'opacity 0.2s ease',
+                    cursor: clickable ? 'pointer' : 'default',
+                  }}
+                  onMouseEnter={e => handleNodeEnter(e, n.idx, n)}
+                  onMouseMove={e => handleNodeMove(e, n)}
+                  onMouseLeave={handleLeave}
+                  onClick={() => handleClick(n)}
+                />
+              );
+            })}
+          </g>
+
+          {/* Labels */}
+          <g>
+            {layout.nodes.map((n, i) => {
+              if (n.h < 0.5 || !n.showLabel) return null;
+              const isLeft = n.nodeType === 'income';
+              const lx = isLeft ? n.x - 8 : n.x + NODE_W + 8;
+              const anchor = isLeft ? 'end' : 'start';
+              const isGroup = n.nodeType === 'expense-group';
+              const fontSize = isGroup ? 11 : 10;
+              const fontWeight = isGroup ? 600 : n.nodeType === 'hub' ? 600 : 400;
+              const clickable = n.nodeType === 'subcategory' || n.nodeType === 'expense-group';
+
+              let nodeOpacity = 1;
+              if (highlighted) {
+                nodeOpacity = highlighted.hn.has(n.idx) ? 1 : 0.25;
+              }
+
+              // Build label text
+              const amtStr = formatDollars(n.amount);
+              let pctStr = '';
+              if (n.nodeType === 'income' && n.pctOfIncome != null) {
+                pctStr = ` · ${n.pctOfIncome.toFixed(1)}%`;
+              } else if (n.nodeType === 'expense-group' && n.pctOfIncome != null) {
+                pctStr = ` · ${n.pctOfIncome.toFixed(1)}%`;
+              } else if (n.nodeType === 'subcategory' && n.pctOfGroup != null) {
+                pctStr = ` · ${n.pctOfGroup.toFixed(1)}%`;
+              } else if (n.nodeType === 'savings' && n.savingsRate != null) {
+                pctStr = ` · ${n.savingsRate.toFixed(1)}%`;
+              }
+
+              return (
+                <g
+                  key={i}
+                  style={{
+                    opacity: nodeOpacity,
+                    transition: 'opacity 0.2s ease',
+                    cursor: clickable ? 'pointer' : 'default',
+                  }}
+                  onMouseEnter={e => handleNodeEnter(e, n.idx, n)}
+                  onMouseMove={e => handleNodeMove(e, n)}
+                  onMouseLeave={handleLeave}
+                  onClick={() => handleClick(n)}
+                >
+                  <text
+                    x={lx} y={n.labelY - 3}
+                    textAnchor={anchor} fontSize={fontSize} fontWeight={fontWeight}
+                    fill={chartColors.label}
+                  >
+                    {n.name}
+                  </text>
+                  <text
+                    x={lx} y={n.labelY + 10}
+                    textAnchor={anchor} fontSize={9}
+                    fill={chartColors.axis}
+                  >
+                    {amtStr}{pctStr}
+                  </text>
+                </g>
+              );
+            })}
+          </g>
+        </svg>
+      )}
+
+      {/* Tooltip */}
       {tooltip && (
         <div
-          className="fixed z-50 pointer-events-none bg-surface rounded-md shadow-hover border border-border px-3 py-2"
-          style={{ left: tooltip.x + 12, top: tooltip.y - 10 }}
+          className="fixed z-50 pointer-events-none bg-surface rounded-md shadow-hover border border-border px-3 py-2 max-w-[260px]"
+          style={{ left: tooltip.x + 14, top: tooltip.y - 12 }}
         >
-          <p className="text-xs font-medium text-text">{tooltip.title}</p>
-          <p className="text-xs text-positive font-medium">{tooltip.value}</p>
+          <SankeyTooltip node={tooltip.node} totalIncome={graph.totalIncome} totalExpenses={graph.totalExpenses} />
+        </div>
+      )}
+
+      {/* Negative flow info */}
+      {graph.hasNegativeFlows && (
+        <div className="absolute bottom-1 left-4 right-4 flex items-center gap-1.5 text-xs text-text-tertiary">
+          <Info size={12} className="shrink-0" />
+          <span>Some flows excluded — Sankey diagrams cannot represent negative values (e.g. refunds). Summary totals may differ slightly.</span>
         </div>
       )}
     </div>
   );
 }
 
+// ─── Tooltip Content ─────────────────────────────────────────────────────────
+
+function SankeyTooltip({ node, totalIncome, totalExpenses }: {
+  node: SankeyNode; totalIncome: number; totalExpenses: number;
+}) {
+  const n = node;
+  const amt = formatCurrency(n.amount);
+
+  if (n.nodeType === 'hub') {
+    return <><p className="text-xs font-medium text-text">{n.name}</p><p className="text-xs text-positive font-semibold">{amt}</p></>;
+  }
+
+  if (n.nodeType === 'income') {
+    return (
+      <>
+        <p className="text-xs font-medium text-text">{n.name}</p>
+        <p className="text-xs text-positive font-semibold">{amt}</p>
+        {n.pctOfIncome != null && <p className="text-xs text-text-tertiary">{n.pctOfIncome.toFixed(1)}% of total income</p>}
+      </>
+    );
+  }
+
+  if (n.nodeType === 'savings') {
+    return (
+      <>
+        <p className="text-xs font-medium text-text">{n.name}</p>
+        <p className="text-xs text-positive font-semibold">{amt}</p>
+        {n.savingsRate != null && <p className="text-xs text-text-tertiary">{n.savingsRate.toFixed(1)}% savings rate</p>}
+      </>
+    );
+  }
+
+  if (n.nodeType === 'expense-group') {
+    return (
+      <>
+        <p className="text-xs font-medium text-text">{n.name}</p>
+        <p className="text-xs font-semibold" style={{ color: n.color }}>{amt}</p>
+        {n.pctOfIncome != null && <p className="text-xs text-text-tertiary">{n.pctOfIncome.toFixed(1)}% of total income</p>}
+        {n.pctOfSpending != null && <p className="text-xs text-text-tertiary">{n.pctOfSpending.toFixed(1)}% of total spending</p>}
+      </>
+    );
+  }
+
+  // Subcategory
+  if (n.isOther && n.otherBreakdown?.length) {
+    return (
+      <>
+        <p className="text-xs font-medium text-text">Other</p>
+        <p className="text-xs font-semibold" style={{ color: n.color }}>{amt}</p>
+        <div className="mt-1.5 pt-1.5 border-t border-border space-y-0.5">
+          {n.otherBreakdown.slice(0, 8).map((item, i) => (
+            <div key={i} className="flex justify-between gap-3 text-xs text-text-secondary">
+              <span className="truncate">{item.name}</span>
+              <span className="tabular-nums shrink-0">{formatDollars(item.amount)}</span>
+            </div>
+          ))}
+          {n.otherBreakdown.length > 8 && (
+            <p className="text-xs text-text-tertiary mt-0.5">and {n.otherBreakdown.length - 8} more…</p>
+          )}
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <p className="text-xs font-medium text-text">{n.name}</p>
+      <p className="text-xs font-semibold" style={{ color: n.color }}>{amt}</p>
+      {n.pctOfGroup != null && n.groupName && (
+        <p className="text-xs text-text-tertiary">{n.pctOfGroup.toFixed(1)}% of {n.groupName}</p>
+      )}
+      {n.pctOfSpending != null && (
+        <p className="text-xs text-text-tertiary">{n.pctOfSpending.toFixed(1)}% of total spending</p>
+      )}
+    </>
+  );
+}
+
+// ─── Page Component ──────────────────────────────────────────────────────────
+
 export default function CashFlowPage() {
-  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
+  const showIcons = usePreferencesStore(s => s.showCategoryIcons);
   const today = new Date();
   const [preset, setPreset] = useState<Preset>('6m');
   const [from, setFrom] = useState(() => format(subMonths(today, 5), 'yyyy-MM'));
   const [to, setTo] = useState(() => format(today, 'yyyy-MM'));
   const [selectedNode, setSelectedNode] = useState<SelectedNode | null>(null);
+  const [userNodeCap, setUserNodeCap] = useState(15);
   const txSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -451,10 +793,7 @@ export default function CashFlowPage() {
     setTo(r.to);
   }, [preset]);
 
-  // Clear selection when date range changes
-  useEffect(() => {
-    setSelectedNode(null);
-  }, [from, to]);
+  useEffect(() => { setSelectedNode(null); }, [from, to]);
 
   const { data: incData = [] } = useIncomeByCategory(from, to);
   const { data: spData = [] } = useSpendingByCategory(from, to);
@@ -471,10 +810,13 @@ export default function CashFlowPage() {
   }, [incData, spData]);
 
   const sankeyHeight = useMemo(() => {
-    const groupCount = new Set(spData.map((d) => d.groupName ?? 'Uncategorized')).size;
-    const maxCol = Math.max(incData.length, groupCount + 1, spData.length);
-    return Math.max(420, maxCol * 28 + 60);
-  }, [incData, spData]);
+    const groupCount = new Set(spData.map(d => d.groupName ?? 'Uncategorized')).size;
+    const totalIncome = incData.reduce((s, d) => s + d.totalReceived, 0);
+    const totalExpenses = spData.reduce((s, d) => s + d.totalSpent, 0);
+    const hasSavings = totalIncome - totalExpenses > MIN_SAVINGS_CENTS ? 1 : 0;
+    const maxCol = Math.max(incData.length, groupCount + hasSavings, Math.min(userNodeCap, spData.length));
+    return Math.max(420, Math.min(680, maxCol * 28 + 60));
+  }, [incData, spData, userNodeCap]);
 
   const handleNodeClick = useCallback((node: SelectedNode | null) => {
     setSelectedNode(node);
@@ -486,11 +828,10 @@ export default function CashFlowPage() {
   }, []);
 
   function handleExport() {
-    const filename = `cash-flow-${from}-${to}.csv`;
     downloadCsv(
-      filename,
-      spData.map((d) => ({
-        category: `${showCategoryIcons && d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`,
+      `cash-flow-${from}-${to}.csv`,
+      spData.map(d => ({
+        category: `${showIcons && d.categoryIcon ? d.categoryIcon + ' ' : ''}${d.categoryName ?? 'Uncategorized'}`,
         group: d.groupName ?? '',
         total_cents: d.totalSpent,
       })),
@@ -504,7 +845,7 @@ export default function CashFlowPage() {
           <h1 className="text-lg font-semibold text-text shrink-0">Cash Flow</h1>
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex gap-0">
-              {PRESETS.map((p) => (
+              {PRESETS.map(p => (
                 <button
                   key={p.id}
                   onClick={() => setPreset(p.id)}
@@ -522,23 +863,27 @@ export default function CashFlowPage() {
               <>
                 <span className="text-xs text-text-tertiary">From</span>
                 <input
-                  type="month"
-                  value={from}
-                  max={to}
-                  onChange={(e) => setFrom(e.target.value)}
+                  type="month" value={from} max={to}
+                  onChange={e => setFrom(e.target.value)}
                   className="text-sm border border-border rounded-md px-2 py-1 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
                 />
                 <span className="text-xs text-text-tertiary">to</span>
                 <input
-                  type="month"
-                  value={to}
-                  min={from}
-                  max={format(today, 'yyyy-MM')}
-                  onChange={(e) => setTo(e.target.value)}
+                  type="month" value={to} min={from} max={format(today, 'yyyy-MM')}
+                  onChange={e => setTo(e.target.value)}
                   className="text-sm border border-border rounded-md px-2 py-1 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600"
                 />
               </>
             )}
+            <select
+              value={userNodeCap}
+              onChange={e => setUserNodeCap(Number(e.target.value))}
+              className="text-sm border border-border rounded-md px-2 py-1 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 cursor-pointer"
+            >
+              {NODE_CAP_OPTIONS.map(n => (
+                <option key={n} value={n}>Show up to {n}</option>
+              ))}
+            </select>
             <Button variant="secondary" size="sm" onClick={handleExport}>
               <Download size={13} /> Export CSV
             </Button>
@@ -552,6 +897,7 @@ export default function CashFlowPage() {
           <SankeyDiagram
             from={from}
             to={to}
+            maxNodeCap={userNodeCap}
             selectedNode={selectedNode}
             onNodeClick={handleNodeClick}
           />
@@ -567,19 +913,21 @@ export default function CashFlowPage() {
                 onClick={() => setSelectedNode(null)}
                 className="flex items-center gap-1 text-xs text-text-tertiary hover:text-text-secondary cursor-pointer transition-colors"
               >
-                <X size={14} />
-                Clear
+                <X size={14} /> Clear
               </button>
             </div>
             <div className="bg-surface rounded-lg shadow-card border border-border-light overflow-hidden">
               <TransactionTable
                 categoryId={
-                  selectedNode.nodeType === 'subcategory' && selectedNode.categoryId
+                  selectedNode.nodeType === 'subcategory' && selectedNode.categoryId && !selectedNode.categoryIds?.length
                     ? selectedNode.categoryId
                     : undefined
                 }
+                categoryIds={
+                  selectedNode.categoryIds?.length ? selectedNode.categoryIds : undefined
+                }
                 categoryGroupId={
-                  selectedNode.nodeType === 'expense-group' && selectedNode.groupId
+                  selectedNode.nodeType === 'expense-group' && selectedNode.groupId && !selectedNode.categoryIds?.length
                     ? selectedNode.groupId
                     : undefined
                 }

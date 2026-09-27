@@ -40,7 +40,8 @@ export function getTransactions(params: TransactionQueryParams = {}) {
   if (params.month) q.set('month', params.month);
   if (params.from) q.set('from', params.from);
   if (params.to) q.set('to', params.to);
-  if (params.categoryId) q.set('category_id', params.categoryId);
+  if (params.categoryIds?.length) q.set('category_ids', params.categoryIds.join(','));
+  else if (params.categoryId) q.set('category_id', params.categoryId);
   if (params.categoryGroupId) q.set('category_group_id', params.categoryGroupId);
   if (params.search) q.set('search', params.search);
   if (params.reconciled !== undefined) q.set('reconciled', String(params.reconciled));

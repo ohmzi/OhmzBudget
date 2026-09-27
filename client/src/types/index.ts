@@ -78,6 +78,7 @@ export interface TransactionQueryParams {
   to?: string;
   categoryId?: string;
   categoryGroupId?: string;
+  categoryIds?: string[];
   search?: string;
   reconciled?: 0 | 1;
   limit?: number;
