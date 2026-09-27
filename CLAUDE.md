@@ -134,11 +134,12 @@ The report builder at `/reports/custom` supports:
 
 ### Recurring Transactions
 
-The recurring page at `/recurring` has three tabs:
+The recurring page at `/recurring` blends Monarch's layout with Actual Budget's schedules table. Two tabs:
 
-- **Monthly** — calendar view with colored dots per occurrence + list of items for the selected month. Summary bar (income/expenses/net).
-- **Upcoming** — next 60 days of unpaid occurrences (upcoming + overdue).
-- **All** — all recurring definitions with pause/resume/edit/cancel actions. Collapsible canceled section.
+- **Monthly** (Monarch-style) — one card with month nav (← → Today), a List | Calendar toggle, and an Income / Expenses summary (remaining, paid of total, progress bar) computed client-side from occurrences. List view is split into Income and Expenses sections sorted by date; Calendar view shows name chips per day (clicking a day jumps to its rows).
+- **All recurring** (Actual `SchedulesTable`-style) — searchable table: Name | Payee | Account | Next date | Status | Amount | Frequency | ⋮. Status follows Actual's `getStatus()` order (missed → due → upcoming ≤7d → scheduled). Canceled items hide behind a "Show canceled" row.
+
+Shared pieces: `StatusBadge` (Actual color/icon scheme), `RowMenu` (⋮ portal menu), `scheduleFormat.ts` (`~` approx / `+` income amounts). Match suggestions render as a banner under the header (`MatchSuggestionsPanel`).
 
 Occurrence status is computed by cross-referencing `recurringTransactionId` on transactions within a 3-day window of expected date: `paid`, `paid_different` (amount differs), `upcoming`, or `overdue`.
 

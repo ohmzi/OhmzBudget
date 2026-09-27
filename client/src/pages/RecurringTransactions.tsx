@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Plus, CalendarRange, ListChecks, Layers } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import MonthlyTab from '../components/recurring/MonthlyTab';
-import UpcomingTab from '../components/recurring/UpcomingTab';
 import AllTab from '../components/recurring/AllTab';
 import RecurringFormModal from '../components/recurring/RecurringFormModal';
 import MatchSuggestionsPanel from '../components/recurring/MatchSuggestionsPanel';
@@ -17,9 +16,8 @@ import type { Schedule, ScheduleOccurrence } from '../types';
 import { format, subDays, addDays } from 'date-fns';
 
 const tabs = [
-  { id: 'monthly' as const, label: 'Monthly', icon: CalendarRange },
-  { id: 'upcoming' as const, label: 'Upcoming', icon: ListChecks },
-  { id: 'all' as const, label: 'All', icon: Layers },
+  { id: 'monthly' as const, label: 'Monthly' },
+  { id: 'all' as const, label: 'All recurring' },
 ];
 
 type TabId = (typeof tabs)[number]['id'];
@@ -34,7 +32,6 @@ export default function RecurringTransactionsPage() {
   const createSchedule = useCreateSchedule();
   const updateSchedule = useUpdateSchedule();
 
-  const today = format(new Date(), 'yyyy-MM-dd');
   const matchFrom = format(subDays(new Date(), 30), 'yyyy-MM-dd');
   const matchTo = format(addDays(new Date(), 90), 'yyyy-MM-dd');
   const { data: allOccurrences = [] } = useScheduleOccurrences(matchFrom, matchTo);
@@ -72,47 +69,35 @@ export default function RecurringTransactionsPage() {
     setEditItem(null);
   }
 
+  function handleAdd() {
+    setEditItem(null);
+    setFormOpen(true);
+  }
+
   return (
     <div className="flex flex-col h-full bg-surface">
-      <div className="px-6 py-4 border-b border-border shrink-0">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-semibold text-text">Recurring</h1>
-            <p className="text-xs text-text-tertiary mt-0.5">
-              Track bills, subscriptions, and recurring income
-            </p>
-          </div>
-          <Button
-            size="sm"
-            onClick={() => {
-              setEditItem(null);
-              setFormOpen(true);
-            }}
-          >
-            <Plus size={13} /> Add Recurring
-          </Button>
-        </div>
-
-        <div className="flex gap-0 mt-3 border-b border-border-light -mb-px">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
+      <div className="px-6 border-b border-border shrink-0 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <h1 className="text-lg font-semibold text-text py-4">Recurring</h1>
+          <div className="flex gap-1 self-stretch">
+            {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                  isActive
+                className={`px-2 text-sm font-medium transition-colors border-b-2 -mb-px cursor-pointer ${
+                  activeTab === tab.id
                     ? 'border-brand-600 text-brand-600'
                     : 'border-transparent text-text-tertiary hover:text-text-secondary'
                 }`}
               >
-                <Icon size={14} />
                 {tab.label}
               </button>
-            );
-          })}
+            ))}
+          </div>
         </div>
+        <Button size="sm" onClick={handleAdd}>
+          <Plus size={13} /> Add recurring
+        </Button>
       </div>
 
       <MatchSuggestionsPanel />
@@ -121,13 +106,7 @@ export default function RecurringTransactionsPage() {
         {activeTab === 'monthly' && (
           <MonthlyTab
             onEdit={handleEdit}
-            allRecurring={allRecurring}
-            onMatchOccurrence={setMatchOccurrenceId}
-          />
-        )}
-        {activeTab === 'upcoming' && (
-          <UpcomingTab
-            onEdit={handleEdit}
+            onAdd={handleAdd}
             allRecurring={allRecurring}
             onMatchOccurrence={setMatchOccurrenceId}
           />

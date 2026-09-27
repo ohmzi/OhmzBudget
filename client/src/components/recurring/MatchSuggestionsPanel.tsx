@@ -8,27 +8,32 @@ export default function MatchSuggestionsPanel() {
   const { data: suggestions = [] } = useMatchSuggestions();
   const matchOcc = useMatchOccurrence();
   const dismissMatch = useDismissMatch();
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   if (suggestions.length === 0) return null;
 
   const totalCandidates = suggestions.reduce((s, sg) => s + sg.candidates.length, 0);
 
   return (
-    <div className="mx-6 mt-4 bg-brand-50 border border-brand-200 rounded-lg overflow-hidden">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-brand-700 hover:bg-brand-100 transition-colors"
-      >
-        {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-        {totalCandidates} transaction{totalCandidates !== 1 ? 's' : ''} may match your recurring
-        items — review
-      </button>
+    <div className="shrink-0 bg-brand-600 text-white">
+      <div className="flex items-center justify-between px-6 py-2 text-sm font-medium">
+        <span>
+          {totalCandidates} transaction{totalCandidates !== 1 ? 's' : ''} may match your recurring
+          items
+        </span>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="flex items-center gap-1 underline underline-offset-2 hover:opacity-80 cursor-pointer"
+        >
+          {expanded ? 'Hide' : 'Review now'}
+          {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        </button>
+      </div>
 
       {expanded && (
-        <div className="border-t border-brand-200 divide-y divide-brand-100">
+        <div className="bg-surface text-text border-b border-border max-h-80 overflow-y-auto divide-y divide-border-light">
           {suggestions.map((sg) => (
-            <div key={sg.occurrenceId} className="px-4 py-3">
+            <div key={sg.occurrenceId} className="px-6 py-3">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm font-medium text-text">{sg.scheduleName}</span>
                 <span className="text-xs text-text-tertiary">

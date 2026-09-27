@@ -9,31 +9,29 @@ import {
   isSameDay,
   format,
   parseISO,
-  addMonths,
-  subMonths,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { ScheduleOccurrence, OccurrenceDisplayStatus } from '../../types';
 
 const DAY_HEADERS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MAX_CHIPS = 3;
 
-const DOT_COLORS: Record<OccurrenceDisplayStatus, string> = {
-  upcoming: 'bg-brand-500',
-  due: 'bg-brand-600',
-  waiting: 'bg-caution',
-  paid: 'bg-positive',
-  skipped: 'bg-text-disabled',
-  cancelled: 'bg-text-disabled',
+const CHIP_COLORS: Record<OccurrenceDisplayStatus, string> = {
+  upcoming: 'bg-brand-50 text-brand-700',
+  due: 'bg-caution-subtle text-caution',
+  waiting: 'bg-negative-subtle text-negative',
+  paid: 'bg-positive-subtle text-positive',
+  skipped: 'bg-surface-alt text-text-disabled line-through',
+  cancelled: 'bg-surface-alt text-text-disabled line-through',
 };
 
 interface Props {
   month: string;
-  onMonthChange: (month: string) => void;
   occurrences: ScheduleOccurrence[];
   onDateClick?: (date: string) => void;
 }
 
-export default function Calendar({ month, onMonthChange, occurrences, onDateClick }: Props) {
+/** Month grid; navigation lives in the parent card header. */
+export default function Calendar({ month, occurrences, onDateClick }: Props) {
   const monthDate = parseISO(`${month}-01`);
 
   const days = useMemo(() => {
@@ -45,79 +43,63 @@ export default function Calendar({ month, onMonthChange, occurrences, onDateClic
   const occByDate = useMemo(() => {
     const map = new Map<string, ScheduleOccurrence[]>();
     for (const occ of occurrences) {
-      const key = occ.expectedDate;
-      const list = map.get(key) || [];
+      const list = map.get(occ.expectedDate) || [];
       list.push(occ);
-      map.set(key, list);
+      map.set(occ.expectedDate, list);
     }
     return map;
   }, [occurrences]);
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-3">
-        <button
-          onClick={() => onMonthChange(format(subMonths(monthDate, 1), 'yyyy-MM'))}
-          className="p-1.5 rounded-md hover:bg-hover text-text-tertiary hover:text-text-secondary transition-colors"
+    <div className="grid grid-cols-7 gap-px bg-border-light rounded-lg overflow-hidden border border-border-light">
+      {DAY_HEADERS.map((d) => (
+        <div
+          key={d}
+          className="bg-surface-alt py-2 text-center text-xs font-medium text-text-tertiary"
         >
-          <ChevronLeft size={16} />
-        </button>
-        <span className="text-sm font-semibold text-text">{format(monthDate, 'MMMM yyyy')}</span>
-        <button
-          onClick={() => onMonthChange(format(addMonths(monthDate, 1), 'yyyy-MM'))}
-          className="p-1.5 rounded-md hover:bg-hover text-text-tertiary hover:text-text-secondary transition-colors"
-        >
-          <ChevronRight size={16} />
-        </button>
-      </div>
+          {d}
+        </div>
+      ))}
+      {days.map((day) => {
+        const dateStr = format(day, 'yyyy-MM-dd');
+        const inMonth = isSameMonth(day, monthDate);
+        const isToday = isSameDay(day, new Date());
+        const dayOccs = inMonth ? occByDate.get(dateStr) || [] : [];
 
-      <div className="grid grid-cols-7 gap-px bg-border-light rounded-lg overflow-hidden border border-border-light">
-        {DAY_HEADERS.map((d) => (
+        return (
           <div
-            key={d}
-            className="bg-surface-alt py-1.5 text-center text-xs font-medium text-text-tertiary"
+            key={dateStr}
+            onClick={() => dayOccs.length > 0 && onDateClick?.(dateStr)}
+            className={`bg-surface min-h-[96px] p-1.5 flex flex-col gap-1 ${
+              dayOccs.length > 0 ? 'cursor-pointer hover:bg-hover' : ''
+            } ${!inMonth ? 'opacity-40' : ''}`}
           >
-            {d}
-          </div>
-        ))}
-        {days.map((day) => {
-          const dateStr = format(day, 'yyyy-MM-dd');
-          const inMonth = isSameMonth(day, monthDate);
-          const isToday = isSameDay(day, new Date());
-          const dayOccs = occByDate.get(dateStr) || [];
-
-          return (
-            <div
-              key={dateStr}
-              onClick={() => dayOccs.length > 0 && onDateClick?.(dateStr)}
-              className={`bg-surface min-h-[52px] px-1.5 py-1 ${
-                dayOccs.length > 0 ? 'cursor-pointer hover:bg-brand-50' : ''
-              } ${!inMonth ? 'opacity-30' : ''}`}
+            <span
+              className={`text-xs tabular-nums self-start ${
+                isToday
+                  ? 'bg-brand-600 text-white w-5 h-5 rounded-full inline-flex items-center justify-center font-medium'
+                  : 'text-text-secondary px-0.5'
+              }`}
             >
+              {format(day, 'd')}
+            </span>
+            {dayOccs.slice(0, MAX_CHIPS).map((occ) => (
               <span
-                className={`text-xs tabular-nums ${
-                  isToday
-                    ? 'bg-brand-600 text-white w-5 h-5 rounded-full inline-flex items-center justify-center font-medium'
-                    : 'text-text-secondary'
-                }`}
+                key={occ.id}
+                className={`text-[11px] leading-tight px-1.5 py-0.5 rounded truncate ${CHIP_COLORS[occ.displayStatus]}`}
+                title={occ.scheduleName}
               >
-                {format(day, 'd')}
+                {occ.scheduleName}
               </span>
-              {dayOccs.length > 0 && (
-                <div className="flex gap-0.5 mt-0.5 flex-wrap">
-                  {dayOccs.slice(0, 4).map((occ, i) => (
-                    <div
-                      key={i}
-                      className={`w-1.5 h-1.5 rounded-full ${DOT_COLORS[occ.displayStatus]}`}
-                      title={`${occ.scheduleName} (${occ.displayStatus})`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+            ))}
+            {dayOccs.length > MAX_CHIPS && (
+              <span className="text-[11px] text-text-tertiary px-1">
+                +{dayOccs.length - MAX_CHIPS} more
+              </span>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
