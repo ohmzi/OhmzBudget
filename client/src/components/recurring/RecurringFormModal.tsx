@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react';
 import { Modal } from '../ui/Modal';
 import { Input, Select } from '../ui/Input';
 import { CurrencyInput } from '../ui/CurrencyInput';
-import { PayeeCombobox } from '../transactions/PayeeCombobox';
+import { MerchantSelect } from '../transactions/MerchantSelect';
+import { CategorySelectButton } from '../transactions/CategorySelectButton';
 import { useAccounts } from '../../hooks/useAccounts';
-import { useCategories } from '../../hooks/useCategories';
 import { usePayees } from '../../hooks/usePayees';
 import { format } from 'date-fns';
-import { usePreferencesStore } from '../../store/preferencesStore';
 import {
   RECURRENCE_TYPE_LABELS,
   type Schedule,
@@ -37,9 +36,7 @@ const WEEKEND_ADJUST_OPTIONS: { value: WeekendAdjust; label: string }[] = [
 ];
 
 export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }: Props) {
-  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const { data: accounts = [] } = useAccounts();
-  const { data: groups = [] } = useCategories();
   const { data: payees = [] } = usePayees();
 
   const [name, setName] = useState('');
@@ -261,29 +258,16 @@ export default function RecurringFormModal({ isOpen, onClose, onSave, editItem }
           <label className="block text-sm font-medium text-text-secondary mb-1">
             Payee <span className="text-text-tertiary font-normal">(optional)</span>
           </label>
-          <PayeeCombobox
-            value={payeeValue}
-            onChange={setPayeeValue}
-            payees={payees}
-            className="border border-border rounded-lg px-3 py-2 focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
-          />
+          <MerchantSelect value={payeeValue} onChange={setPayeeValue} />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-text-secondary mb-1">Category</label>
-          <Select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-            <option value="">No category</option>
-            {groups.map((g) => (
-              <optgroup key={g.id} label={g.name}>
-                {g.categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {showCategoryIcons && c.icon ? `${c.icon} ` : ''}
-                    {c.name}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </Select>
+          <CategorySelectButton
+            value={categoryId || null}
+            onChange={(id) => setCategoryId(id ?? '')}
+            position="above"
+          />
         </div>
 
         <div>

@@ -184,7 +184,7 @@ export default function MonthlyTab({ onEdit, onAdd, onFind, allRecurring, onMatc
         {/* Summary strip */}
         <div className="flex divide-x divide-border-light">
           <SummaryColumn label="Income" verb="received" totals={incomeTotals} barClass="bg-positive" />
-          <SummaryColumn label="Expenses" verb="paid" totals={expenseTotals} barClass="bg-brand-600" />
+          <SummaryColumn label="Expenses" verb="paid" totals={expenseTotals} barClass="bg-negative" />
         </div>
       </div>
 

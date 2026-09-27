@@ -1,19 +1,16 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { format, isValid as isValidDate, parseISO } from 'date-fns';
-import { MinusCircle, PlusCircle, ChevronDown, CreditCard, Plus } from 'lucide-react';
+import { MinusCircle, PlusCircle, ChevronDown } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { CurrencyInput } from '../ui/CurrencyInput';
 import { formatCurrency } from '../../utils/currency';
 import { useAccounts } from '../../hooks/useAccounts';
-import { usePayees } from '../../hooks/usePayees';
-import { useCreatePayee } from '../../hooks/usePayees';
-import { useCategories } from '../../hooks/useCategories';
 import { useCreateTransaction } from '../../hooks/useTransactions';
-import { CategoryPicker } from './CategoryPicker';
-import { payeeColor, ACCOUNT_TYPE_COLORS } from '../../utils/transactionColors';
+import { MerchantSelect } from './MerchantSelect';
+import { CategorySelectButton } from './CategorySelectButton';
+import { ACCOUNT_TYPE_COLORS } from '../../utils/transactionColors';
 import { usePreferencesStore } from '../../store/preferencesStore';
-import type { CategoryGroup } from '../../types';
 
 interface Props {
   isOpen: boolean;
@@ -27,59 +24,26 @@ const selectClass =
   'block w-full rounded-md border border-border px-3 py-2 text-sm bg-surface focus:border-brand-600 focus:outline-none focus:ring-1 focus:ring-brand-600 appearance-none cursor-pointer';
 
 export function AddTransactionModal({ isOpen, onClose }: Props) {
-  const showMerchantIcons = usePreferencesStore((s) => s.showMerchantIcons);
-  const showCategoryIcons = usePreferencesStore((s) => s.showCategoryIcons);
   const showAccountIcons = usePreferencesStore((s) => s.showAccountIcons);
   const [type, setType] = useState<'debit' | 'credit'>('debit');
   const [amount, setAmount] = useState(0);
   const [payeeName, setPayeeName] = useState('');
   const [payeeId, setPayeeId] = useState<string | null>(null);
-  const [payeeQuery, setPayeeQuery] = useState('');
-  const [showPayeeList, setShowPayeeList] = useState(false);
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [accountId, setAccountId] = useState('');
   const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showAccountPicker, setShowAccountPicker] = useState(false);
   const [notes, setNotes] = useState('');
 
-  const payeeRef = useRef<HTMLDivElement>(null);
   const accountRef = useRef<HTMLDivElement>(null);
 
   const { data: accounts = [] } = useAccounts();
-  const { data: payees = [] } = usePayees();
-  const { data: groups = [] } = useCategories();
   const createTransaction = useCreateTransaction();
-  const createPayee = useCreatePayee();
 
   const openAccounts = accounts.filter((a) => !a.closedAt);
   const onBudgetAccounts = openAccounts.filter((a) => !a.isOffBudget);
   const offBudgetAccounts = openAccounts.filter((a) => a.isOffBudget);
   const selectedAccount = openAccounts.find((a) => a.id === accountId);
-
-  const sortedPayees = useMemo(
-    () => [...payees].sort((a, b) => b.transactionCount - a.transactionCount),
-    [payees],
-  );
-
-  const filteredPayees = payeeQuery
-    ? sortedPayees
-        .filter((p) => p.name.toLowerCase().includes(payeeQuery.toLowerCase()))
-        .slice(0, 8)
-    : sortedPayees.slice(0, 8);
-
-  const exactMatch = payees.find(
-    (p) => p.name.toLowerCase() === payeeQuery.trim().toLowerCase(),
-  );
-
-  const categoryEntry = useMemo(() => {
-    if (!categoryId) return null;
-    for (const g of groups as CategoryGroup[]) {
-      const cat = g.categories.find((c) => c.id === categoryId);
-      if (cat) return { name: cat.name, icon: cat.icon };
-    }
-    return null;
-  }, [categoryId, groups]);
 
   const hasConfirmedMerchant = payeeId !== null;
   const dateValid = date !== '' && /^\d{4}-\d{2}-\d{2}$/.test(date) && isValidDate(parseISO(date));
@@ -87,20 +51,13 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (payeeRef.current && !payeeRef.current.contains(e.target as Node)) {
-        setShowPayeeList(false);
-        if (!payeeId) {
-          setPayeeQuery('');
-          setPayeeName('');
-        }
-      }
       if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
         setShowAccountPicker(false);
       }
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, [payeeId]);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -108,13 +65,10 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
       setAmount(0);
       setPayeeName('');
       setPayeeId(null);
-      setPayeeQuery('');
-      setShowPayeeList(false);
       setDate(format(new Date(), 'yyyy-MM-dd'));
       setAccountId('');
       setShowAccountPicker(false);
       setCategoryId(null);
-      setShowCategoryPicker(false);
       setNotes('');
     }
   }, [isOpen]);
@@ -176,81 +130,13 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
         {/* Merchant */}
         <div>
           <label className="block text-sm font-medium text-text mb-1">Merchant *</label>
-          <div ref={payeeRef} className="relative">
-            <input
-              type="text"
-              value={payeeQuery}
-              onChange={(e) => {
-                const name = e.target.value;
-                setPayeeQuery(name);
-                setPayeeName('');
-                setPayeeId(null);
-                setShowPayeeList(true);
-              }}
-              onFocus={() => setShowPayeeList(true)}
-              placeholder="Search merchants..."
-              className={inputClass}
-            />
-            {showPayeeList && (filteredPayees.length > 0 || payeeQuery) && (
-              <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-surface border border-border rounded-lg shadow-lg overflow-hidden max-h-56 overflow-y-auto">
-                {filteredPayees.map((p) => {
-                  const color = payeeColor(p.name);
-                  return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        setPayeeName(p.name);
-                        setPayeeId(p.id);
-                        setPayeeQuery(p.name);
-                        setShowPayeeList(false);
-                      }}
-                      className="w-full text-left px-3 py-2 text-sm flex items-center gap-2.5 hover:bg-hover cursor-pointer"
-                    >
-                      {showMerchantIcons && (
-                        <div
-                          className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
-                          style={{ backgroundColor: color }}
-                        >
-                          {p.name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <span className="truncate flex-1">{p.name}</span>
-                      <span className="flex items-center gap-1 text-xs text-text-tertiary shrink-0">
-                        <CreditCard size={11} />
-                        {p.transactionCount}
-                      </span>
-                    </button>
-                  );
-                })}
-                {payeeQuery.trim() && !exactMatch && (
-                  <button
-                    type="button"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      const name = payeeQuery.trim();
-                      createPayee.mutate(
-                        { name },
-                        {
-                          onSuccess: (created) => {
-                            setPayeeName(created.name);
-                            setPayeeId(created.id);
-                            setPayeeQuery(created.name);
-                            setShowPayeeList(false);
-                          },
-                        },
-                      );
-                    }}
-                    className="w-full text-left px-3 py-2.5 text-sm text-brand-600 font-medium flex items-center gap-1.5 hover:bg-surface-alt cursor-pointer border-t border-border-light"
-                  >
-                    <Plus size={14} />
-                    Create new merchant: &ldquo;{payeeQuery.trim()}&rdquo;
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          <MerchantSelect
+            value={{ id: payeeId, name: payeeName }}
+            onChange={(v) => {
+              setPayeeId(v.id);
+              setPayeeName(v.name);
+            }}
+          />
         </div>
 
         {/* Date */}
@@ -373,37 +259,7 @@ export function AddTransactionModal({ isOpen, onClose }: Props) {
         {/* Category */}
         <div>
           <label className="block text-sm font-medium text-text mb-1">Category</label>
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShowCategoryPicker(!showCategoryPicker)}
-              className={`${inputClass} text-left flex items-center justify-between cursor-pointer`}
-            >
-              <span className="flex items-center gap-2 truncate">
-                {categoryEntry ? (
-                  <>
-                    {showCategoryIcons && categoryEntry.icon && <span className="text-base">{categoryEntry.icon}</span>}
-                    <span className="text-text">{categoryEntry.name}</span>
-                  </>
-                ) : (
-                  <span className="text-text-disabled">Search categories...</span>
-                )}
-              </span>
-              <ChevronDown size={14} className="text-text-tertiary shrink-0" />
-            </button>
-            {showCategoryPicker && (
-              <CategoryPicker
-                value={categoryId}
-                onChange={(id) => {
-                  setCategoryId(id);
-                  setShowCategoryPicker(false);
-                }}
-                groups={groups as CategoryGroup[]}
-                onClose={() => setShowCategoryPicker(false)}
-                position="above"
-              />
-            )}
-          </div>
+          <CategorySelectButton value={categoryId} onChange={setCategoryId} position="above" />
         </div>
 
         {/* Notes */}
