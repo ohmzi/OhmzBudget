@@ -31,7 +31,6 @@ const PRESETS: { id: Preset; label: string }[] = [
   { id: 'custom', label: 'Custom' },
 ];
 
-const NODE_CAP_OPTIONS = [10, 15, 20, 30];
 const MIN_SAVINGS_CENTS = 500;
 const NODE_W = 12;
 const MIN_NODE_H = 2;
@@ -47,15 +46,12 @@ interface SankeyNode {
   color: string;
   layer: number;
   categoryId?: string | null;
-  categoryIds?: string[];
   groupId?: string | null;
   groupName?: string;
   pctOfIncome?: number;
   pctOfGroup?: number;
   pctOfSpending?: number;
   savingsRate?: number;
-  isOther?: boolean;
-  otherBreakdown?: { name: string; amount: number }[];
 }
 
 interface SankeyLink { source: number; target: number; value: number }
@@ -81,7 +77,6 @@ interface LayoutLink {
 
 interface SelectedNode {
   categoryId?: string | null;
-  categoryIds?: string[];
   groupId?: string | null;
   groupName?: string;
   name: string;
@@ -91,7 +86,6 @@ interface SelectedNode {
 interface SankeyDiagramProps {
   from: string;
   to: string;
-  maxNodeCap: number;
   selectedNode: SelectedNode | null;
   onNodeClick: (node: SelectedNode | null) => void;
 }
@@ -171,7 +165,6 @@ function fitLayerScale(amounts: number[], avail: number): number {
 function buildSankeyGraph(
   incomeData: IncomeByCategoryItem[],
   spendingData: SpendingByCat[],
-  maxNodes: number,
   showIcons: boolean,
 ): SankeyGraph | null {
   const validIncome = incomeData.filter(c => c.totalReceived > 0);
@@ -240,36 +233,14 @@ function buildSankeyGraph(
     const gTotal = items.reduce((s, i) => s + i.totalSpent, 0);
     const sorted = [...items].sort((a, b) => b.totalSpent - a.totalSpent);
 
-    let visible: typeof sorted;
-    let otherNode: SankeyNode | null = null;
-
-    if (sorted.length > maxNodes) {
-      visible = sorted.slice(0, maxNodes - 1);
-      const hidden = sorted.slice(maxNodes - 1);
-      const otherTotal = hidden.reduce((s, i) => s + i.totalSpent, 0);
-      otherNode = {
-        name: 'Other', nodeType: 'subcategory', amount: otherTotal,
-        color: lighten(gColor, 0.3), layer: 3, groupName: gName, isOther: true,
-        categoryIds: hidden.map(i => i.categoryId).filter((id): id is string => id != null),
-        otherBreakdown: hidden.map(i => ({
-          name: `${icon(i)}${i.categoryName ?? 'Uncategorized'}`, amount: i.totalSpent,
-        })),
-        pctOfGroup: gTotal > 0 ? (otherTotal / gTotal) * 100 : 0,
-        pctOfSpending: totalExpenses > 0 ? (otherTotal / totalExpenses) * 100 : 0,
-      };
-    } else {
-      visible = sorted;
-    }
-
-    const subs: SankeyNode[] = visible.map((item, ci) => ({
+    const subs: SankeyNode[] = sorted.map((item, ci) => ({
       name: `${icon(item)}${item.categoryName ?? 'Uncategorized'}`,
       nodeType: 'subcategory' as NodeType, amount: item.totalSpent,
-      color: lighten(gColor, visible.length > 1 ? Math.min(ci * 0.12, 0.4) : 0),
+      color: lighten(gColor, sorted.length > 1 ? Math.min(ci * 0.12, 0.4) : 0),
       layer: 3, categoryId: item.categoryId, groupName: gName,
       pctOfGroup: gTotal > 0 ? (item.totalSpent / gTotal) * 100 : 0,
       pctOfSpending: totalExpenses > 0 ? (item.totalSpent / totalExpenses) * 100 : 0,
     }));
-    if (otherNode) subs.push(otherNode);
     groupSubMap.set(gName, subs);
     subcatNodes.push(...subs);
   }
@@ -425,7 +396,7 @@ function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
   return size;
 }
 
-function SankeyDiagram({ from, to, maxNodeCap, selectedNode, onNodeClick }: SankeyDiagramProps) {
+function SankeyDiagram({ from, to, selectedNode, onNodeClick }: SankeyDiagramProps) {
   const showIcons = usePreferencesStore(s => s.showCategoryIcons);
   const { data: incomeData = [], isLoading: il } = useIncomeByCategory(from, to);
   const { data: spendingData = [], isLoading: sl } = useSpendingByCategory(from, to);
@@ -435,8 +406,8 @@ function SankeyDiagram({ from, to, maxNodeCap, selectedNode, onNodeClick }: Sank
   const [tooltip, setTooltip] = useState<{ x: number; y: number; node: SankeyNode } | null>(null);
 
   const graph = useMemo(
-    () => buildSankeyGraph(incomeData, spendingData, maxNodeCap, showIcons),
-    [incomeData, spendingData, maxNodeCap, showIcons],
+    () => buildSankeyGraph(incomeData, spendingData, showIcons),
+    [incomeData, spendingData, showIcons],
   );
 
   // Height derived from the graph itself: the most crowded column gets one MIN_SLOT row
@@ -458,8 +429,6 @@ function SankeyDiagram({ from, to, maxNodeCap, selectedNode, onNodeClick }: Sank
   const selectedIdx = useMemo(() => {
     if (!selectedNode || !graph) return -1;
     return graph.nodes.findIndex(n => {
-      if (selectedNode.categoryIds?.length && n.isOther && n.groupName === selectedNode.groupName)
-        return true;
       if (selectedNode.nodeType === 'subcategory' && n.nodeType === 'subcategory')
         return n.categoryId != null && n.categoryId === selectedNode.categoryId;
       if (selectedNode.nodeType === 'expense-group' && n.nodeType === 'expense-group')
@@ -495,14 +464,12 @@ function SankeyDiagram({ from, to, maxNodeCap, selectedNode, onNodeClick }: Sank
     if (!isClickable) return;
     // Check if already selected
     const isSame = selectedNode && (
-      (node.isOther && selectedNode.categoryIds?.length && node.groupName === selectedNode.groupName) ||
       (node.categoryId != null && node.categoryId === selectedNode.categoryId) ||
       (node.nodeType === 'expense-group' && node.groupName === selectedNode.name)
     );
     if (isSame) { onNodeClick(null); return; }
     onNodeClick({
       categoryId: node.categoryId,
-      categoryIds: node.categoryIds,
       groupId: node.groupId,
       groupName: node.groupName,
       name: node.name,
@@ -723,25 +690,6 @@ function SankeyTooltip({ node, totalIncome, totalExpenses }: {
   }
 
   // Subcategory
-  if (n.isOther && n.otherBreakdown?.length) {
-    return (
-      <>
-        <p className="text-xs font-medium text-text">Other</p>
-        <p className="text-xs font-semibold" style={{ color: n.color }}>{amt}</p>
-        <div className="mt-1.5 pt-1.5 border-t border-border space-y-0.5">
-          {n.otherBreakdown.slice(0, 8).map((item, i) => (
-            <div key={i} className="flex justify-between gap-3 text-xs text-text-secondary">
-              <span className="truncate">{item.name}</span>
-              <span className="tabular-nums shrink-0">{formatDollars(item.amount)}</span>
-            </div>
-          ))}
-          {n.otherBreakdown.length > 8 && (
-            <p className="text-xs text-text-tertiary mt-0.5">and {n.otherBreakdown.length - 8} more…</p>
-          )}
-        </div>
-      </>
-    );
-  }
 
   return (
     <>
@@ -766,7 +714,6 @@ export default function CashFlowPage() {
   const [from, setFrom] = useState(() => format(subMonths(today, 5), 'yyyy-MM'));
   const [to, setTo] = useState(() => format(today, 'yyyy-MM'));
   const [selectedNode, setSelectedNode] = useState<SelectedNode | null>(null);
-  const [userNodeCap, setUserNodeCap] = useState(15);
   const txSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -860,15 +807,6 @@ export default function CashFlowPage() {
                 />
               </>
             )}
-            <select
-              value={userNodeCap}
-              onChange={e => setUserNodeCap(Number(e.target.value))}
-              className="text-sm border border-border rounded-md px-2 py-1 bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 cursor-pointer"
-            >
-              {NODE_CAP_OPTIONS.map(n => (
-                <option key={n} value={n}>Show up to {n}</option>
-              ))}
-            </select>
             <Button variant="secondary" size="sm" onClick={handleExport}>
               <Download size={13} /> Export CSV
             </Button>
@@ -882,7 +820,6 @@ export default function CashFlowPage() {
           <SankeyDiagram
             from={from}
             to={to}
-            maxNodeCap={userNodeCap}
             selectedNode={selectedNode}
             onNodeClick={handleNodeClick}
           />
@@ -904,15 +841,12 @@ export default function CashFlowPage() {
             <div className="bg-surface rounded-lg shadow-card border border-border-light overflow-hidden">
               <TransactionTable
                 categoryId={
-                  selectedNode.nodeType === 'subcategory' && selectedNode.categoryId && !selectedNode.categoryIds?.length
+                  selectedNode.nodeType === 'subcategory' && selectedNode.categoryId
                     ? selectedNode.categoryId
                     : undefined
                 }
-                categoryIds={
-                  selectedNode.categoryIds?.length ? selectedNode.categoryIds : undefined
-                }
                 categoryGroupId={
-                  selectedNode.nodeType === 'expense-group' && selectedNode.groupId && !selectedNode.categoryIds?.length
+                  selectedNode.nodeType === 'expense-group' && selectedNode.groupId
                     ? selectedNode.groupId
                     : undefined
                 }
