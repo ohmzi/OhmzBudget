@@ -42,20 +42,31 @@ export interface StatCard {
   label: string;
   value: string;
   sub?: string;
+  tone?: 'positive' | 'negative' | 'neutral';
 }
 
-export function StatCardRow({ cards }: { cards: StatCard[] }) {
+const TONE_CLASS = {
+  positive: 'text-positive',
+  negative: 'text-negative',
+  neutral: 'text-text-tertiary',
+} as const;
+
+export function StatCardRow({ cards, stretch }: { cards: StatCard[]; stretch?: boolean }) {
   if (!cards.length) return null;
   return (
     <div className="flex gap-3 mb-5 flex-wrap">
       {cards.map((c) => (
         <div
           key={c.label}
-          className="rounded-lg bg-surface-alt border border-border-light px-4 py-3 min-w-[110px]"
+          className={`rounded-lg bg-surface-alt border border-border-light px-4 py-3 min-w-[110px] ${
+            stretch ? 'flex-1 basis-0 min-w-[160px]' : ''
+          }`}
         >
           <p className="text-xs text-text-tertiary">{c.label}</p>
-          <p className="text-lg font-semibold text-text mt-0.5 tabular-nums">{c.value}</p>
-          {c.sub && <p className="text-xs text-text-tertiary mt-0.5">{c.sub}</p>}
+          {c.sub && <p className="text-[11px] text-text-tertiary/80">{c.sub}</p>}
+          <p className={`text-lg font-semibold mt-0.5 tabular-nums ${c.tone ? TONE_CLASS[c.tone] : 'text-text'}`}>
+            {c.value}
+          </p>
         </div>
       ))}
     </div>

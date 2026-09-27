@@ -149,6 +149,7 @@ reportsRouter.get('/income-vs-expenses', (req, res) => {
       month: sql<string>`strftime('%Y-%m', ${transactions.date})`,
       isIncome: categoryGroups.isIncome,
       total: sql<number>`coalesce(sum(${transactions.amount}), 0)`,
+      outflowCount: sql<number>`sum(case when ${transactions.amount} < 0 then 1 else 0 end)`,
     })
     .from(transactions)
     .innerJoin(categories, eq(transactions.categoryId, categories.id))
@@ -162,16 +163,25 @@ reportsRouter.get('/income-vs-expenses', (req, res) => {
     .groupBy(sql`strftime('%Y-%m', ${transactions.date})`, categoryGroups.isIncome)
     .all();
 
-  const dataMap: Record<string, { income: number; expenses: number }> = {};
+  type MonthData = { income: number; expenses: number; expenseNet: number; expenseCount: number };
+  const empty = (): MonthData => ({ income: 0, expenses: 0, expenseNet: 0, expenseCount: 0 });
+  const dataMap: Record<string, MonthData> = {};
   for (const row of txRows) {
-    dataMap[row.month] ??= { income: 0, expenses: 0 };
+    dataMap[row.month] ??= empty();
     if (row.isIncome === 1) dataMap[row.month].income += row.total;
-    else dataMap[row.month].expenses += Math.abs(Math.min(row.total, 0));
+    else {
+      dataMap[row.month].expenses += Math.abs(Math.min(row.total, 0));
+      dataMap[row.month].expenseNet += row.total;
+      dataMap[row.month].expenseCount += row.outflowCount ?? 0;
+    }
   }
 
   const result = months.map((month) => {
-    const d = dataMap[month] ?? { income: 0, expenses: 0 };
-    return { month, income: d.income, expenses: d.expenses, net: d.income - d.expenses };
+    const d = dataMap[month] ?? empty();
+    return {
+      month, income: d.income, expenses: d.expenses, net: d.income - d.expenses,
+      expenseNet: d.expenseNet, expenseCount: d.expenseCount,
+    };
   });
 
   res.json(result);

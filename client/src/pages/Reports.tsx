@@ -448,7 +448,7 @@ function OverviewGrid({
           onClick={() => onSelectTab(chart.id)}
           className="bg-surface-alt rounded-lg border border-border-light p-3 hover:shadow-hover hover:border-brand-200 transition-all text-left cursor-pointer group"
         >
-          <p className="text-xs font-medium text-text-secondary mb-2 group-hover:text-brand-600 transition-colors">
+          <p className="text-sm font-semibold text-text mb-2 group-hover:text-brand-600 transition-colors">
             {chart.label}
           </p>
           <div className="h-64 pointer-events-none">
@@ -498,16 +498,27 @@ export default function ReportsPage() {
   const statCards = useMemo((): StatCard[] => {
     switch (activeTab) {
       case 'all': {
-        const cards: StatCard[] = [];
+        // Signed totals, colored by sign like Actual Budget: >0 green, <0 red, 0 neutral.
+        // Values display as absolute amounts.
         const totalInc = ieData.reduce((s, d) => s + d.income, 0);
-        const totalExp = ieData.reduce((s, d) => s + d.expenses, 0);
-        if (totalInc > 0 || totalExp > 0) {
-          cards.push(
-            { label: 'Income', value: formatCurrency(totalInc) },
-            { label: 'Expenses', value: formatCurrency(totalExp) },
-          );
-        }
-        return cards;
+        const expNet = ieData.reduce((s, d) => s + d.expenseNet, 0);
+        const txCount = ieData.reduce((s, d) => s + d.expenseCount, 0);
+        const monthCount = Math.max(ieData.length, 1);
+        const fmtMonth = (m: string) => format(parseISO(`${m}-01`), 'MMM yyyy');
+        const range = from === to ? fmtMonth(from) : `${fmtMonth(from)} – ${fmtMonth(to)}`;
+        const signedCard = (label: string, cents: number): StatCard => {
+          const v = Math.round(cents);
+          return {
+            label, sub: range, value: formatCurrency(Math.abs(v)),
+            tone: v > 0 ? 'positive' : v < 0 ? 'negative' : 'neutral',
+          };
+        };
+        return [
+          signedCard('Total Income', totalInc),
+          signedCard('Total Expenses', expNet),
+          signedCard('Avg Per Month', expNet / monthCount),
+          signedCard('Avg Per Transaction', txCount > 0 ? expNet / txCount : 0),
+        ];
       }
       case 'net-worth': {
         if (!nwData.length) return [];
@@ -541,7 +552,7 @@ export default function ReportsPage() {
       case 'trends':
         return [];
     }
-  }, [activeTab, nwData, ieData, spData]);
+  }, [activeTab, nwData, ieData, spData, from, to]);
 
   function handleExport() {
     if (activeTab === 'all') return;
@@ -663,7 +674,7 @@ export default function ReportsPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
-        <StatCardRow cards={statCards} />
+        <StatCardRow cards={statCards} stretch={activeTab === 'all'} />
         {activeTab === 'all' ? (
           <OverviewGrid from={from} to={to} onSelectTab={setActiveTab} />
         ) : (

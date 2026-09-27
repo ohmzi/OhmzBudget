@@ -139,6 +139,10 @@ export interface IncomeExpensesPoint {
   income: number;
   expenses: number;
   net: number;
+  /** Signed sum of expense-category transactions (negative = net spending, refunds not clamped) */
+  expenseNet: number;
+  /** Number of outflow transactions in expense categories */
+  expenseCount: number;
 }
 export interface CashFlowPoint {
   month: string;
