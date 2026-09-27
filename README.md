@@ -33,3 +33,4 @@
 - Investment projections and forecasting
 - FIRE Calculator
 - Supported Hosting plans for ease of access
+- Support for enevelope budgeting
