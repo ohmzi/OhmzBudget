@@ -14,6 +14,8 @@ interface PreferencesState {
   showMerchantIcons: boolean;
   showCategoryIcons: boolean;
   showAccountIcons: boolean;
+  /** Actual Budget-style upcoming window token: '1' | '7' | '14' | 'oneMonth' | 'currentMonth' | '<n>-<day|week|month|year>' */
+  upcomingLength: string;
   setTheme: (theme: Theme) => void;
   setCurrencySymbol: (symbol: string) => void;
   setDateFormat: (format: DateFormatOption) => void;
@@ -22,6 +24,7 @@ interface PreferencesState {
   setShowMerchantIcons: (show: boolean) => void;
   setShowCategoryIcons: (show: boolean) => void;
   setShowAccountIcons: (show: boolean) => void;
+  setUpcomingLength: (length: string) => void;
 }
 
 export const usePreferencesStore = create<PreferencesState>()(
@@ -35,6 +38,7 @@ export const usePreferencesStore = create<PreferencesState>()(
       showMerchantIcons: true,
       showCategoryIcons: true,
       showAccountIcons: true,
+      upcomingLength: '7',
       setTheme: (theme) => set({ theme }),
       setCurrencySymbol: (currencySymbol) => set({ currencySymbol }),
       setDateFormat: (dateFormat) => set({ dateFormat }),
@@ -43,6 +47,7 @@ export const usePreferencesStore = create<PreferencesState>()(
       setShowMerchantIcons: (showMerchantIcons) => set({ showMerchantIcons }),
       setShowCategoryIcons: (showCategoryIcons) => set({ showCategoryIcons }),
       setShowAccountIcons: (showAccountIcons) => set({ showAccountIcons }),
+      setUpcomingLength: (upcomingLength) => set({ upcomingLength }),
     }),
     { name: 'budget-preferences' },
   ),

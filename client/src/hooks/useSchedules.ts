@@ -247,3 +247,25 @@ export function useDismissMatch() {
     },
   });
 }
+
+/** Runs discovery only while `enabled` (e.g. the Find recurring modal is open). */
+export function useDiscoverSchedules(enabled: boolean) {
+  return useQuery({
+    queryKey: ['schedule-discover'],
+    queryFn: api.discoverSchedules,
+    enabled,
+    staleTime: 0,
+    gcTime: 0,
+  });
+}
+
+export function useCreateDiscoveredSchedules() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: api.createDiscoveredSchedules,
+    onSuccess: () => {
+      invalidateAll(qc);
+      qc.removeQueries({ queryKey: ['schedule-discover'] });
+    },
+  });
+}

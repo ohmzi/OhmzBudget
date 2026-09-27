@@ -5,6 +5,7 @@ import type {
   ScheduleOccurrence,
   ScheduleSummary,
   MatchSuggestion,
+  DiscoveredSchedule,
   Transaction,
   RecurrenceType,
   AmountType,
@@ -99,3 +100,11 @@ export const getMatchSuggestions = () =>
 
 export const triggerScheduleAutoCreate = () =>
   apiFetch<{ created: number }>('/schedules/auto-create', { method: 'POST' });
+
+export const discoverSchedules = () => apiFetch<DiscoveredSchedule[]>('/schedules/discover');
+
+export const createDiscoveredSchedules = (items: DiscoveredSchedule[]) =>
+  apiFetch<{ created: number; ids: string[] }>('/schedules/discover/create', {
+    method: 'POST',
+    body: JSON.stringify({ items }),
+  });

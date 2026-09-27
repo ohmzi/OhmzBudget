@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
-import { format, parseISO, subDays, addDays, differenceInCalendarDays } from 'date-fns';
-import { Search } from 'lucide-react';
+import { format, parseISO, subDays, addDays } from 'date-fns';
+import { Search, Sparkles, Clock } from 'lucide-react';
 import { useAccounts } from '../../hooks/useAccounts';
 import { usePayees } from '../../hooks/usePayees';
 import {
@@ -13,17 +13,25 @@ import {
 import { ConfirmModal } from '../ui/ConfirmModal';
 import StatusBadge, { statusLabel, type RecurringBadgeStatus } from './StatusBadge';
 import RowMenu from './RowMenu';
-import { FREQ_LABEL, formatScheduleAmount } from './scheduleFormat';
+import {
+  FREQ_LABEL,
+  formatScheduleAmount,
+  getUpcomingDays,
+  occurrenceBadgeStatus,
+  describeUpcomingLength,
+} from './scheduleFormat';
+import { usePreferencesStore } from '../../store/preferencesStore';
+import { Button } from '../ui/Button';
 import type { Schedule, ScheduleOccurrence } from '../../types';
 
-// Actual Budget's default "upcoming" window; later pending dates show as "Scheduled"
-const UPCOMING_DAYS = 7;
 const GRID =
   'grid grid-cols-[minmax(0,1.6fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_110px_130px_120px_120px_32px] items-center gap-4';
 
 interface Props {
   allRecurring: Schedule[];
   onEdit: (item: Schedule) => void;
+  onFind: () => void;
+  onChangeUpcomingLength: () => void;
 }
 
 interface Row {
@@ -39,26 +47,28 @@ const isPending = (o: ScheduleOccurrence) =>
   o.displayStatus === 'upcoming' || o.displayStatus === 'due' || o.displayStatus === 'waiting';
 
 /**
- * Mirrors Actual's getStatus() order: completed → missed/due → upcoming (≤7d) → scheduled,
+ * Mirrors Actual's getStatus() order: completed → missed/due → upcoming (within window) → scheduled,
  * falling back to the latest settled occurrence (paid/skipped) when nothing is pending.
  */
-function deriveRow(s: Schedule, occs: ScheduleOccurrence[]): Pick<Row, 'nextOcc' | 'nextDate' | 'status'> {
+function deriveRow(
+  s: Schedule,
+  occs: ScheduleOccurrence[],
+  upcomingDays: number,
+): Pick<Row, 'nextOcc' | 'nextDate' | 'status'> {
   const pending = occs.filter(isPending);
   const next = pending[0] ?? null;
   if (s.status === 'canceled') return { nextOcc: null, nextDate: null, status: 'cancelled' };
   if (s.status === 'paused') return { nextOcc: next, nextDate: next?.expectedDate ?? null, status: 'paused' };
-  if (next) {
-    let status: RecurringBadgeStatus = next.displayStatus;
-    if (status === 'upcoming' && differenceInCalendarDays(parseISO(next.expectedDate), new Date()) > UPCOMING_DAYS)
-      status = 'scheduled';
-    return { nextOcc: next, nextDate: next.expectedDate, status };
-  }
+  if (next)
+    return { nextOcc: next, nextDate: next.expectedDate, status: occurrenceBadgeStatus(next, upcomingDays) };
   const last = occs[occs.length - 1];
   if (last) return { nextOcc: null, nextDate: last.expectedDate, status: last.displayStatus };
   return { nextOcc: null, nextDate: null, status: 'scheduled' };
 }
 
-export default function AllTab({ allRecurring, onEdit }: Props) {
+export default function AllTab({ allRecurring, onEdit, onFind, onChangeUpcomingLength }: Props) {
+  const upcomingLength = usePreferencesStore((s) => s.upcomingLength);
+  const upcomingDays = getUpcomingDays(upcomingLength);
   const [filter, setFilter] = useState('');
   const [showCanceled, setShowCanceled] = useState(false);
   const [confirm, setConfirm] = useState<{ schedule: Schedule; hard: boolean } | null>(null);
@@ -90,10 +100,10 @@ export default function AllTab({ allRecurring, onEdit }: Props) {
         schedule: s,
         payeeName: s.payeeId ? (payeeMap.get(s.payeeId) ?? '') : '',
         accountName: s.accountId ? (accountMap.get(s.accountId) ?? '') : '',
-        ...deriveRow(s, occsBySchedule.get(s.id) ?? []),
+        ...deriveRow(s, occsBySchedule.get(s.id) ?? [], upcomingDays),
       }))
       .sort((a, b) => (a.nextDate ?? '9999').localeCompare(b.nextDate ?? '9999'));
-  }, [allRecurring, occurrences, accounts, payees]);
+  }, [allRecurring, occurrences, accounts, payees, upcomingDays]);
 
   // Same searchable fields as Actual: name, payee, account, amount, status, date
   const filtered = useMemo(() => {
@@ -184,7 +194,15 @@ export default function AllTab({ allRecurring, onEdit }: Props) {
 
   return (
     <div className="p-6">
-      <div className="flex justify-end mb-3">
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" onClick={onFind}>
+            <Sparkles size={13} /> Find recurring
+          </Button>
+          <Button variant="secondary" size="sm" onClick={onChangeUpcomingLength} title="Change upcoming length">
+            <Clock size={13} /> Upcoming: {describeUpcomingLength(upcomingLength)}
+          </Button>
+        </div>
         <div className="relative w-72">
           <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
           <input

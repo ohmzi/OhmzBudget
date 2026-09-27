@@ -139,7 +139,11 @@ The recurring page at `/recurring` blends Monarch's layout with Actual Budget's 
 - **Monthly** (Monarch-style) — one card with month nav (← → Today), a List | Calendar toggle, and an Income / Expenses summary (remaining, paid of total, progress bar) computed client-side from occurrences. List view is split into Income and Expenses sections sorted by date; Calendar view shows name chips per day (clicking a day jumps to its rows).
 - **All recurring** (Actual `SchedulesTable`-style) — searchable table: Name | Payee | Account | Next date | Status | Amount | Frequency | ⋮. Status follows Actual's `getStatus()` order (missed → due → upcoming ≤7d → scheduled). Canceled items hide behind a "Show canceled" row.
 
-Shared pieces: `StatusBadge` (Actual color/icon scheme), `RowMenu` (⋮ portal menu), `scheduleFormat.ts` (`~` approx / `+` income amounts). Match suggestions render as a banner under the header (`MatchSuggestionsPanel`).
+Shared pieces: `StatusBadge` (Actual color/icon scheme), `RowMenu` (⋮ portal menu), `scheduleFormat.ts` (`~` approx / `+` income amounts, upcoming-length helpers). Match suggestions render as a banner under the header (`MatchSuggestionsPanel`).
+
+**Find recurring** (`DiscoverSchedulesModal`, `GET /api/schedules/discover`, `POST /api/schedules/discover/create`) — port of Actual's `find-schedules.ts` in `server/src/services/scheduleDiscovery.ts`. Per open account it scans weekly / every-2-weeks / monthly-on-day-X / monthly-last-day patterns, requiring 3 consecutive matches (same payee, ±2 days, amount within 7.5%), picks the best-ranked pattern per payee, then walks the start date back through history. Ignores transactions already linked to a schedule or occurrence, transfers, split children, and payees with a live schedule. Creating links past transactions to occurrences (paid) and marks unmatched past occurrences skipped; schedules get `source='detected'`.
+
+**Upcoming length** (`UpcomingLengthModal`) — Actual's setting, stored as `upcomingLength` in `preferencesStore` (`'1'|'7'|'14'|'oneMonth'|'currentMonth'|'<n>-<day|week|month|year>'`, default `'7'`). Pending occurrences beyond the window show as "Scheduled" instead of "Upcoming" (`occurrenceBadgeStatus`).
 
 Occurrence status is computed by cross-referencing `recurringTransactionId` on transactions within a 3-day window of expected date: `paid`, `paid_different` (amount differs), `upcoming`, or `overdue`.
 

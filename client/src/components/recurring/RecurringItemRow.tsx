@@ -3,7 +3,7 @@ import { formatCurrency } from '../../utils/currency';
 import type { ScheduleOccurrence } from '../../types';
 import StatusBadge from './StatusBadge';
 import RowMenu from './RowMenu';
-import { FREQ_LABEL, formatScheduleAmount } from './scheduleFormat';
+import { FREQ_LABEL, formatScheduleAmount, occurrenceBadgeStatus } from './scheduleFormat';
 
 /** Shared with the section header in MonthlyTab so columns line up. */
 export const OCCURRENCE_GRID =
@@ -12,6 +12,7 @@ export const OCCURRENCE_GRID =
 interface Props {
   occurrence: ScheduleOccurrence;
   accountName?: string;
+  upcomingDays: number;
   highlighted?: boolean;
   onMarkPaid?: () => void;
   onEdit?: () => void;
@@ -23,6 +24,7 @@ interface Props {
 export default function RecurringItemRow({
   occurrence: occ,
   accountName,
+  upcomingDays,
   highlighted,
   onMarkPaid,
   onEdit,
@@ -78,7 +80,7 @@ export default function RecurringItemRow({
       <p className="text-sm text-text-secondary truncate">{accountName ?? '—'}</p>
 
       <div>
-        <StatusBadge status={occ.displayStatus} />
+        <StatusBadge status={occurrenceBadgeStatus(occ, upcomingDays)} />
       </div>
 
       <div className="text-right">

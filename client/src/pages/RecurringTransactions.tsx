@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 import MonthlyTab from '../components/recurring/MonthlyTab';
 import AllTab from '../components/recurring/AllTab';
 import RecurringFormModal from '../components/recurring/RecurringFormModal';
 import MatchSuggestionsPanel from '../components/recurring/MatchSuggestionsPanel';
 import OccurrenceMatchModal from '../components/recurring/OccurrenceMatchModal';
+import DiscoverSchedulesModal from '../components/recurring/DiscoverSchedulesModal';
+import UpcomingLengthModal from '../components/recurring/UpcomingLengthModal';
 import { Button } from '../components/ui/Button';
 import {
   useSchedules,
@@ -27,6 +29,8 @@ export default function RecurringTransactionsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<Schedule | null>(null);
   const [matchOccurrenceId, setMatchOccurrenceId] = useState<string | null>(null);
+  const [discoverOpen, setDiscoverOpen] = useState(false);
+  const [upcomingOpen, setUpcomingOpen] = useState(false);
 
   const { data: allRecurring = [] } = useSchedules();
   const createSchedule = useCreateSchedule();
@@ -95,9 +99,14 @@ export default function RecurringTransactionsPage() {
             ))}
           </div>
         </div>
-        <Button size="sm" onClick={handleAdd}>
-          <Plus size={13} /> Add recurring
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" onClick={() => setDiscoverOpen(true)}>
+            <Sparkles size={13} /> Find recurring
+          </Button>
+          <Button size="sm" onClick={handleAdd}>
+            <Plus size={13} /> Add recurring
+          </Button>
+        </div>
       </div>
 
       <MatchSuggestionsPanel />
@@ -107,11 +116,19 @@ export default function RecurringTransactionsPage() {
           <MonthlyTab
             onEdit={handleEdit}
             onAdd={handleAdd}
+            onFind={() => setDiscoverOpen(true)}
             allRecurring={allRecurring}
             onMatchOccurrence={setMatchOccurrenceId}
           />
         )}
-        {activeTab === 'all' && <AllTab allRecurring={allRecurring} onEdit={handleEdit} />}
+        {activeTab === 'all' && (
+          <AllTab
+            allRecurring={allRecurring}
+            onEdit={handleEdit}
+            onFind={() => setDiscoverOpen(true)}
+            onChangeUpcomingLength={() => setUpcomingOpen(true)}
+          />
+        )}
       </div>
 
       <RecurringFormModal
@@ -120,6 +137,9 @@ export default function RecurringTransactionsPage() {
         onSave={handleSave}
         editItem={editItem}
       />
+
+      <DiscoverSchedulesModal isOpen={discoverOpen} onClose={() => setDiscoverOpen(false)} />
+      <UpcomingLengthModal isOpen={upcomingOpen} onClose={() => setUpcomingOpen(false)} />
 
       <OccurrenceMatchModal
         isOpen={matchOccurrenceId !== null}

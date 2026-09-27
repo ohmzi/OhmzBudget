@@ -341,6 +341,23 @@ export interface ScheduleSummary {
   expenses: number;
 }
 
+/** A likely recurring charge found by GET /schedules/discover (port of Actual's find-schedules). */
+export interface DiscoveredSchedule {
+  id: string;
+  accountId: string;
+  accountName: string;
+  payeeId: string | null;
+  payeeName: string;
+  amount: number;
+  amountType: 'exact' | 'approximate';
+  recurrenceType: 'weekly' | 'biweekly' | 'monthly';
+  recurrenceRule: RecurrenceRule;
+  startDate: string;
+  exactDate: boolean;
+  categoryId: string | null;
+  transactionIds: string[];
+}
+
 export interface MatchSuggestion {
   occurrenceId: string;
   scheduleId: string;

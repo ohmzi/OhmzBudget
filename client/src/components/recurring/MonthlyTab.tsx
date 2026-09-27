@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, parseISO } from 'date-fns';
-import { ChevronLeft, ChevronRight, List, CalendarDays, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, List, CalendarDays, Plus, Sparkles } from 'lucide-react';
 import Calendar from './Calendar';
 import RecurringItemRow, { OCCURRENCE_GRID } from './RecurringItemRow';
 import {
@@ -12,11 +12,14 @@ import {
 import { useAccounts } from '../../hooks/useAccounts';
 import { formatCurrency } from '../../utils/currency';
 import { Button } from '../ui/Button';
+import { usePreferencesStore } from '../../store/preferencesStore';
+import { getUpcomingDays } from './scheduleFormat';
 import type { Schedule, ScheduleOccurrence } from '../../types';
 
 interface Props {
   onEdit: (item: Schedule) => void;
   onAdd: () => void;
+  onFind: () => void;
   allRecurring: Schedule[];
   onMatchOccurrence?: (occurrenceId: string) => void;
 }
@@ -62,7 +65,8 @@ function SummaryColumn({ label, verb, totals, barClass }: {
   );
 }
 
-export default function MonthlyTab({ onEdit, onAdd, allRecurring, onMatchOccurrence }: Props) {
+export default function MonthlyTab({ onEdit, onAdd, onFind, allRecurring, onMatchOccurrence }: Props) {
+  const upcomingDays = getUpcomingDays(usePreferencesStore((s) => s.upcomingLength));
   const [month, setMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [view, setView] = useState<View>('list');
   const [highlightDate, setHighlightDate] = useState<string | null>(null);
@@ -115,6 +119,7 @@ export default function MonthlyTab({ onEdit, onAdd, allRecurring, onMatchOccurre
           <RecurringItemRow
             key={occ.id}
             occurrence={occ}
+            upcomingDays={upcomingDays}
             highlighted={highlightDate === occ.expectedDate}
             accountName={occ.scheduleAccountId ? accountMap.get(occ.scheduleAccountId) : undefined}
             onMarkPaid={() =>
@@ -191,9 +196,14 @@ export default function MonthlyTab({ onEdit, onAdd, allRecurring, onMatchOccurre
         <div className="bg-surface rounded-lg shadow-card border border-border-light py-14 text-center">
           <p className="text-sm font-semibold text-text">No recurring items this month</p>
           <p className="text-xs text-text-tertiary mt-1">Add bills, subscriptions, or paychecks to track them here.</p>
-          <Button size="sm" className="mt-4" onClick={onAdd}>
-            <Plus size={13} /> Add recurring
-          </Button>
+          <div className="flex justify-center gap-2 mt-4">
+            <Button variant="secondary" size="sm" onClick={onFind}>
+              <Sparkles size={13} /> Find recurring
+            </Button>
+            <Button size="sm" onClick={onAdd}>
+              <Plus size={13} /> Add recurring
+            </Button>
+          </div>
         </div>
       ) : view === 'calendar' ? (
         <div className="bg-surface rounded-lg shadow-card border border-border-light p-4">

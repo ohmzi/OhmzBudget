@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid';
 import { z } from 'zod';
 import { format, addDays } from 'date-fns';
 import { buildRecurrenceRule, type RecurrenceType } from '../utils/recurrence.js';
+import { findSchedules, createDiscoveredSchedules } from '../services/scheduleDiscovery.js';
 import {
   ensureOccurrences,
   regenerateFutureOccurrences,
@@ -66,6 +67,35 @@ function deriveDisplayStatus(dbStatus: string, expectedDate: string): string {
 }
 
 // --- Static routes FIRST (before /:id) ---
+
+// GET /discover — find likely recurring transactions not yet covered by a schedule
+schedulesRouter.get('/discover', (_req, res) => {
+  res.json(findSchedules());
+});
+
+const discoveredItemSchema = z.object({
+  id: z.string(),
+  accountId: z.string(),
+  accountName: z.string(),
+  payeeId: z.string().nullable(),
+  payeeName: z.string().min(1),
+  amount: z.number().int(),
+  amountType: z.enum(['exact', 'approximate']),
+  recurrenceType: z.enum(['weekly', 'biweekly', 'monthly']),
+  recurrenceRule: z.any(),
+  startDate: z.string().regex(dateRegex),
+  exactDate: z.boolean(),
+  categoryId: z.string().nullable(),
+  transactionIds: z.array(z.string()),
+});
+
+// POST /discover/create — create schedules from discovered items and link their transactions
+schedulesRouter.post('/discover/create', (req, res) => {
+  const parsed = z.object({ items: z.array(discoveredItemSchema).min(1) }).safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  const ids = createDiscoveredSchedules(parsed.data.items);
+  res.status(201).json({ created: ids.length, ids });
+});
 
 // GET /occurrences — all occurrences in a date range
 schedulesRouter.get('/occurrences', (req, res) => {
