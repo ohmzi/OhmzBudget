@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { format, subMonths } from 'date-fns';
+import { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { ArrowLeft, Save, Download } from 'lucide-react';
 import ReportBuilderSidebar from '../components/reports/ReportBuilderSidebar';
 import ReportChartArea from '../components/reports/ReportChartArea';
@@ -14,27 +13,31 @@ import {
 } from '../hooks/useCustomReports';
 import { useDebounce } from '../hooks/useDebounce';
 import { downloadCsv } from '../utils/exportCsv';
+import { computeDateRange, decodeRangeParam, resolveDateRange } from '../utils/dateRange';
 import { Button } from '../components/ui/Button';
 import type { CustomReportConfig } from '../types';
 
-const now = new Date();
-const DEFAULT_CONFIG: CustomReportConfig = {
+const defaultConfig = (): CustomReportConfig => ({
   chartType: 'bar',
   mode: 'total',
   groupBy: 'category',
   balanceType: 'expense',
-  dateRange: {
-    preset: '6m',
-    from: format(subMonths(now, 5), 'yyyy-MM'),
-    to: format(now, 'yyyy-MM'),
-  },
+  dateRange: { preset: '6m', ...computeDateRange('6m') },
   filters: { accountIds: [], categoryIds: [], categoryGroupIds: [] },
-};
+});
 
 export default function CustomReportBuilder() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [config, setConfig] = useState<CustomReportConfig>(DEFAULT_CONFIG);
+  // The dashboard this report was started from; a new report is added to it on save
+  const [searchParams] = useSearchParams();
+  const dashboardPageId = searchParams.get('dashboard') ?? undefined;
+  // Opened from a dashboard widget: start with the months that widget shows
+  const rangeParam = decodeRangeParam(searchParams.get('range'));
+  const [config, setConfig] = useState<CustomReportConfig>(() => ({
+    ...defaultConfig(),
+    ...(rangeParam && { dateRange: rangeParam }),
+  }));
   const [saveOpen, setSaveOpen] = useState(false);
   const [reportName, setReportName] = useState('');
 
@@ -44,9 +47,17 @@ export default function CustomReportBuilder() {
 
   const savedReportId = savedReport?.id;
   const savedReportUpdatedAt = savedReport?.updatedAt;
+  // The widget's range only applies when the report first loads, not after saving changes
+  const rangeAppliedFor = useRef<string | undefined>(undefined);
   useEffect(() => {
     if (savedReport) {
-      setConfig(savedReport.config);
+      const firstLoad = rangeAppliedFor.current !== savedReport.id;
+      rangeAppliedFor.current = savedReport.id;
+      // Live ranges were computed when the report was saved; bring them up to today
+      setConfig({
+        ...savedReport.config,
+        dateRange: (firstLoad && rangeParam) || resolveDateRange(savedReport.config.dateRange),
+      });
       setReportName(savedReport.name);
     }
   }, [savedReportId, savedReportUpdatedAt]);
@@ -64,11 +75,12 @@ export default function CustomReportBuilder() {
       );
     } else {
       createMutation.mutate(
-        { name, config },
+        { name, config, dashboardPageId },
         {
           onSuccess: (saved) => {
             setSaveOpen(false);
-            navigate(`/reports/custom/${saved.id}`, { replace: true });
+            const back = dashboardPageId ? `?dashboard=${dashboardPageId}` : '';
+            navigate(`/reports/custom/${saved.id}${back}`, { replace: true });
           },
         },
       );
@@ -100,7 +112,7 @@ export default function CustomReportBuilder() {
       <div className="px-6 py-3 border-b border-border bg-surface flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
-            to="/reports"
+            to={dashboardPageId ? `/reports?dashboard=${dashboardPageId}` : '/reports'}
             className="text-text-tertiary hover:text-text-secondary transition-colors"
           >
             <ArrowLeft size={16} />
