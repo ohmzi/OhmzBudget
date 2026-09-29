@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { db } from '../db/index.js';
 import { plaidConfig, plaidItems, plaidAccountMappings, accounts } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
+import { logError } from '../utils/log.js';
 import { accountTypeSchema, defaultOffBudget } from '../utils/accountTypes.js';
 import {
   isPlaidConfigured,
@@ -36,17 +37,22 @@ const configureSchema = z.object({
 });
 
 const mapAccountSchema = z.object({
-  mappings: z.array(
-    z.object({
-      plaidAccountId: z.string().max(256),
-      action: z.enum(['create', 'link', 'skip']),
-      accountId: z.string().max(64).optional(),
-      accountName: z.string().trim().max(200).optional(),
-      accountType: accountTypeSchema.optional(),
-      isOffBudget: z.number().int().min(0).max(1).optional(),
-    }),
-  ),
+  mappings: z
+    .array(
+      z.object({
+        plaidAccountId: z.string().max(256),
+        action: z.enum(['create', 'link', 'skip']),
+        accountId: z.string().max(64).optional(),
+        accountName: z.string().trim().max(200).optional(),
+        accountType: accountTypeSchema.optional(),
+        isOffBudget: z.number().int().min(0).max(1).optional(),
+      }),
+    )
+    .max(1_000),
 });
+
+const accountExists = (id: string) =>
+  db.select({ id: accounts.id }).from(accounts).where(eq(accounts.id, id)).get() !== undefined;
 
 function requirePlaid(res: any): boolean {
   if (!isPlaidConfigured()) {
@@ -164,7 +170,7 @@ plaidRouter.post('/hosted-link', async (_req, res) => {
   try {
     res.json(await startHostedLink({ kind: 'new' }));
   } catch (err: any) {
-    console.error('Plaid hosted-link error:', err?.response?.data ?? err.message);
+    logError('Plaid hosted-link error', err);
     res.status(502).json({ error: plaidErrorMessage(err, 'Could not start connecting to Plaid') });
   }
 });
@@ -182,7 +188,7 @@ plaidRouter.post('/items/:itemId/hosted-link', async (req, res) => {
   try {
     res.json(await startHostedLink({ kind: 'update', itemId }, item.accessToken));
   } catch (err: any) {
-    console.error('Plaid hosted-link (update) error:', err?.response?.data ?? err.message);
+    logError('Plaid hosted-link (update) error', err);
     res
       .status(502)
       .json({ error: plaidErrorMessage(err, 'Could not start reconnecting to Plaid') });
@@ -206,7 +212,7 @@ plaidRouter.get('/hosted-link/:sessionId', async (req, res) => {
     });
     res.json(result);
   } catch (err: any) {
-    console.error('Plaid hosted-link poll error:', err?.response?.data ?? err.message);
+    logError('Plaid hosted-link poll error', err);
     res.status(502).json({ error: plaidErrorMessage(err, 'Could not finish connecting to Plaid') });
   }
 });
@@ -232,7 +238,12 @@ plaidRouter.post('/items/:itemId/map-accounts', (req, res) => {
     const mapping = db
       .select()
       .from(plaidAccountMappings)
-      .where(eq(plaidAccountMappings.plaidAccountId, m.plaidAccountId))
+      .where(
+        and(
+          eq(plaidAccountMappings.plaidItemId, itemId),
+          eq(plaidAccountMappings.plaidAccountId, m.plaidAccountId),
+        ),
+      )
       .get();
     if (!mapping) continue;
 
@@ -242,7 +253,7 @@ plaidRouter.post('/items/:itemId/map-accounts', (req, res) => {
         .where(eq(plaidAccountMappings.id, mapping.id))
         .run();
       skipped++;
-    } else if (m.action === 'link' && m.accountId) {
+    } else if (m.action === 'link' && m.accountId && accountExists(m.accountId)) {
       db.update(plaidAccountMappings)
         .set({ isEnabled: 1, accountId: m.accountId })
         .where(eq(plaidAccountMappings.id, mapping.id))
@@ -278,11 +289,18 @@ plaidRouter.post('/items/:itemId/map-accounts', (req, res) => {
 plaidRouter.post('/items/:itemId/sync', async (req, res) => {
   if (!requirePlaid(res)) return;
   const { itemId } = req.params;
+  const item = db
+    .select({ id: plaidItems.id })
+    .from(plaidItems)
+    .where(eq(plaidItems.id, itemId))
+    .get();
+  if (!item) return res.status(404).json({ error: 'Item not found' });
   try {
-    const result = await syncPlaidItem(itemId);
+    const result = await syncPlaidItem(item.id);
     res.json(result);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    logError('Plaid sync error', err);
+    res.status(500).json({ error: 'Sync failed' });
   }
 });
 
@@ -292,7 +310,8 @@ plaidRouter.post('/sync-all', async (_req, res) => {
     const results = await syncAllItems();
     res.json({ results });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    logError('Plaid sync error', err);
+    res.status(500).json({ error: 'Sync failed' });
   }
 });
 
@@ -354,7 +373,7 @@ plaidRouter.delete('/items/:itemId', async (req, res) => {
       } catch (err: any) {
         const code = err?.response?.data?.error_code;
         if (code !== 'ITEM_NOT_FOUND' && code !== 'INVALID_ACCESS_TOKEN') {
-          console.error('Plaid item remove error:', err?.response?.data ?? err.message);
+          logError('Plaid item remove error', err);
           return res.status(502).json({
             error:
               'Could not revoke access at Plaid, so the connection was kept. Check your internet connection and try again.',

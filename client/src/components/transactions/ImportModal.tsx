@@ -5,12 +5,13 @@ import {
   parseCsv,
   normalizeDate,
   generateImportId,
+  parseImportAmount,
   guessColumnRoles,
   type ColumnRole,
 } from '../../utils/csv';
 import { importPreview } from '../../api/transactions';
 import { useImportConfirm } from '../../hooks/useTransactions';
-import { formatCurrency, parseCents } from '../../utils/currency';
+import { formatCurrency } from '../../utils/currency';
 import type { ImportPreviewRow } from '../../types';
 import type { ImportRow } from '../../api/transactions';
 
@@ -89,7 +90,8 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
     });
   }
 
-  function buildImportRows(): ImportRow[] {
+  /** The rows to import, or a message saying why there are none */
+  function buildImportRows(): ImportRow[] | string {
     const dateIdx = roles.indexOf('date');
     const payeeIdx = roles.indexOf('payee');
     const amountIdx = roles.indexOf('amount');
@@ -97,33 +99,35 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
     const outflowIdx = roles.indexOf('outflow');
     const notesIdx = roles.indexOf('notes');
 
-    if (dateIdx === -1) {
-      setError('Date column is required');
-      return [];
-    }
+    if (dateIdx === -1) return 'Date column is required';
     if (amountIdx === -1 && inflowIdx === -1 && outflowIdx === -1) {
-      setError('At least one amount column is required');
-      return [];
+      return 'At least one amount column is required';
     }
 
     const rows: ImportRow[] = [];
+    const seen = new Map<string, number>();
     for (const raw of rawRows) {
       const date = normalizeDate(raw[dateIdx] ?? '');
       if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
 
       let amount: number;
       if (amountIdx !== -1) {
-        amount = parseCents(raw[amountIdx]?.replace(/[$,]/g, '') ?? '0');
+        amount = parseImportAmount(raw[amountIdx]);
       } else {
-        const inf = parseCents(raw[inflowIdx]?.replace(/[$,]/g, '') ?? '0');
-        const out = parseCents(raw[outflowIdx]?.replace(/[$,]/g, '') ?? '0');
+        // Some banks write debits in the outflow column as negative numbers
+        const inf = Math.abs(inflowIdx !== -1 ? parseImportAmount(raw[inflowIdx]) : 0);
+        const out = Math.abs(outflowIdx !== -1 ? parseImportAmount(raw[outflowIdx]) : 0);
         amount = inf > 0 ? inf : -out;
       }
       if (amount === 0) continue;
 
-      const payeeName = payeeIdx !== -1 ? raw[payeeIdx] || null : null;
-      const notes = notesIdx !== -1 ? raw[notesIdx] || null : null;
-      const importedId = generateImportId(date, amount, payeeName ?? '');
+      // Same limits as the server, so one long memo can't fail the whole import
+      const payeeName = payeeIdx !== -1 ? raw[payeeIdx]?.slice(0, 500) || null : null;
+      const notes = notesIdx !== -1 ? raw[notesIdx]?.slice(0, 5000) || null : null;
+      const key = generateImportId(date, amount, payeeName ?? '');
+      const occurrence = (seen.get(key) ?? 0) + 1;
+      seen.set(key, occurrence);
+      const importedId = generateImportId(date, amount, payeeName ?? '', occurrence);
       rows.push({ date, amount, payeeName, notes, importedId });
     }
     return rows;
@@ -132,8 +136,8 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
   async function handlePreview() {
     setError(null);
     const rows = buildImportRows();
-    if (!rows.length) {
-      if (!error) setError('No valid rows found');
+    if (typeof rows === 'string' || !rows.length) {
+      setError(typeof rows === 'string' ? rows : 'No valid rows found');
       return;
     }
 
@@ -196,7 +200,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
       {error && (
         <div className="mb-4 flex items-center gap-2 px-3 py-2 text-sm bg-negative-subtle text-negative rounded-lg">
           <AlertTriangle size={14} /> {error}
-          <button onClick={() => setError(null)} className="ml-auto">
+          <button onClick={() => setError(null)} className="ml-auto" aria-label="Dismiss">
             <X size={14} />
           </button>
         </div>
@@ -218,6 +222,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
             id="csv-file-input"
             type="file"
             accept=".csv"
+            aria-label="CSV file"
             className="hidden"
             onChange={handleFileInput}
           />
@@ -238,6 +243,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
                       <div className="text-xs font-medium text-text-tertiary mb-1">{h}</div>
                       <select
                         value={roles[i]}
+                        aria-label={`Column ${h}`}
                         onChange={(e) => setRole(i, e.target.value as ColumnRole)}
                         className="w-full text-xs border border-border rounded px-1.5 py-1 bg-surface text-text"
                       >
@@ -319,6 +325,7 @@ export function ImportModal({ isOpen, onClose, accountId }: Props) {
                         type="checkbox"
                         checked={!excluded.has(i)}
                         onChange={() => toggleExclude(i)}
+                        aria-label={`Import ${row.payeeName ?? 'row'} on ${row.date}`}
                         className="w-3.5 h-3.5 accent-brand-600"
                       />
                     </td>

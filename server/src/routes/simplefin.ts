@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { db } from '../db/index.js';
 import { simplefinConnections, simplefinAccountMappings, accounts } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
+import { logError } from '../utils/log.js';
 import { accountTypeSchema, defaultOffBudget } from '../utils/accountTypes.js';
 import {
   claimAccessUrl,
@@ -24,20 +25,26 @@ const setupSchema = z.object({
 });
 
 const mapAccountSchema = z.object({
-  mappings: z.array(
-    z.object({
-      simplefinAccountId: z.string(),
-      action: z.enum(['create', 'link', 'skip']),
-      accountId: z.string().optional(),
-      accountName: z.string().optional(),
-      accountType: accountTypeSchema.optional(),
-      isOffBudget: z.number().int().min(0).max(1).optional(),
-    }),
-  ),
+  mappings: z
+    .array(
+      z.object({
+        simplefinAccountId: z.string().max(256),
+        action: z.enum(['create', 'link', 'skip']),
+        accountId: z.string().max(64).optional(),
+        accountName: z.string().trim().max(200).optional(),
+        accountType: accountTypeSchema.optional(),
+        isOffBudget: z.number().int().min(0).max(1).optional(),
+      }),
+    )
+    .max(1_000),
 });
 
+const accountExists = (id: string) =>
+  db.select({ id: accounts.id }).from(accounts).where(eq(accounts.id, id)).get() !== undefined;
+
 simplefinRouter.get('/status', (_req, res) => {
-  const count = db.select().from(simplefinConnections).all().length;
+  // Only the id: selecting the whole row would decrypt every access URL
+  const count = db.select({ id: simplefinConnections.id }).from(simplefinConnections).all().length;
   res.json({ configured: count > 0, connectionCount: count });
 });
 
@@ -51,31 +58,34 @@ simplefinRouter.post('/setup', async (req, res) => {
     const connName = connectionNameFromResponse(data);
 
     const connectionId = nanoid();
-    db.insert(simplefinConnections)
-      .values({
-        id: connectionId,
-        accessUrl,
-        connectionName: connName,
-        syncStatus: 'good',
-        syncError: null,
-        lastSyncedAt: null,
-        createdAt: new Date().toISOString(),
-      })
-      .run();
-
-    for (const acct of data.accounts) {
-      db.insert(simplefinAccountMappings)
+    db.transaction(() => {
+      db.insert(simplefinConnections)
         .values({
-          id: nanoid(),
-          connectionId,
-          simplefinAccountId: acct.id,
-          accountId: null,
-          simplefinAccountName: acct.name,
-          isEnabled: 1,
+          id: connectionId,
+          accessUrl,
+          connectionName: connName,
+          syncStatus: 'good',
+          syncError: null,
+          lastSyncedAt: null,
           createdAt: new Date().toISOString(),
         })
         .run();
-    }
+
+      for (const acct of data.accounts) {
+        db.insert(simplefinAccountMappings)
+          .values({
+            id: nanoid(),
+            connectionId,
+            simplefinAccountId: acct.id,
+            accountId: null,
+            simplefinAccountName: acct.name,
+            isEnabled: 1,
+            createdAt: new Date().toISOString(),
+          })
+          .onConflictDoNothing()
+          .run();
+      }
+    });
 
     res.json({
       connectionId,
@@ -88,7 +98,7 @@ simplefinRouter.post('/setup', async (req, res) => {
       })),
     });
   } catch (err: any) {
-    console.error('SimpleFIN setup error:', err.message);
+    logError('SimpleFIN setup error', err);
     res.status(err instanceof InvalidSetupTokenError ? 400 : 502).json({ error: err.message });
   }
 });
@@ -109,10 +119,16 @@ simplefinRouter.post('/connections/:id/map-accounts', (req, res) => {
   let skipped = 0;
 
   for (const m of parsed.data.mappings) {
+    // The same bridge account can appear in several connections (e.g. after reconnecting)
     const mapping = db
       .select()
       .from(simplefinAccountMappings)
-      .where(eq(simplefinAccountMappings.simplefinAccountId, m.simplefinAccountId))
+      .where(
+        and(
+          eq(simplefinAccountMappings.connectionId, conn.id),
+          eq(simplefinAccountMappings.simplefinAccountId, m.simplefinAccountId),
+        ),
+      )
       .get();
     if (!mapping) continue;
 
@@ -122,7 +138,7 @@ simplefinRouter.post('/connections/:id/map-accounts', (req, res) => {
         .where(eq(simplefinAccountMappings.id, mapping.id))
         .run();
       skipped++;
-    } else if (m.action === 'link' && m.accountId) {
+    } else if (m.action === 'link' && m.accountId && accountExists(m.accountId)) {
       db.update(simplefinAccountMappings)
         .set({ isEnabled: 1, accountId: m.accountId })
         .where(eq(simplefinAccountMappings.id, mapping.id))
@@ -156,11 +172,18 @@ simplefinRouter.post('/connections/:id/map-accounts', (req, res) => {
 });
 
 simplefinRouter.post('/connections/:id/sync', async (req, res) => {
+  const conn = db
+    .select({ id: simplefinConnections.id })
+    .from(simplefinConnections)
+    .where(eq(simplefinConnections.id, req.params.id))
+    .get();
+  if (!conn) return res.status(404).json({ error: 'Connection not found' });
   try {
-    const result = await syncSimplefinConnection(req.params.id);
+    const result = await syncSimplefinConnection(conn.id);
     res.json(result);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    logError('SimpleFIN sync error', err);
+    res.status(500).json({ error: 'Sync failed' });
   }
 });
 
@@ -169,7 +192,8 @@ simplefinRouter.post('/sync-all', async (_req, res) => {
     const results = await syncAllSimplefinConnections();
     res.json({ results });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    logError('SimpleFIN sync error', err);
+    res.status(500).json({ error: 'Sync failed' });
   }
 });
 
