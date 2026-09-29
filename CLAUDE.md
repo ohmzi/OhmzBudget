@@ -181,6 +181,7 @@ The desktop app and `npm run dev` have no login, so `server/src/middleware/secur
 - Adding a transaction on a phone opens `TransactionFormRow` with `layout="sheet"` in a `Modal` (one field per row); `PayeeCombobox`/`CategorySelect` take `fieldClassName` for the larger fields.
 - Touch targets are at least 44px on phones (`max-md:min-h-11`, plus `max-md:min-w-11` for icon buttons): `Button`, `RowMenu`, modal close buttons, month navigation, the sidebar and filter tabs. Give new icon buttons the same. Inputs, selects and textareas are at least 16px (an unlayered rule in `index.css`) so iOS doesn't zoom in.
 - E2E: `tests/phone/phone-native.spec.ts` covers the cards, sheets and 44px controls (`expectTouchSize`, `expectBottomSheet`).
+- **Forms never reset because data refreshed**: fill a dialog's fields once per opening with `useFormReset(openKey, reset)` (`hooks/useFormReset.ts`), never from an effect that depends on query data or the record being edited (payees, accounts and records refetch on window focus, syncs, or after creating a payee/category, and would wipe what the user typed). Values that load later fill only empty fields, once. `Button` defaults to `type="button"`; give plain `<button>`s inside pickers `type="button"` too, or they submit the surrounding form.
 - Don't default query data to a fresh `[]` (`data: x = []`) when an effect copies it into state: a new array each render re-runs the effect forever while loading (React error #185). Use a module-level constant (`NO_RULES` in `pages/Rules.tsx`).
 
 ### Shared UI components (`client/src/components/ui/`)
@@ -227,13 +228,13 @@ The desktop app and `npm run dev` have no login, so `server/src/middleware/secur
 - `accounts` — `type` is one of 17 types in six groups (cash: `checking`/`savings`/`cash`; credit: `credit`/`line_of_credit`; investments: `investment`/`retirement`/`crypto`; property: `real_estate`/`vehicle`/`valuables`; loans: `mortgage`/`auto_loan`/`student_loan`/`loan`; other: `other_asset`/`other_liability`). The list lives in `server/src/utils/accountTypes.ts` and `ACCOUNT_TYPES` in `client/src/types/index.ts` (keep them in sync; helpers in `client/src/utils/accountTypes.ts`). Liability types hold negative balances and count as liabilities in net worth; only cash and credit types default to on budget. Non-spending accounts get an "Update value" button (`UpdateValueModal`) that adds a dated adjustment transaction; `isOffBudget` excludes from budget calculations; `closedAt` for soft-delete; `logo` (nullable PNG/JPEG/WebP data URL, cropped client-side to 128px) replaces the colored initials in `AccountIcon`, which is hidden entirely when the "Account icons" preference is off
 - `category_groups` — `isIncome=1` marks income groups (affects budget math and report filtering)
 - `categories` — belong to a group; used as budget envelopes
-- `transactions` — `payeeName` (denormalized string) + `payeeId` (FK, nullable)
+- `transactions` — `payeeName` (denormalized string) + `payeeId` (FK, nullable). `is_adjustment` (migration `0020`, hand-written) marks balance corrections (reconciliation, "Update value"; sent as `adjustment: true`): rules don't touch them, and while uncategorized they're left out of income and spending reports (`isIncomeOrSpending` in `services/balances.ts`) but still count in balances and net worth
 - `budget_months` — one row per category per month; stores the `budgeted` amount
 - `rules` — `conditions` and `actions` stored as JSON strings, `conditions_op` (`and`/`or`), `enabled`; ordered by `sortOrder`. `transactions.imported_payee` keeps the raw bank/CSV payee text for rules (migration `0017`)
 - `auth_config` / `sessions` — server mode only: the scrypt password hash (single row, `id='server'`) and hashed session tokens (plus `user_agent` / `last_used_at` for the signed-in devices list, migration `0019`, hand-written like `0014`/`0015`)
 - `payees` — `defaultCategoryId` auto-applied when a payee is selected on a new transaction; `logo` (same format as account logos) replaces the colored initial in `PayeeIcon`. Pass `onLogoChange` to make the icon editable (hover shows a pencil, click uploads, × removes), as on the Payees page and transaction detail panel. Merging keeps a merged payee's logo if the kept one has none
 - `custom_reports` — `name` + `config` (JSON string of `CustomReportConfig`); stores saved custom report configurations
-- `dashboard_pages` / `dashboard_widgets` — report dashboards and their widgets (`type`, grid `x`/`y`/`width`/`height`, `meta` JSON). Pages have a `date_range` (null = last 6 months). Custom report widgets reference `custom_report_id` (cascade delete). Migrations `0014`/`0015` were hand-written because `db:generate` prompts about the pending legacy cleanup above
+- `dashboard_pages` / `dashboard_widgets` — report dashboards and their widgets (`type`, grid `x`/`y`/`width`/`height`, `meta` JSON). Pages have a `date_range` (null = last 6 months; the auto-created Overview starts on a live `1m`, this month). Custom report widgets reference `custom_report_id` (cascade delete). Migrations `0014`/`0015` were hand-written because `db:generate` prompts about the pending legacy cleanup above
 - `recurring_transactions` — `frequency` (`weekly|biweekly|semimonthly|monthly|quarterly|semiannually|yearly`); `status` (`active|paused|canceled`); `autoCreate` auto-creates transactions on server startup; linked to transactions via `recurringTransactionId` FK
 
 ### Custom Report Builder
@@ -284,7 +285,7 @@ UI components live in `client/src/components/recurring/`. Occurrence computation
 
 The dashboard at `/dashboard` (default landing page) is built from the components in `client/src/components/dashboard/`, with `HelpFooter` (docs, GitHub and issues links) at the bottom:
 
-- `GettingStarted` — first-run checklist (add an account, bring in transactions, plan the budget, add recurring, create a rule), ticked off from real data; hidden once every step is done or by the user (`gettingStartedHidden` preference)
+- `GettingStarted` — first-run checklist (add an account, bring in transactions, add bills and paychecks, plan the budget, create a rule), ticked off from real data; hidden once every step is done or by the user (`gettingStartedHidden` preference)
 - `NetWorthMini` — net worth with a range picker and area chart
 - `SummaryStats` — Left to Spend, average monthly income/expenses, savings rate (shows "—" with a hint until there's a budget or income)
 - `IncomeExpensesMini` — 6-month income vs. expenses bars

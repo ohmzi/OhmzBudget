@@ -34,6 +34,23 @@ test.describe('accounts', () => {
     await expect(page.getByRole('heading', { name: 'Get started with FlyBudget' })).toBeVisible();
   });
 
+  test('the assets and liabilities summary lists only the kinds of accounts you have', async ({
+    page,
+    api,
+  }) => {
+    await api.createAccount('Checking', 120_000);
+    await open(page, '/accounts');
+    const main = page.getByRole('main');
+    await expect(main.getByText('Assets', { exact: true })).toBeVisible();
+    // No "$0" rows for kinds of accounts that were never added
+    await expect(main.getByText('Investments', { exact: true })).toHaveCount(0);
+    await expect(main.getByText('Credit', { exact: true })).toHaveCount(0);
+    await expect(main.getByText('No credit cards or loans yet.')).toBeVisible();
+
+    await main.getByRole('link', { name: 'Add account' }).click();
+    await expect(page.getByRole('dialog', { name: 'Add Account' })).toBeVisible();
+  });
+
   test('investments, property and loans default to off budget', async ({ page, api }) => {
     await api.createAccount('Checking', 0);
     await open(page, '/accounts');
@@ -111,7 +128,13 @@ test.describe('accounts', () => {
 
     await expect.poll(() => api.balance(brokerage.id)).toBe(1_050_000);
     const [adjustment] = await api.transactions(`?account_id=${brokerage.id}`);
-    expect(adjustment).toMatchObject({ amount: 50_000, notes: 'Value update' });
+    expect(adjustment).toMatchObject({ amount: 50_000, notes: 'Value update', isAdjustment: 1 });
+
+    // A change in value isn't money earned or spent: reports leave it out
+    await open(page, '/reports');
+    const main = page.getByRole('main');
+    await expect(main).toContainText(/\$0\s*Total Income/);
+    await expect(main).toContainText(/\$0\s*Total Expenses/);
   });
 
   test('the accounts page totals assets and liabilities', async ({ page, api }) => {

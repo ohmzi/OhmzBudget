@@ -15,6 +15,7 @@ import { useIsPhone } from '../hooks/useIsPhone';
 import { useCanSave } from '../hooks/useConnection';
 import { ExternalLink } from '../components/ui/ExternalLink';
 import { docsUrl } from '../utils/project';
+import { splitCategories } from '../utils/budgetFigures';
 import type { BudgetCategory, BudgetGroup, BudgetType } from '../types';
 
 function AmountInput({
@@ -201,13 +202,8 @@ function IncomeGroupSection({
     return { ...raw, received: raw.balance - raw.carryOver - raw.budgeted };
   }, [group.categories]);
 
-  const active = group.categories.filter(
-    (c) => c.budgeted !== 0 || c.balance - c.carryOver - c.budgeted !== 0,
-  );
-  const inactive = group.categories.filter(
-    (c) => c.budgeted === 0 && c.balance - c.carryOver - c.budgeted === 0,
-  );
-  const visibleCats = showUnbudgeted || showAll ? group.categories : active;
+  const { shown, hidden: inactive } = splitCategories(group.categories, true);
+  const visibleCats = showUnbudgeted || showAll ? group.categories : shown;
 
   return (
     <>
@@ -313,9 +309,8 @@ function BudgetTypeSection({
     [categories],
   );
 
-  const active = categories.filter((c) => c.budgeted !== 0 || c.spent !== 0);
-  const inactive = categories.filter((c) => c.budgeted === 0 && c.spent === 0);
-  const visibleCats = showUnbudgeted || showAll ? categories : active;
+  const { shown, hidden: inactive } = splitCategories(categories, false);
+  const visibleCats = showUnbudgeted || showAll ? categories : shown;
 
   const status = getStatus(totals.spent, totals.budgeted);
   const remaining = totals.budgeted - totals.spent;
@@ -400,7 +395,7 @@ export default function BudgetPage() {
   const [incomeCollapsed, setIncomeCollapsed] = useState(false);
   const [expensesCollapsed, setExpensesCollapsed] = useState(false);
 
-  const { data: groups = [] } = useBudget(selectedMonth);
+  const { data: groups = [], isPlaceholderData: switchingMonth } = useBudget(selectedMonth);
   const { data: summary } = useBudgetSummary(selectedMonth);
   const setBudgetMutation = useSetBudget();
   const setBulkMutation = useSetBudgetBulk();
@@ -530,7 +525,11 @@ export default function BudgetPage() {
       )}
 
       {/* Phones: the summary (with To Be Budgeted) goes above the table instead of beside it */}
-      <div className="flex max-md:flex-col flex-1 overflow-y-auto">
+      {/* While the next month loads, the previous one stays (faded) so nothing jumps */}
+      <div
+        aria-busy={switchingMonth}
+        className={`flex max-md:flex-col flex-1 overflow-y-auto transition-opacity ${switchingMonth ? 'opacity-60' : ''}`}
+      >
         <div className="flex-1 max-md:flex-none max-md:order-last max-md:overflow-x-auto">
           {isPhone ? (
             <PhoneBudget
