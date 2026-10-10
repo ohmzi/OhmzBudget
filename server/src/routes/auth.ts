@@ -9,8 +9,6 @@ import {
   DEVICE_TTL_MS,
   SESSION_COOKIE,
   SESSION_TTL_MS,
-  changePassword,
-  checkPassword,
   createDeviceToken,
   createSession,
   deleteOtherSessions,
@@ -23,12 +21,22 @@ import {
   touchSession,
   verifyDeviceToken,
 } from '../auth/sessions.js';
+import {
+  changeOwnPassword,
+  createUser,
+  listUsers,
+  sessionUser,
+  verifyLogin,
+  type SessionUser,
+} from '../auth/users.js';
 import { checkSetupCode, clearSetupCode, setupCode } from '../auth/setupCode.js';
 
-// Login for server mode (Docker / self-hosted). Modeled on Actual Budget's server:
-// the first visitor creates the server password, and everything else requires a
-// session. In the desktop app and `npm run dev` these routes report that login is
-// disabled, and nothing else changes.
+// Login for server mode (Docker / self-hosted). Sessions belong to a user (see auth/users.ts).
+//
+// INTERIM: this interim layer still signs in the server's single account with the password
+// from the old auth_config row. Task 4 replaces it with username-based setup and login
+// (`createUser` from the request, `verifyLogin`, `sessionUser` in /status), which is also
+// when `isPasswordSet()` gives way to `isSetupNeeded()`.
 
 export const authRouter = Router();
 
@@ -54,8 +62,17 @@ const authRateLimit = rateLimit({
 
 const sessionToken = (req: Request) => readCookie(req.headers.cookie, SESSION_COOKIE);
 
-function startSession(req: Request, res: Response) {
-  const { token } = createSession(req.headers['user-agent']);
+/** The interim single-password layer's account: the one account this server has. */
+const singleUser = (): SessionUser | null => listUsers()[0] ?? null;
+
+/** Creates the interim `admin` account for a fresh single-password setup. */
+async function createSingleAccount(password: string): Promise<SessionUser | null> {
+  const created = await createUser('admin', password, 'admin');
+  return created.ok ? created.user : null;
+}
+
+function startSession(req: Request, res: Response, user: SessionUser) {
+  const { token } = createSession(user.id, req.headers['user-agent']);
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: 'strict',
@@ -110,17 +127,22 @@ authRouter.post('/setup', authRateLimit, async (req, res) => {
     return res.status(409).json({ error: 'A password has already been set' });
   }
   clearSetupCode();
-  startSession(req, res);
+  // An upgraded install already has the backfilled admin; a fresh one gets `admin` here.
+  const user = singleUser() ?? (await createSingleAccount(parsed.data.password));
+  if (!user) return res.status(409).json({ error: 'A password has already been set' });
+  startSession(req, res, user);
   res.status(204).send();
 });
 
 authRouter.post('/login', authRateLimit, async (req, res) => {
   if (!serverMode) return res.status(404).json({ error: 'Not found' });
   const parsed = z.object({ password: z.string().max(MAX_PASSWORD_LENGTH) }).safeParse(req.body);
-  if (!parsed.success || !(await checkPassword(parsed.data.password))) {
-    return res.status(401).json({ error: 'Incorrect password' });
-  }
-  startSession(req, res);
+  if (!parsed.success) return res.status(401).json({ error: 'Incorrect password' });
+  const user = singleUser();
+  // A missing account still spends a hash (verifyLogin), so timing reveals nothing
+  const matched = await verifyLogin(user?.username ?? '', parsed.data.password);
+  if (!user || !matched) return res.status(401).json({ error: 'Incorrect password' });
+  startSession(req, res, user);
   res.status(204).send();
 });
 
@@ -132,8 +154,8 @@ authRouter.post('/logout', (req, res) => {
 
 authRouter.post('/change-password', authRateLimit, async (req, res) => {
   if (!serverMode) return res.status(404).json({ error: 'Not found' });
-  const token = sessionToken(req);
-  if (!isValidSession(token)) return res.status(401).json({ error: 'Login required' });
+  const session = signedIn(req, res);
+  if (!session) return;
   const parsed = z
     .object({ currentPassword: z.string().max(MAX_PASSWORD_LENGTH), newPassword: password })
     .safeParse(req.body);
@@ -142,50 +164,57 @@ authRouter.post('/change-password', authRateLimit, async (req, res) => {
       error: `New password must be ${MIN_PASSWORD_LENGTH}-${MAX_PASSWORD_LENGTH} characters`,
     });
   }
-  if (!(await checkPassword(parsed.data.currentPassword))) {
-    return res.status(401).json({ error: 'Current password is incorrect' });
-  }
-  await changePassword(parsed.data.newPassword, token);
-  // The new password voids every device cookie; this browser gets a fresh one
+  const changed = await changeOwnPassword(
+    session.user.id,
+    parsed.data.currentPassword,
+    parsed.data.newPassword,
+    session.token,
+  );
+  if (!changed.ok) return res.status(401).json({ error: 'Current password is incorrect' });
+  // This browser keeps a trusted-device cookie (keyed by the install secret, not a password)
   trustDevice(req, res);
   res.status(204).send();
 });
 
 // --- Signed-in devices (Settings → Server) ---
 // Each session is named by an opaque public id (see publicSessionId), never by the
-// stored hash, so nothing here can be turned back into a login.
+// stored hash, so nothing here can be turned back into a login. Every route is scoped
+// to the caller's own sessions.
 
-/** The caller's session token, or null after answering 404 / 401. */
-function signedIn(req: Request, res: Response): string | null {
+/** The caller's session (token and user), or null after answering 404 / 401. */
+function signedIn(req: Request, res: Response): { token: string; user: SessionUser } | null {
   if (!serverMode) {
     res.status(404).json({ error: 'Not found' });
     return null;
   }
   const token = sessionToken(req);
-  if (!token || !isValidSession(token)) {
+  const user = sessionUser(token);
+  if (!token || !user) {
     res.status(401).json({ error: 'Login required' });
     return null;
   }
-  return token;
+  return { token, user };
 }
 
 authRouter.get('/sessions', (req, res) => {
-  const token = signedIn(req, res);
-  if (token) res.json(listSessions(token));
+  const session = signedIn(req, res);
+  if (session) res.json(listSessions(session.user.id, session.token));
 });
 
 authRouter.post('/sessions/sign-out-others', (req, res) => {
-  const token = signedIn(req, res);
-  if (token) res.json({ signedOut: deleteOtherSessions(token) });
+  const session = signedIn(req, res);
+  if (session) res.json({ signedOut: deleteOtherSessions(session.user.id, session.token) });
 });
 
 authRouter.delete('/sessions/:id', (req, res) => {
-  const token = signedIn(req, res);
-  if (!token) return;
+  const session = signedIn(req, res);
+  if (!session) return;
   const id = req.params.id;
   if (!/^[0-9a-f]{12}$/.test(id)) return res.status(400).json({ error: 'Invalid session id' });
-  const current = listSessions(token).find((s) => s.current)?.id === id;
-  if (!deleteSessionByPublicId(id)) return res.status(404).json({ error: 'Not found' });
+  const current = listSessions(session.user.id, session.token).find((s) => s.current)?.id === id;
+  if (!deleteSessionByPublicId(session.user.id, id)) {
+    return res.status(404).json({ error: 'Not found' });
+  }
   if (current) res.clearCookie(SESSION_COOKIE, { path: '/' });
   res.status(204).send();
 });

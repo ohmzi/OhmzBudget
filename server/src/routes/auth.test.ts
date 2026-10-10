@@ -94,6 +94,7 @@ describe('server mode login', () => {
   it('stores only hashes: no plaintext password or session token in the database', () => {
     const dump = JSON.stringify([
       db.$client.prepare('select * from auth_config').all(),
+      db.$client.prepare('select * from users').all(),
       db.$client.prepare('select * from sessions').all(),
     ]);
     expect(dump).not.toContain('first password 123');
@@ -138,13 +139,15 @@ describe('server mode login', () => {
   let device: string;
   let voidedDevice: string;
 
-  it('remembers a browser that signed in, until the password changes', async () => {
+  it('remembers a browser that signed in, even across a password change', async () => {
     const before = await post('/auth/login', { password: 'second password 456' });
     voidedDevice = deviceCookie(before)!;
     const session = sessionCookie(before)!;
     expect(voidedDevice).toMatch(/^ohmzbudget_device=[\w-]+\.[\w-]+$/);
     expect(before.headers.getSetCookie().join()).toMatch(/Path=\/api\/auth/);
-    // Changing the password voids old device cookies and gives this browser a new one
+    // Device cookies are keyed by the install secret (auth_config.secret), not by a
+    // password hash, so changing the password keeps this browser trusted and it gets a
+    // fresh cookie
     const changed = await post(
       '/auth/change-password',
       { currentPassword: 'second password 456', newPassword: 'third password 789' },
@@ -172,12 +175,13 @@ describe('server mode login', () => {
     expect((await post('/auth/login', { password: 'third password 789' }, device)).status).toBe(
       204,
     );
-    // Forged, tampered or voided device cookies fall back to the address's limit
-    for (const fake of [
-      'ohmzbudget_device=forged.cookie',
-      device.slice(0, -2) + 'AA',
-      voidedDevice,
-    ]) {
+    // A device cookie from before the password change stays trusted: the HMAC keys on the
+    // install secret, which is never rotated
+    expect(
+      (await post('/auth/login', { password: 'third password 789' }, voidedDevice)).status,
+    ).toBe(204);
+    // Forged or tampered device cookies fall back to the address's limit
+    for (const fake of ['ohmzbudget_device=forged.cookie', device.slice(0, -2) + 'AA']) {
       expect((await post('/auth/login', { password: 'third password 789' }, fake)).status).toBe(
         429,
       );
