@@ -107,6 +107,7 @@ git commit -m "chore: rename packages and metadata to ohmzbudget"
 **Files:**
 - Modify: `client/src/components/ui/BrandName.tsx` (wordmark: render `Ohmz` + `Budget`; rename prop `flyClassName` → `ohmzClassName` and its usages)
 - Modify: all files under `client/src` containing `FlyBudget` (~39 files, ~91 hits — e.g. `Sidebar`, `AppShell`, `Welcome`, `AuthGate` "Set up your OhmzBudget server"/"Sign in to OhmzBudget", `ReconnectScreen`, `ConnectionBanner`, `SavingPausedHint`, `DemoBanner`, `NotInDemo`, `ServerSettings`, `DataExport`, `HelpFooter`, `MerchantSelect`, `WaitingTransactions`, plaid/simplefin cards, `api/client.ts` error text)
+- Modify: `client/vite.config.ts` (define `__FLYBUDGET_VERSION__` → `__OHMZBUDGET_VERSION__`) — **same commit**, so the tree never carries a renamed usage without its define (tsc/build would fail)
 - Test: client tests asserting display strings (run all; fix hits)
 
 - [ ] **Step 1: Case-sensitive sweep (order matters — display name first; `project.ts` excluded)**
@@ -115,6 +116,7 @@ git commit -m "chore: rename packages and metadata to ohmzbudget"
 cd ~/StudioProjects/OhmzBudget
 grep -rln 'FlyBudget' client/src --exclude=project.ts | xargs sed -i 's/FlyBudget/OhmzBudget/g'
 grep -rln 'flybudget' client/src --exclude=project.ts | xargs sed -i 's/flybudget/ohmzbudget/g'
+sed -i 's/__FLYBUDGET_VERSION__/__OHMZBUDGET_VERSION__/g' client/vite.config.ts
 ```
 
 Note: this also renames storage identifiers and plugin names in `client/src` — Task 4 verifies those specifically (storage.ts / outbox.ts). `client/src/utils/project.ts` carries the only `flybudget.org` URLs and is handled deliberately in Task 9 — never blanket-replace the domain.
@@ -203,8 +205,7 @@ git add client && git commit -m "refactor: rename client shell, sw cache and sto
 ```bash
 cd ~/StudioProjects/OhmzBudget
 grep -rl 'FLYBUDGET' server | xargs sed -i 's/FLYBUDGET_/OHMZBUDGET_/g'
-grep -rl 'FlyBudget' server | xargs sed -i 's/FlyBudget/OhmzBudget/g'
-grep -rl 'flybudget' server | xargs sed -i 's/flybudget/ohmzbudget/g'
+grep -rl 'flybudget' server | xargs sed -i 's#flybudget\.org#@@KD@@#g; s/flybudget/ohmzbudget/g; s/@@KD@@/flybudget.org/g'   # domain-protective (Global Constraints)
 ```
 
 Hand-check the four hand-written migrations' comments and `server/src/routes/server.ts` `securityChecks` (env-var names in user-facing hints).
@@ -238,6 +239,7 @@ cd ~/StudioProjects/OhmzBudget
 grep -rl 'FlyBudget' e2e | xargs sed -i 's/FlyBudget/OhmzBudget/g'
 grep -rl 'flybudget' e2e | xargs sed -i 's/flybudget/ohmzbudget/g'
 grep -rl 'FLYBUDGET' e2e | xargs sed -i 's/FLYBUDGET_/OHMZBUDGET_/g'
+grep -rl 'flybudget' e2e | xargs sed -i 's#flybudget\.org#@@KD@@#g; s/flybudget/ohmzbudget/g; s/@@KD@@/flybudget.org/g'   # domain-protective
 ```
 
 - [ ] **Step 2: Full e2e run (desktop + phone + demo + server-mode)**
@@ -267,7 +269,7 @@ git add e2e && git commit -m "test: update e2e suite for ohmzbudget identifiers"
 
 ```bash
 grep -rl 'FlyBudget' Dockerfile docker-compose.yml docker .github | xargs sed -i 's/FlyBudget/OhmzBudget/g'
-grep -rl 'flybudget' Dockerfile docker-compose.yml docker .github | xargs sed -i 's/flybudget/ohmzbudget/g'
+grep -rl 'flybudget' Dockerfile docker-compose.yml docker .github | xargs sed -i 's#flybudget\.org#@@KD@@#g; s/flybudget/ohmzbudget/g; s/@@KD@@/flybudget.org/g'   # domain-protective
 grep -rl 'FLYBUDGET' Dockerfile docker-compose.yml docker .github | xargs sed -i 's/FLYBUDGET_/OHMZBUDGET_/g'
 grep -rn 'FlyBudget\|flybudget\|FLYBUDGET' Dockerfile docker-compose.yml docker .github | grep -v cla.yml || echo CLEAN
 ```
@@ -308,6 +310,7 @@ git commit -m "build: rename docker and CI identity to ohmzbudget"
 grep -rl 'FlyBudget' electron | xargs sed -i 's/FlyBudget/OhmzBudget/g'
 grep -rl 'flybudget' electron | xargs sed -i 's/flybudget/ohmzbudget/g'
 grep -rl 'FLYBUDGET' electron | xargs sed -i 's/FLYBUDGET_/OHMZBUDGET_/g'
+grep -rl 'flybudget' electron | xargs sed -i 's#flybudget\.org#@@KD@@#g; s/flybudget/ohmzbudget/g; s/@@KD@@/flybudget.org/g'   # domain-protective
 grep -rn 'ohmzbudget_token' electron/main.ts server/src/middleware/security.ts   # both files must show it
 ```
 
@@ -337,7 +340,7 @@ git add electron && git commit -m "refactor: rename electron app identity (insta
 
 ```bash
 grep -rl 'FlyBudget' README.md SECURITY.md CONTRIBUTING.md PLANNING.md AGENTS.md CLAUDE.md | xargs sed -i 's/FlyBudget/OhmzBudget/g'
-grep -rl 'flybudget' README.md SECURITY.md CONTRIBUTING.md PLANNING.md AGENTS.md CLAUDE.md | xargs sed -i 's/flybudget/ohmzbudget/g'
+grep -rl 'flybudget' README.md SECURITY.md CONTRIBUTING.md PLANNING.md AGENTS.md CLAUDE.md | xargs sed -i 's#flybudget\.org#@@KD@@#g; s/flybudget/ohmzbudget/g; s/@@KD@@/flybudget.org/g'   # domain-protective
 grep -rl 'FLYBUDGET' README.md SECURITY.md CONTRIBUTING.md PLANNING.md AGENTS.md CLAUDE.md | xargs sed -i 's/FLYBUDGET_/OHMZBUDGET_/g'
 grep -rl 'dtymoszenko/FlyBudget\|dtymoszenko/flybudget' README.md SECURITY.md CONTRIBUTING.md AGENTS.md CLAUDE.md website/sidebarsCommunity.ts | xargs sed -i 's#dtymoszenko/[Ff]ly[Bb]udget#ohmzi/OhmzBudget#g'
 ```
@@ -367,7 +370,8 @@ as a separate, unmodified service.
 - [ ] **Step 4: Verify + commit**
 
 ```bash
-grep -rn 'flybudget.org' README.md client/src/utils/ || echo CLEAN   # project.ts must show none
+grep -n 'flybudget.org' client/src/utils/project.ts && echo 'FAIL: project.ts still points at flybudget.org' || echo OK
+grep -c 'flybudget.org' README.md   # may stay >0: README keeps upstream-site links; NOTICE covers attribution
 diff AGENTS.md CLAUDE.md    # no output — they must stay identical
 git add README.md SECURITY.md CONTRIBUTING.md PLANNING.md AGENTS.md CLAUDE.md client/src/utils/project.ts NOTICE website/sidebarsCommunity.ts
 git commit -m "docs: rebrand documentation, attribution and source links"
@@ -411,7 +415,7 @@ cd .. && git add website && git commit -m "docs: sweep website text for ohmzbudg
 ### Task 11: Deploy skeleton & host run
 
 **Files:**
-- Create: `deploy/compose.yml`, `deploy/docker-compose.override.yml`, `deploy/.env.example`, `deploy/README.md`
+- Create: `deploy/compose.yml`, `deploy/docker-compose.override.yml`, `deploy/.env.example`, `deploy/README.md`, `deploy/.gitignore` (contents: `secrets/`)
 - Compose secrets pattern (host): `deploy/secrets/ohmzbudget_data_key` (chmod 400)
 
 - [ ] **Step 1: Write `deploy/compose.yml`** (service skeleton — paperless stack lands in M2 with the same conventions):
