@@ -11,7 +11,7 @@ Maintained between tasks; commit shas live on branch `m0-rebrand`. Owner directi
 | 1 Baseline & branch                      | ✅ done        | `m0-rebrand` @ 7c8d00d; server 263/263 · client 85/85 · tsc ✓ · e2e 113/115 (2 pre-existing flakes, pass isolated) · format repaired pre-T2 |
 | 2 Root & package manifests               | ✅ done        | f24f917; names + lockfiles name-only; tsc ✓; review clean (0 findings)                                                                      |
 | 3 Client display strings & wordmark      | ✅ done        | 1eb58c7; 41 files; greps CLEAN; tsc/85 tests/build/demo ✓; review clean (0 blocking)                                                        |
-| 4 Client shell & storage identifiers     | ⬜ not started |                                                                                                                                             |
+| 4 Client shell & storage identifiers     | ✅ done        | d7960fd; 5 files; dist scan CLEAN; review clean (0 blocking)                                                                                |
 | 5 Server runtime identity                | ⬜ not started |                                                                                                                                             |
 | 6 End-to-end tests                       | ⬜ not started |                                                                                                                                             |
 | 7 Docker & CI identity                   | ⬜ not started |                                                                                                                                             |
@@ -176,7 +176,7 @@ git add client && git commit -m "refactor: rebrand client display strings to Ohm
 - Modify: wherever the client reads the version global (grep `__FLYBUDGET_VERSION__` / `__OHMZBUDGET_VERSION__`)
 - Replace: `client/public/logo.png` with a placeholder mark — the upstream logo must come off product surfaces (the favicon reference keeps pointing at `logo.png`). `electron/resources/` icons stay untouched for now (builds deferred).
 
-- [ ] **Step 1: Confirm the Task 3 sweep covered the identifiers, then fix leftovers**
+- [x] **Step 1: Confirm the Task 3 sweep covered the identifiers, then fix leftovers**
 
 ```bash
 grep -rn 'flybudget' client/public client/vite.config.ts client/index.html client/src/offline || echo CLEAN
@@ -185,7 +185,7 @@ grep -rn '__FLYBUDGET_VERSION__\|FLYBUDGET_VERSION' client server Dockerfile || 
 
 Replace any remaining `__FLYBUDGET_VERSION__` → `__OHMZBUDGET_VERSION__` (vite define + all readers) and ensure `sw.js` purges both cache-name generations on activate.
 
-- [ ] **Step 2: Placeholder logo**
+- [x] **Step 2: Placeholder logo**
 
 ```bash
 python3 - <<'PY'
@@ -202,13 +202,13 @@ PY
 
 A real OhmzBudget logo is a tier-2 design task.
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 ```bash
 cd client && npx tsc --noEmit && npm test && npm run build && npx vite build --mode demo 2>&1 | tail -3
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit** (landed as d7960fd)
 
 ```bash
 git add client server/src/browser/app.ts && git commit -m "refactor: rename client shell, sw cache and storage identifiers"
@@ -536,10 +536,10 @@ cd .. && git add deploy && git commit -m "build: add deploy compose skeleton wit
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
-grep -rIn 'FlyBudget\|flybudget\|FLYBUDGET' --exclude-dir={.git,node_modules,dist,build,.docusaurus,static,coverage} . | grep -vE 'CLA\.md|LICENSE|NOTICE|welcome-to-flybudget|/tmp/' || echo CLEAN
+grep -rIn 'FlyBudget\|flybudget\|FLYBUDGET' --exclude-dir={.git,node_modules,dist,build,.docusaurus,static,coverage} . | grep -vE 'CLA\.md|LICENSE|NOTICE|welcome-to-flybudget|flybudget-app-v1|/tmp/' || echo CLEAN
 ```
 
-Expected leftovers: only `CLA.md` (kept) and `website/blog/…welcome-to-flybudget.mdx` (slug kept). Generated dirs (`website/build`, `website/.docusaurus`, `website/static/demo`, `client/dist`, `server/dist`) are excluded. Anything else — fix in a `fix:` commit and re-run.
+Expected leftovers: only `CLA.md` (kept), `website/blog/…welcome-to-flybudget.mdx` (slug kept), and `client/public/sw.js`'s `LEGACY_CACHE = 'flybudget-app-v1'` literal (the mandated stale-client purge needs the old cache name). Generated dirs (`website/build`, `website/.docusaurus`, `website/static/demo`, `client/dist`, `server/dist`) are excluded. Anything else — fix in a `fix:` commit and re-run.
 
 - [ ] **Step 2: Full local battery**
 
