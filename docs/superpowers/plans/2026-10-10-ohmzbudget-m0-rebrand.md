@@ -9,7 +9,7 @@ Maintained between tasks; commit shas live on branch `m0-rebrand`. Owner directi
 | Task                                     | Status         | Evidence / commits                                                                                                                          |
 | ---------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1 Baseline & branch                      | ✅ done        | `m0-rebrand` @ 7c8d00d; server 263/263 · client 85/85 · tsc ✓ · e2e 113/115 (2 pre-existing flakes, pass isolated) · format repaired pre-T2 |
-| 2 Root & package manifests               | ⬜ not started |                                                                                                                                             |
+| 2 Root & package manifests               | ✅ done        | f24f917; names + lockfiles name-only; tsc ✓; review clean (0 findings)                                                                      |
 | 3 Client display strings & wordmark      | ⬜ not started |                                                                                                                                             |
 | 4 Client shell & storage identifiers     | ⬜ not started |                                                                                                                                             |
 | 5 Server runtime identity                | ⬜ not started |                                                                                                                                             |
@@ -97,24 +97,24 @@ Expected: all pass. If this is skipped, the Task 6 e2e run is also the first ful
 - Modify: `package.json` (root), `client/package.json`, `server/package.json`, `e2e/package.json`, `website/package.json`
 - Modify (regenerated): all matching `package-lock.json`
 
-- [ ] **Step 1: Rename the package names + repo metadata**
+- [x] **Step 1: Rename the package names + repo metadata**
 
 Root `package.json`: `"name": "ohmzbudget"`, `"desktopName": "ohmzbudget.desktop"` (root), and update `description` / `repository` / `homepage` / `bugs` / `author` URL fields to `https://github.com/ohmzi/OhmzBudget`. Same `name` rename per dir: `ohmzbudget-client`, `ohmzbudget-server`, `ohmzbudget-e2e`, `ohmzbudget-website`. Use `npm pkg set name=ohmzbudget-client` inside each dir (root: `npm pkg set name=ohmzbudget`). Do **not** touch version, engines, dependencies.
 
-- [ ] **Step 2: Resync lockfiles**
+- [x] **Step 2: Resync lockfiles**
 
 ```bash
 npm install --package-lock-only --ignore-scripts && (cd client && npm install --package-lock-only --ignore-scripts) && (cd server && npm install --package-lock-only --ignore-scripts) && (cd e2e && npm install --package-lock-only --ignore-scripts) && (cd website && npm install --package-lock-only --ignore-scripts)
 ```
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 ```bash
 grep -rn '"name"' package.json client/package.json server/package.json e2e/package.json website/package.json | grep -v ohmzbudget || echo CLEAN
 (cd client && npx tsc --noEmit) && (cd server && npx tsc --noEmit)
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit** (landed as f24f917)
 
 ```bash
 git add package.json package-lock.json client server e2e website
@@ -155,7 +155,7 @@ Note: this also renames storage identifiers and plugin names in `client/src` —
 - [ ] **Step 3: Verify zero hits + tests**
 
 ```bash
-grep -rn 'FlyBudget\|flybudget' client/src || echo CLEAN
+grep -rn 'FlyBudget\|flybudget' client/src --exclude=project.ts || echo CLEAN   # project.ts keeps its URL constants until Task 9
 cd client && npx tsc --noEmit && npm test && npm run build
 npx vite build --mode demo 2>&1 | tail -3   # demo build must pass
 ```
