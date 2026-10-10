@@ -4,7 +4,7 @@ import { useConnectionStore } from '../store/connectionStore';
 import { sendable } from '../utils/offline';
 import { sendWaiting, useOutbox } from './outbox';
 
-/** Sends transactions saved on this device as soon as FlyBudget's server can be reached. */
+/** Sends transactions saved on this device as soon as OhmzBudget's server can be reached. */
 export function OutboxSender() {
   const qc = useQueryClient();
   const connected = useConnectionStore((s) => s.status === 'connected');

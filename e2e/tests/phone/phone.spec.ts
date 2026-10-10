@@ -1,7 +1,7 @@
 import type { Page, TestInfo } from '@playwright/test';
 import { test, expect, open, isoDay, thisMonth } from '../fixtures';
 
-// FlyBudget on a phone-sized screen (390×844, the "phone" project in
+// OhmzBudget on a phone-sized screen (390×844, the "phone" project in
 // playwright.config.ts). Every page is visited with realistic data, a screenshot is
 // saved (test-results/…/phone-*.png, uploaded by CI), and nothing may make the page
 // scroll sideways: neither the document nor the main content area.
@@ -107,7 +107,7 @@ test('every page fits a phone screen', async ({ page, api }, testInfo) => {
 
 test('the welcome screen fits a phone screen', async ({ page }, testInfo) => {
   await open(page, '/dashboard');
-  await expect(page.getByRole('heading', { name: 'Welcome to FlyBudget' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome to OhmzBudget' })).toBeVisible();
   await screenshot(page, testInfo, 'welcome');
   expect(await sidewaysOverflow(page)).toEqual([]);
 });

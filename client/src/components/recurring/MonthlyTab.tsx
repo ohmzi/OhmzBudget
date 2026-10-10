@@ -271,7 +271,7 @@ export default function MonthlyTab({
             }
             description={
               allRecurring.length === 0
-                ? 'See what’s due and what’s been paid each month. Add them one by one, or let FlyBudget find them in the transactions you already have.'
+                ? 'See what’s due and what’s been paid each month. Add them one by one, or let OhmzBudget find them in the transactions you already have.'
                 : 'Nothing is scheduled for this month.'
             }
             learnMoreHref={allRecurring.length === 0 ? docsUrl('recurring') : undefined}

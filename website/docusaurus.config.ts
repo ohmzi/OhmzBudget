@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'FlyBudget',
+  title: 'OhmzBudget',
   tagline:
     'A fast, open-source budgeting app that gives you complete control over your financial data.',
   favicon: 'img/logo.png',
@@ -17,8 +17,8 @@ const config: Config = {
   url: 'https://flybudget.org',
   baseUrl: '/',
 
-  organizationName: 'dtymoszenko',
-  projectName: 'flybudget',
+  organizationName: 'ohmzi',
+  projectName: 'OhmzBudget',
 
   stylesheets: [
     {
@@ -55,7 +55,7 @@ const config: Config = {
         path: 'tour',
         routeBasePath: 'tour',
         sidebarPath: './sidebarsTour.ts',
-        editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/website/',
+        editUrl: 'https://github.com/ohmzi/OhmzBudget/tree/main/website/',
       },
     ],
     [
@@ -65,7 +65,7 @@ const config: Config = {
         path: 'community',
         routeBasePath: 'community',
         sidebarPath: './sidebarsCommunity.ts',
-        editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/website/',
+        editUrl: 'https://github.com/ohmzi/OhmzBudget/tree/main/website/',
       },
     ],
   ],
@@ -76,7 +76,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/website/',
+          editUrl: 'https://github.com/ohmzi/OhmzBudget/tree/main/website/',
         },
         blog: {
           blogSidebarTitle: 'All Posts',
@@ -85,7 +85,7 @@ const config: Config = {
             type: ['rss', 'atom'],
             xslt: true,
           },
-          editUrl: 'https://github.com/dtymoszenko/flybudget/tree/main/website/',
+          editUrl: 'https://github.com/ohmzi/OhmzBudget/tree/main/website/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -104,9 +104,9 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'FlyBudget',
+      title: 'OhmzBudget',
       logo: {
-        alt: 'FlyBudget Logo',
+        alt: 'OhmzBudget Logo',
         src: 'img/logo.png',
       },
       items: [
@@ -134,12 +134,12 @@ const config: Config = {
         },
         { to: '/download', label: 'Download', position: 'left' },
         {
-          href: 'https://github.com/dtymoszenko/flybudget',
+          href: 'https://github.com/ohmzi/OhmzBudget',
           label: 'GitHub',
           position: 'right',
           // Shown as an icon next to the dark mode toggle on phones (src/css/custom.css)
           className: 'header-github-link',
-          'aria-label': 'FlyBudget on GitHub',
+          'aria-label': 'OhmzBudget on GitHub',
         },
       ],
     },
@@ -150,9 +150,9 @@ const config: Config = {
         { label: 'Download', to: '/download' },
         { label: 'Blog', to: '/blog' },
         { label: 'Security', to: '/community/security' },
-        { label: 'GitHub', href: 'https://github.com/dtymoszenko/flybudget' },
+        { label: 'GitHub', href: 'https://github.com/ohmzi/OhmzBudget' },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} FlyBudget. Free software under the AGPL-3.0 license.`,
+      copyright: `Copyright © ${new Date().getFullYear()} OhmzBudget. Free software under the AGPL-3.0 license.`,
     },
     prism: {
       theme: prismThemes.github,

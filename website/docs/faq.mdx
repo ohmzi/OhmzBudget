@@ -7,17 +7,17 @@ sidebar_label: FAQ
 
 ## General
 
-### Is FlyBudget really free?
+### Is OhmzBudget really free?
 
-Yes. FlyBudget is free and open-source software under the
-[AGPL-3.0 license](https://github.com/dtymoszenko/FlyBudget/blob/main/LICENSE). The only
+Yes. OhmzBudget is free and open-source software under the
+[AGPL-3.0 license](https://github.com/ohmzi/OhmzBudget/blob/main/LICENSE). The only
 possible cost is a bank connection service, if you choose to use one (see
 [Connecting a bank](./bank-sync)).
 
 ### Where is my data stored?
 
 In a single SQLite database file: on your computer for the desktop app, or in the data
-directory of your self-hosted server. Nothing is sent to FlyBudget; there is no FlyBudget
+directory of your self-hosted server. Nothing is sent to OhmzBudget; there is no OhmzBudget
 server to send it to.
 
 ### Can I try it without installing anything?
@@ -33,10 +33,12 @@ Every page has a layout made for small screens. See [On your phone](./phone).
 
 ### Can more than one person use the same budget?
 
-A self-hosted server can be opened from several devices at once with the same password. There
-are no separate user accounts yet.
+Yes. A self-hosted server can be opened from several devices at once, and each person gets their
+own account: an admin creates them, with a **member** or **admin** role, in **Settings → Server
+→ Users**. Everyone shares the same budget; the role only decides who can manage accounts and
+API tokens.
 
-### Does FlyBudget support multiple currencies?
+### Does OhmzBudget support multiple currencies?
 
 Each budget uses one currency. You can choose its symbol in **Settings → Preferences**.
 
@@ -52,38 +54,39 @@ Press <kbd>Ctrl</kbd>+<kbd>Z</kbd> (<kbd>⌘</kbd>+<kbd>Z</kbd> on a Mac). See
 
 ## Troubleshooting
 
-### The desktop app says "FlyBudget is starting up again"
+### The desktop app says "OhmzBudget is starting up again"
 
 Its built-in server stopped for a moment and is restarting. It usually comes back on its own
-within a few seconds. If it doesn't, close FlyBudget and open it again.
+within a few seconds. If it doesn't, close OhmzBudget and open it again.
 
 ### My self-hosted server shows "can't reach the server"
 
 The page is fine; the server isn't answering. Check that the container is running
-(`docker ps`) and what it logged (`docker logs flybudget`). Anything you add in the meantime is
+(`docker ps`) and what it logged (`docker logs ohmzbudget`). Anything you add in the meantime is
 kept on your device and sent when it's back (see [Working offline](./offline)).
 
 ### I forgot my server password
 
-See [Your password](/community/self-hosting#your-password) in the self-hosting guide: a command
-on the server removes it, and you then set a new one.
+See [Your account](/community/self-hosting#your-account) in the self-hosting guide: a command on
+the server removes every account, and the next visit starts fresh setup (a new account and a new
+setup code).
 
-### Windows or macOS won't open FlyBudget the first time
+### Windows or macOS won't open OhmzBudget the first time
 
-FlyBudget isn't signed with a paid Microsoft certificate or notarized by Apple yet. On Windows,
+OhmzBudget isn't signed with a paid Microsoft certificate or notarized by Apple yet. On Windows,
 choose **More info → Run anyway**. On a Mac, open **System Settings → Privacy & Security** and
-choose **Open Anyway** next to FlyBudget (see [Installing](./installing#macos)). You can check that
+choose **Open Anyway** next to OhmzBudget (see [Installing](./installing#macos)). You can check that
 the download is genuine with its signature (see
 [Verifying your download](/community/security#verifying-your-download)).
 
-### FlyBudget won't start from the AppImage on Ubuntu
+### OhmzBudget won't start from the AppImage on Ubuntu
 
 Ubuntu 24.04 and later block the sandbox Electron apps use when they run from an AppImage. Install
 the .deb instead (see [Installing](./installing#linux)).
 
 ### Imported transactions have the wrong sign, or the wrong dates
 
-See [What FlyBudget understands](./importing#what-flybudget-understands) and
+See [What OhmzBudget understands](./importing#what-ohmzbudget-understands) and
 [Credit cards](./importing#credit-cards) on the importing page.
 
 ### A transaction didn't get the category I expected
@@ -95,7 +98,7 @@ Rules run top to bottom and a higher rule wins; a category you picked yourself a
 
 ### I found a bug or have an idea
 
-Please [open an issue on GitHub](https://github.com/dtymoszenko/FlyBudget/issues). For security
+Please [open an issue on GitHub](https://github.com/ohmzi/OhmzBudget/issues). For security
 problems, follow the [security policy](/community/security) instead so they can be fixed
 privately.
 

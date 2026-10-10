@@ -9,7 +9,7 @@ const sidebars: SidebarsConfig = {
     'getting-started',
     {
       type: 'category',
-      label: 'Using FlyBudget',
+      label: 'Using OhmzBudget',
       collapsed: false,
       items: [
         'dashboard',

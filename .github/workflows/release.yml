@@ -10,13 +10,13 @@ name: Release
 #
 # File names don't include the version, so the website can link to
 # releases/latest/download/<file> (see website/src/pages/download.tsx):
-#   FlyBudget-Windows-Setup.exe
-#   FlyBudget-macOS-arm64.dmg, FlyBudget-macOS-x64.dmg
-#   FlyBudget-Linux-x86_64.AppImage, FlyBudget-Linux-arm64.AppImage
-#   FlyBudget-Linux-amd64.deb, FlyBudget-Linux-arm64.deb
+#   OhmzBudget-Windows-Setup.exe
+#   OhmzBudget-macOS-arm64.dmg, OhmzBudget-macOS-x64.dmg
+#   OhmzBudget-Linux-x86_64.AppImage, OhmzBudget-Linux-arm64.AppImage
+#   OhmzBudget-Linux-amd64.deb, OhmzBudget-Linux-arm64.deb
 #
 # Verify a download with:
-#   gh attestation verify FlyBudget-Windows-Setup.exe -R dtymoszenko/FlyBudget
+#   gh attestation verify OhmzBudget-Windows-Setup.exe -R ohmzi/OhmzBudget
 
 on:
   push:
@@ -44,17 +44,17 @@ jobs:
           - os: windows-latest
             name: windows
             files: dist-electron/*.exe
-            app: dist-electron/win-unpacked/FlyBudget.exe
+            app: dist-electron/win-unpacked/OhmzBudget.exe
           - os: macos-latest # Apple Silicon; builds the Intel version too
             name: macos
             files: dist-electron/*.dmg
-            app: dist-electron/mac-arm64/FlyBudget.app/Contents/MacOS/FlyBudget
+            app: dist-electron/mac-arm64/OhmzBudget.app/Contents/MacOS/OhmzBudget
           - os: ubuntu-latest
             name: linux
             files: |
               dist-electron/*.AppImage
               dist-electron/*.deb
-            app: dist-electron/linux-unpacked/flybudget
+            app: dist-electron/linux-unpacked/ohmzbudget
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -112,12 +112,12 @@ jobs:
           $RUN "$APP" > app.log 2>&1 &
           for _ in $(seq 1 60); do
             if curl -sf http://127.0.0.1:58342/api/health | grep -q '"ok"'; then
-              echo "FlyBudget started"
+              echo "OhmzBudget started"
               exit 0
             fi
             sleep 2
           done
-          echo "FlyBudget didn't start within two minutes:"
+          echo "OhmzBudget didn't start within two minutes:"
           cat app.log
           exit 1
       - name: Stop the app
@@ -125,9 +125,9 @@ jobs:
         shell: bash
         run: |
           case "$RUNNER_OS" in
-            Windows) taskkill //F //IM FlyBudget.exe || true ;;
-            macOS) pkill -f FlyBudget.app || true ;;
-            Linux) pkill -f linux-unpacked/flybudget || true ;;
+            Windows) taskkill //F //IM OhmzBudget.exe || true ;;
+            macOS) pkill -f OhmzBudget.app || true ;;
+            Linux) pkill -f linux-unpacked/ohmzbudget || true ;;
           esac
 
       - name: Attest build provenance
@@ -177,14 +177,14 @@ jobs:
       # One file with every download's SHA-256, for people who check downloads that way
       - name: Write checksums
         working-directory: release
-        run: sha256sum FlyBudget-* | grep -v -e '\.sigstore\.json' -e '\.intoto\.jsonl' > SHA256SUMS.txt
+        run: sha256sum OhmzBudget-* | grep -v -e '\.sigstore\.json' -e '\.intoto\.jsonl' > SHA256SUMS.txt
 
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          flags=(--generate-notes --title "FlyBudget $TAG")
+          flags=(--generate-notes --title "OhmzBudget $TAG")
           # v1.0.0 → normal release; tags with a suffix (v1.1.0-beta.1) → marked as a beta
           [[ "$TAG" == *-* ]] && flags+=(--prerelease)
           gh release create "$TAG" release/* --repo "$GITHUB_REPOSITORY" "${flags[@]}"

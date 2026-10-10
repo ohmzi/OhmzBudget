@@ -9,7 +9,7 @@ export function HelpFooter({ className = '' }: { className?: string }) {
     <footer
       className={`flex flex-wrap items-center justify-center gap-x-5 gap-y-2 py-6 text-xs text-text-tertiary ${className}`}
     >
-      <span>New to FlyBudget?</span>
+      <span>New to OhmzBudget?</span>
       <ExternalLink href={DOCS_URL} className={link} icon={false}>
         <BookOpen size={13} aria-hidden /> Read the guide
       </ExternalLink>

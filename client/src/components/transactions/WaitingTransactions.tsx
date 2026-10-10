@@ -16,7 +16,7 @@ interface Props {
 }
 
 /**
- * New transactions saved on this device while FlyBudget couldn't reach its server, shown
+ * New transactions saved on this device while OhmzBudget couldn't reach its server, shown
  * above the register until they're sent. They aren't in balances or the budget yet.
  */
 export function WaitingTransactions({ accountId, categoryName, accountName }: Props) {
@@ -35,7 +35,7 @@ export function WaitingTransactions({ accountId, categoryName, accountName }: Pr
     ? 'Sending…'
     : connected
       ? null
-      : 'Sent when FlyBudget reconnects. Not in balances or the budget yet.';
+      : 'Sent when OhmzBudget reconnects. Not in balances or the budget yet.';
 
   function payeeOf(item: OutboxItem) {
     if (item.kind === 'transfer') {
@@ -131,7 +131,7 @@ export function WaitingTransactions({ accountId, categoryName, accountName }: Pr
           setDiscarding(null);
         }}
         title="Discard this transaction?"
-        message="It was only saved on this device and hasn't been sent to FlyBudget, so it will be gone."
+        message="It was only saved on this device and hasn't been sent to OhmzBudget, so it will be gone."
         confirmLabel="Discard"
         danger
       />

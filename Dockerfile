@@ -1,4 +1,4 @@
-# FlyBudget self-hosted server: the web app and API in one container, with a
+# OhmzBudget self-hosted server: the web app and API in one container, with a
 # password login (server mode). See docs: https://flybudget.org/community/self-hosting
 #
 #   docker compose up -d        (see docker-compose.yml)
@@ -29,7 +29,7 @@ RUN VERSION=$(node -p "require('./package.json').version") \
  && npm run build --prefix client \
  && server/node_modules/.bin/esbuild server/src/index.ts --bundle --platform=node --target=node24 \
       --external:better-sqlite3 --format=cjs --outfile=dist/server.js \
-      --define:process.env.FLYBUDGET_VERSION="\"$VERSION\""
+      --define:process.env.OHMZBUDGET_VERSION="\"$VERSION\""
 
 # The only runtime dependency: better-sqlite3, which ships prebuilt binaries for
 # every platform. Keep just the Linux (glibc) ones.
@@ -61,12 +61,12 @@ WORKDIR /app
 COPY --from=build /src/dist/ ./
 COPY --from=build /src/client/dist/ ./client/
 COPY --from=build /src/server/src/db/migrations/ ./migrations/
-# Maintenance: `docker exec flybudget node backup.cjs` / `node reset-password.cjs`
+# Maintenance: `docker exec ohmzbudget node backup.cjs` / `node reset-password.cjs`
 COPY docker/backup.cjs docker/reset-password.cjs ./
 
 ENV NODE_ENV=production \
-    FLYBUDGET_SERVER_MODE=true \
-    FLYBUDGET_HOST=0.0.0.0 \
+    OHMZBUDGET_SERVER_MODE=true \
+    OHMZBUDGET_HOST=0.0.0.0 \
     PORT=3001 \
     DB_PATH=/data/budget.db \
     MIGRATIONS_PATH=/app/migrations \

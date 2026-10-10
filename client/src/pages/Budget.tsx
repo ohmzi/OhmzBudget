@@ -136,7 +136,7 @@ function CategoryRow({
             <button
               onClick={() => onStartEdit(cat.id)}
               disabled={!canSave}
-              title={canSave ? undefined : 'Saving is paused until FlyBudget reconnects'}
+              title={canSave ? undefined : 'Saving is paused until OhmzBudget reconnects'}
               aria-label={`Planned for ${cat.name}: ${formatCurrency(cat.budgeted)}`}
               className="tabular-nums text-sm rounded px-2 py-0.5 min-w-[5.5rem] text-right border border-border bg-surface transition-colors hover:border-text-tertiary cursor-text disabled:cursor-not-allowed disabled:opacity-60"
             >

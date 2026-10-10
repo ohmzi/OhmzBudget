@@ -8,7 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { CONTROL_PORT, DEMO_PORT, DESKTOP_PORT, SERVER_PORT } from './ports';
 
-// Starts FlyBudget twice, each on a throwaway database:
+// Starts OhmzBudget twice, each on a throwaway database:
 //
 // - desktop: configured exactly like the Electron app (client built with
 //   `--mode electron`, served by the API server, a per-launch API token cookie, and
@@ -209,7 +209,7 @@ function startDemoServer(root: string): Promise<http.Server> {
 }
 
 export default async function globalSetup() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'flybudget-e2e-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ohmzbudget-e2e-'));
   if (!process.env.E2E_SKIP_BUILD) {
     buildClient(path.join(dir, 'client-desktop'), 'electron');
     buildClient(path.join(dir, 'client-web'));
@@ -221,7 +221,7 @@ export default async function globalSetup() {
       ['client-web', undefined],
       ['client-demo', 'demo'],
     ] as const) {
-      const cached = path.join(os.tmpdir(), `flybudget-e2e-cache-${target}`);
+      const cached = path.join(os.tmpdir(), `ohmzbudget-e2e-cache-${target}`);
       if (!fs.existsSync(cached)) buildClient(cached, mode);
       fs.cpSync(cached, path.join(dir, target), { recursive: true });
     }
@@ -237,8 +237,8 @@ export default async function globalSetup() {
     PORT: String(DESKTOP_PORT),
     DB_PATH: path.join(dir, 'desktop.db'),
     CLIENT_DIST: path.join(dir, 'client-desktop'),
-    FLYBUDGET_API_TOKEN: apiToken,
-    FLYBUDGET_DATA_KEY: dataKey,
+    OHMZBUDGET_API_TOKEN: apiToken,
+    OHMZBUDGET_DATA_KEY: dataKey,
   };
   // Replaced when a test restarts it
   let desktop = startServer('desktop', desktopEnv, desktopLog);
@@ -250,9 +250,9 @@ export default async function globalSetup() {
       PORT: String(SERVER_PORT),
       DB_PATH: path.join(dir, 'server.db'),
       CLIENT_DIST: path.join(dir, 'client-web'),
-      FLYBUDGET_SERVER_MODE: 'true',
-      FLYBUDGET_HOST: '127.0.0.1',
-      FLYBUDGET_DATA_KEY: dataKey,
+      OHMZBUDGET_SERVER_MODE: 'true',
+      OHMZBUDGET_HOST: '127.0.0.1',
+      OHMZBUDGET_DATA_KEY: dataKey,
     },
     serverLog,
   );
@@ -274,7 +274,7 @@ export default async function globalSetup() {
 
   // A snapshot of the fresh desktop database: every test starts from it (see fixtures.ts)
   const snapshot = await fetch(`http://localhost:${DESKTOP_PORT}/api/export/backup`, {
-    headers: { cookie: `flybudget_token=${apiToken}` },
+    headers: { cookie: `ohmzbudget_token=${apiToken}` },
   });
   if (!snapshot.ok) throw new Error(`Could not snapshot the database: ${snapshot.status}`);
   // Kept in memory, handed to the test workers through the environment (compressed: it

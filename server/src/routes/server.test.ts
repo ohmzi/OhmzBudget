@@ -4,7 +4,7 @@ import type { AddressInfo } from 'net';
 import type { Server } from 'http';
 
 // Server mode is read from the environment when modules load, so set it first
-process.env.FLYBUDGET_SERVER_MODE = 'true';
+process.env.OHMZBUDGET_SERVER_MODE = 'true';
 
 const express = (await import('express')).default;
 const { migrate } = await import('drizzle-orm/better-sqlite3/migrator');
@@ -13,6 +13,7 @@ const { authRouter, requireSession } = await import('./auth.js');
 const { serverRouter, securityChecks } = await import('./server.js');
 const { setupCode } = await import('../auth/setupCode.js');
 const { cleanUserAgent } = await import('../auth/sessions.js');
+const { ensureAuthReady } = await import('../auth/users.js');
 const { resolveVersion } = await import('../utils/version.js');
 
 let server: Server;
@@ -20,6 +21,7 @@ let base: string;
 
 beforeAll(async () => {
   migrate(db, { migrationsFolder: 'src/db/migrations' });
+  ensureAuthReady(); // fills auth_config.secret, like server startup
   const app = express();
   app.use(express.json());
   app.use('/api/auth', authRouter);
@@ -50,7 +52,7 @@ async function login(userAgent: string) {
   const res = await fetch(base + '/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'User-Agent': userAgent },
-    body: JSON.stringify({ password: PASSWORD }),
+    body: JSON.stringify({ username: 'owner', password: PASSWORD }),
   });
   expect(res.status).toBe(204);
   return sessionCookie(res)!;
@@ -67,13 +69,13 @@ describe('GET /api/server/info (server mode)', () => {
     const res = await fetch(base + '/auth/setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: PASSWORD, setupCode: setupCode() }),
+      body: JSON.stringify({ username: 'owner', password: PASSWORD, setupCode: setupCode() }),
     });
     expect(res.status).toBe(204);
     cookie = sessionCookie(res)!;
 
     expect((await request('GET', '/server/info')).status).toBe(401);
-    expect((await request('GET', '/server/info', 'flybudget_session=forged')).status).toBe(401);
+    expect((await request('GET', '/server/info', 'ohmzbudget_session=forged')).status).toBe(401);
     expect(await (await request('GET', '/health')).json()).toEqual({ status: 'ok' });
   });
 
@@ -106,15 +108,16 @@ describe('GET /api/server/info (server mode)', () => {
   it('never includes secrets, hashes, tokens or paths', async () => {
     const text = await (await request('GET', '/server/info', cookie)).text();
     const secrets = [
-      process.env.FLYBUDGET_DATA_KEY!,
+      process.env.OHMZBUDGET_DATA_KEY!,
       cookie.split('=')[1],
       PASSWORD,
       ...db.$client
         .prepare('select id from sessions')
         .all()
         .map((r) => (r as { id: string }).id),
+      // Since Task 4 the signable hash lives on the account, not in the legacy auth_config row
       (
-        db.$client.prepare('select password_hash from auth_config').get() as {
+        db.$client.prepare('select password_hash from users').get() as {
           password_hash: string;
         }
       ).password_hash,
@@ -186,7 +189,7 @@ describe('signed-in devices', () => {
     const list = await (await request('GET', '/auth/sessions', laptop)).json();
     const res = await request('DELETE', `/auth/sessions/${list[0].id}`, laptop);
     expect(res.status).toBe(204);
-    expect(res.headers.get('set-cookie')).toMatch(/flybudget_session=;/);
+    expect(res.headers.get('set-cookie')).toMatch(/ohmzbudget_session=;/);
     expect((await request('GET', '/server/info', laptop)).status).toBe(401);
   });
 });

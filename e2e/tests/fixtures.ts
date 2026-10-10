@@ -90,7 +90,7 @@ export const test = base.extend<Fixtures>({
     async ({ playwright, baseURL }, use) => {
       const request = await playwright.request.newContext({
         baseURL,
-        extraHTTPHeaders: { cookie: `flybudget_token=${token()}` },
+        extraHTTPHeaders: { cookie: `ohmzbudget_token=${token()}` },
       });
       const res = await request.post('/api/export/restore', {
         data: freshSnapshot(),
@@ -108,7 +108,7 @@ export const test = base.extend<Fixtures>({
     }, `${baseURL}/api`);
     await context.addCookies([
       {
-        name: 'flybudget_token',
+        name: 'ohmzbudget_token',
         value: token(),
         url: baseURL!,
         httpOnly: true,
@@ -121,7 +121,7 @@ export const test = base.extend<Fixtures>({
   api: async ({ playwright, baseURL }, use) => {
     const request = await playwright.request.newContext({
       baseURL,
-      extraHTTPHeaders: { cookie: `flybudget_token=${token()}` },
+      extraHTTPHeaders: { cookie: `ohmzbudget_token=${token()}` },
     });
     await use(new Api(request));
     await request.dispose();

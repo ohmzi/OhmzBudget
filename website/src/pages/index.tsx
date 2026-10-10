@@ -20,13 +20,13 @@ function HeroSection(): ReactNode {
               Keep it private.
             </Heading>
             <p className={styles.heroDescription}>
-              FlyBudget is a free budgeting app. Plan every dollar, track your accounts, and keep
+              OhmzBudget is a free budgeting app. Plan every dollar, track your accounts, and keep
               your financial data on your own computer or server. No subscription. No account
               required.
             </p>
             <div className={styles.ctaRow}>
               <Link className={styles.ctaPrimary} to="/download">
-                Download FlyBudget
+                Download OhmzBudget
               </Link>
               {/* A static app next to the website (scripts/build-demo.mjs), not a Docusaurus page */}
               <Link className={styles.ctaSecondary} to="pathname:///demo/" target="_self">
@@ -49,7 +49,7 @@ function HeroSection(): ReactNode {
             <img
               src="/img/logo.png"
               className={styles.heroMoney}
-              alt="FlyBudget — flying money illustration"
+              alt="OhmzBudget — flying money illustration"
               width="480"
               height="480"
             />
@@ -170,7 +170,7 @@ function HighlightsSection(): ReactNode {
         <Screenshot
           className={styles.productFrame}
           name="dashboard"
-          alt="The FlyBudget dashboard: net worth, left to spend, cash flow, spending and upcoming bills"
+          alt="The OhmzBudget dashboard: net worth, left to spend, cash flow, spending and upcoming bills"
           width={2880}
           height={1800}
         />
@@ -180,9 +180,9 @@ function HighlightsSection(): ReactNode {
           Stop wondering where your money went.
         </Heading>
         <p className={styles.highlightsIntro}>
-          Open FlyBudget and it’s all right there: what came in, what went out, what’s left to spend
-          and which bills are coming up. Give every dollar a plan, and the end of the month stops
-          being a surprise.
+          Open OhmzBudget and it’s all right there: what came in, what went out, what’s left to
+          spend and which bills are coming up. Give every dollar a plan, and the end of the month
+          stops being a surprise.
         </p>
         {HIGHLIGHTS.map((h) => (
           <HighlightRow key={h.title} {...h} />
@@ -193,12 +193,12 @@ function HighlightsSection(): ReactNode {
               On your phone, too
             </Heading>
             <p>
-              Run FlyBudget on a server of your own and open it from any browser. Every page has a
+              Run OhmzBudget on a server of your own and open it from any browser. Every page has a
               layout made for small screens, and transactions you add without a connection are saved
               as soon as it’s back.
             </p>
             <Link className={styles.highlightLink} to="/docs/phone">
-              Using FlyBudget on your phone
+              Using OhmzBudget on your phone
             </Link>
           </div>
           <div className={styles.phones}>
@@ -302,7 +302,7 @@ const FEATURES: Feature[] = [
         <path d="M21 13v1a4 4 0 0 1-4 4H3" />
       </Icon>
     ),
-    text: 'Keep track of bills, subscriptions and paychecks. FlyBudget can find the ones that repeat in your past transactions.',
+    text: 'Keep track of bills, subscriptions and paychecks. OhmzBudget can find the ones that repeat in your past transactions.',
     doc: '/docs/recurring',
     docLabel: 'Tracking recurring bills',
   },
@@ -363,7 +363,7 @@ function FeaturesSection(): ReactNode {
       />
       <div className={styles.featuresContainer}>
         <Heading as="h2" className={styles.featuresSectionHeader}>
-          Why FlyBudget?
+          Why OhmzBudget?
         </Heading>
         <div className={styles.smallFeaturesGrid}>
           {FEATURES.map((f) => (
@@ -375,7 +375,7 @@ function FeaturesSection(): ReactNode {
           <h2 className={styles.ownDataTitle}>Own your data</h2>
           <p className={styles.ownDataText}>
             Your budget lives in one file on your computer, or on a server you run. There's no
-            FlyBudget account, no subscription and no tracking, and you can download a full backup
+            OhmzBudget account, no subscription and no tracking, and you can download a full backup
             whenever you like.
           </p>
           <p className={styles.ownDataLinks}>

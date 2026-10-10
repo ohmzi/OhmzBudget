@@ -55,7 +55,7 @@ const backup = async () => {
 describe('backup and restore', () => {
   it('backs up every table', async () => {
     const data = await backup();
-    expect(data).toMatchObject({ format: 'flybudget-backup', version: 2 });
+    expect(data).toMatchObject({ format: 'ohmzbudget-backup', version: 2 });
     for (const table of BACKUP_TABLES) expect(Array.isArray(data[table])).toBe(true);
   });
 
@@ -115,12 +115,12 @@ describe('backup and restore', () => {
 
   it.each([
     ['not a backup', { hello: 'world' }],
-    ['a newer version', { format: 'flybudget-backup', version: 99 }],
-    ['a table that is not a list', { format: 'flybudget-backup', version: 2, accounts: {} }],
+    ['a newer version', { format: 'ohmzbudget-backup', version: 99 }],
+    ['a table that is not a list', { format: 'ohmzbudget-backup', version: 2, accounts: {} }],
     [
       'a wrongly typed column',
       {
-        format: 'flybudget-backup',
+        format: 'ohmzbudget-backup',
         version: 2,
         accounts: [{ id: 'a', name: 'A', type: 'checking', startingBalance: 'lots' }],
       },
@@ -128,7 +128,7 @@ describe('backup and restore', () => {
     [
       'a row pointing at a missing account',
       {
-        format: 'flybudget-backup',
+        format: 'ohmzbudget-backup',
         version: 2,
         transactions: [{ id: 't', accountId: 'missing', date: '2025-01-01', amount: 5 }],
       },

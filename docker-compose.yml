@@ -1,38 +1,38 @@
-# Run FlyBudget on your own server:
+# Run OhmzBudget on your own server:
 #
 #   1. Create the encryption key for stored bank credentials (once, keep a backup),
-#      readable only by FlyBudget's user (id 1000):
-#        openssl rand -base64 32 > flybudget_data_key.txt
-#        sudo chown 1000:1000 flybudget_data_key.txt && sudo chmod 400 flybudget_data_key.txt
+#      readable only by OhmzBudget's user (id 1000):
+#        openssl rand -base64 32 > ohmzbudget_data_key.txt
+#        sudo chown 1000:1000 ohmzbudget_data_key.txt && sudo chmod 400 ohmzbudget_data_key.txt
 #   2. docker compose up -d
-#   3. Open http://<your-server>:3001 and create your password. It asks for a setup
-#      code, printed by: docker logs flybudget
+#   3. Open http://<your-server>:3001 and create the admin account (a username and
+#      password). It asks for a setup code, printed by: docker logs ohmzbudget
 #
-# Put FlyBudget behind a reverse proxy with HTTPS (Caddy, Traefik, nginx…) before
+# Put OhmzBudget behind a reverse proxy with HTTPS (Caddy, Traefik, nginx…) before
 # exposing it to the internet. More options: https://flybudget.org/community/self-hosting
 
 services:
-  flybudget:
-    image: ghcr.io/dtymoszenko/flybudget:latest
-    container_name: flybudget
+  ohmzbudget:
+    image: ghcr.io/ohmzi/ohmzbudget:latest
+    container_name: ohmzbudget
     ports:
       # Change the first number to use a different port on your server.
       # Docker opens this port on every network interface and bypasses host
       # firewalls like ufw. With a reverse proxy on the same machine, use
-      # '127.0.0.1:3001:3001' so only the proxy can reach FlyBudget.
+      # '127.0.0.1:3001:3001' so only the proxy can reach OhmzBudget.
       - '3001:3001'
     environment:
       # Encryption key for Plaid/SimpleFIN credentials, read from the secret below
-      - FLYBUDGET_DATA_KEY_FILE=/run/secrets/flybudget_data_key
+      - OHMZBUDGET_DATA_KEY_FILE=/run/secrets/ohmzbudget_data_key
       # Only answer to these addresses (recommended). Comma-separated, e.g.
-      # - FLYBUDGET_ALLOWED_HOSTS=budget.example.com,192.168.1.20
+      # - OHMZBUDGET_ALLOWED_HOSTS=budget.example.com,192.168.1.20
       # Behind a reverse proxy, trust it so HTTPS cookies work (number of proxies):
-      # - FLYBUDGET_TRUST_PROXY=1
+      # - OHMZBUDGET_TRUST_PROXY=1
     secrets:
-      - flybudget_data_key
+      - ohmzbudget_data_key
     volumes:
       # Your budget database lives here. Back it up!
-      - flybudget-data:/data
+      - ohmzbudget-data:/data
     restart: unless-stopped
     read_only: true
     tmpfs:
@@ -43,8 +43,8 @@ services:
       - ALL
 
 secrets:
-  flybudget_data_key:
-    file: ./flybudget_data_key.txt
+  ohmzbudget_data_key:
+    file: ./ohmzbudget_data_key.txt
 
 volumes:
-  flybudget-data:
+  ohmzbudget-data:

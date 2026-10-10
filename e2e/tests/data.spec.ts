@@ -121,7 +121,7 @@ test.describe('export, backup and restore', () => {
     await page.getByRole('button', { name: 'Download Backup' }).click();
     const backupFile = await (await download).path();
     const backup = JSON.parse(fs.readFileSync(backupFile, 'utf8'));
-    expect(backup).toMatchObject({ format: 'flybudget-backup', version: 2 });
+    expect(backup).toMatchObject({ format: 'ohmzbudget-backup', version: 2 });
     expect(backup.goals).toHaveLength(1);
     // Never any bank credentials or login data
     expect(Object.keys(backup)).not.toContain('plaidItems');
@@ -165,7 +165,7 @@ test.describe('export, backup and restore', () => {
       .getByRole('dialog', { name: 'Restore this backup?' })
       .getByRole('button', { name: 'Replace my data' })
       .click();
-    await expect(page.getByRole('status')).toContainText('This is not a FlyBudget backup file');
+    await expect(page.getByRole('status')).toContainText('This is not an OhmzBudget backup file');
     expect((await api.accounts()).map((a) => a.name)).toEqual(['Checking']);
 
     await page.getByLabel('Backup file').setInputFiles({
@@ -174,7 +174,7 @@ test.describe('export, backup and restore', () => {
       buffer: Buffer.from('{not json'),
     });
     await expect(page.getByRole('status')).toContainText(
-      'broken.json is not a FlyBudget backup file',
+      'broken.json is not an OhmzBudget backup file',
     );
   });
 });

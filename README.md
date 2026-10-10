@@ -1,10 +1,10 @@
 <p align="center">
   <a href="https://flybudget.org">
-    <img src="client/public/logo.png" alt="FlyBudget" width="96" />
+    <img src="client/public/logo.png" alt="OhmzBudget" width="96" />
   </a>
 </p>
 
-<h1 align="center">FlyBudget</h1>
+<h1 align="center">OhmzBudget</h1>
 
 <h3 align="center">Plan your money. Keep it private.</h3>
 
@@ -21,19 +21,19 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/dtymoszenko/FlyBudget/actions/workflows/ci.yml"><img src="https://github.com/dtymoszenko/FlyBudget/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
-  <a href="https://github.com/dtymoszenko/FlyBudget/actions/workflows/github-code-scanning/codeql"><img src="https://github.com/dtymoszenko/FlyBudget/actions/workflows/github-code-scanning/codeql/badge.svg" alt="CodeQL" /></a>
-  <a href="https://scorecard.dev/viewer/?uri=github.com/dtymoszenko/FlyBudget"><img src="https://api.scorecard.dev/projects/github.com/dtymoszenko/FlyBudget/badge" alt="OpenSSF Scorecard" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/dtymoszenko/FlyBudget" alt="License: AGPL-3.0" /></a>
-  <a href="https://github.com/dtymoszenko/FlyBudget/releases"><img src="https://img.shields.io/github/v/release/dtymoszenko/FlyBudget?include_prereleases&sort=semver" alt="Latest release" /></a>
-  <a href="https://github.com/dtymoszenko/FlyBudget/stargazers"><img src="https://img.shields.io/github/stars/dtymoszenko/FlyBudget?style=social" alt="GitHub stars" /></a>
+  <a href="https://github.com/ohmzi/OhmzBudget/actions/workflows/ci.yml"><img src="https://github.com/ohmzi/OhmzBudget/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://github.com/ohmzi/OhmzBudget/actions/workflows/github-code-scanning/codeql"><img src="https://github.com/ohmzi/OhmzBudget/actions/workflows/github-code-scanning/codeql/badge.svg" alt="CodeQL" /></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/ohmzi/OhmzBudget"><img src="https://api.scorecard.dev/projects/github.com/ohmzi/OhmzBudget/badge" alt="OpenSSF Scorecard" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/ohmzi/OhmzBudget" alt="License: AGPL-3.0" /></a>
+  <a href="https://github.com/ohmzi/OhmzBudget/releases"><img src="https://img.shields.io/github/v/release/ohmzi/OhmzBudget?include_prereleases&sort=semver" alt="Latest release" /></a>
+  <a href="https://github.com/ohmzi/OhmzBudget/stargazers"><img src="https://img.shields.io/github/stars/ohmzi/OhmzBudget?style=social" alt="GitHub stars" /></a>
 </p>
 
 <p align="center">
   <a href="https://flybudget.org">Website</a> ·
   <a href="https://flybudget.org/tour/intro">Tour</a> ·
   <a href="https://flybudget.org/docs/getting-started">User guide</a> ·
-  <a href="https://flybudget.org/community/security">Security</a> ·
+  <a href="https://flybudget.org/community/security">Security</a> (upstream project site) ·
   <a href="#roadmap">Roadmap</a> ·
   <a href="CONTRIBUTING.md">Contributing</a>
 </p>
@@ -42,21 +42,21 @@
   <a href="https://flybudget.org/demo/">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="website/static/img/screenshots/dark-dashboard.webp" />
-      <img src="website/static/img/screenshots/dashboard.webp" alt="The FlyBudget dashboard: net worth, left to spend, income and expenses, spending and upcoming bills" />
+      <img src="website/static/img/screenshots/dashboard.webp" alt="The OhmzBudget dashboard: net worth, left to spend, income and expenses, spending and upcoming bills" />
     </picture>
   </a>
 </p>
 
-## ✨ Why FlyBudget?
+## ✨ Why OhmzBudget?
 
 <table>
   <tr>
     <td width="30%">🔒 <b>Your data stays yours</b></td>
-    <td>Everything lives in one file on your computer or your own server. There's no FlyBudget cloud, account, telemetry or crash reporting.</td>
+    <td>Everything lives in one file on your computer or your own server. There's no OhmzBudget cloud, account, telemetry or crash reporting.</td>
   </tr>
   <tr>
     <td width="30%">💸 <b>Free, for good</b></td>
-    <td>No subscription and no premium tier. FlyBudget is <a href="LICENSE">AGPL-3.0</a> open source, so anyone can read, check and improve the code.</td>
+    <td>No subscription and no premium tier. OhmzBudget is <a href="LICENSE">AGPL-3.0</a> open source, so anyone can read, check and improve the code.</td>
   </tr>
   <tr>
     <td width="30%">🧭 <b>Every dollar gets a plan</b></td>
@@ -80,14 +80,16 @@ wipes it.
 
 **2. Install the desktop app.**
 
-| Platform    | Download                                                                                                                                                                                                                                                                               | Requires                   |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| **Windows** | [Installer (.exe)](https://github.com/dtymoszenko/FlyBudget/releases/latest/download/FlyBudget-Windows-Setup.exe)                                                                                                                                                                      | Windows 10 or 11, 64-bit   |
-| **macOS**   | [Apple silicon (.dmg)](https://github.com/dtymoszenko/FlyBudget/releases/latest/download/FlyBudget-macOS-arm64.dmg) · [Intel (.dmg)](https://github.com/dtymoszenko/FlyBudget/releases/latest/download/FlyBudget-macOS-x64.dmg)                                                        | macOS 12 Monterey or later |
-| **Linux**   | [.deb](https://github.com/dtymoszenko/FlyBudget/releases/latest/download/FlyBudget-Linux-amd64.deb) · [.AppImage](https://github.com/dtymoszenko/FlyBudget/releases/latest/download/FlyBudget-Linux-x86_64.AppImage) · [ARM](https://github.com/dtymoszenko/FlyBudget/releases/latest) | 64-bit, x86 or ARM         |
+No releases are published for this fork yet; installers appear here after the first tagged release.
+
+| Platform    | Download                                                                                                                                                                                                                                                                  | Requires                   |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| **Windows** | [Installer (.exe)](https://github.com/ohmzi/OhmzBudget/releases/latest/download/OhmzBudget-Windows-Setup.exe)                                                                                                                                                             | Windows 10 or 11, 64-bit   |
+| **macOS**   | [Apple silicon (.dmg)](https://github.com/ohmzi/OhmzBudget/releases/latest/download/OhmzBudget-macOS-arm64.dmg) · [Intel (.dmg)](https://github.com/ohmzi/OhmzBudget/releases/latest/download/OhmzBudget-macOS-x64.dmg)                                                   | macOS 12 Monterey or later |
+| **Linux**   | [.deb](https://github.com/ohmzi/OhmzBudget/releases/latest/download/OhmzBudget-Linux-amd64.deb) · [.AppImage](https://github.com/ohmzi/OhmzBudget/releases/latest/download/OhmzBudget-Linux-x86_64.AppImage) · [ARM](https://github.com/ohmzi/OhmzBudget/releases/latest) | 64-bit, x86 or ARM         |
 
 The installers aren't signed with a paid Windows or Apple certificate yet, so your computer may
-ask you to confirm the first time you open FlyBudget. The
+ask you to confirm the first time you open OhmzBudget. The
 [installing guide](https://flybudget.org/docs/installing) shows what to click, and every
 download can be [verified](#security) against the build that made it.
 
@@ -100,19 +102,20 @@ every feature.
 
 ### 🐳 Self-host with Docker
 
-Run FlyBudget on your own server, protected by a password, and open it from any browser,
+Run OhmzBudget on your own server, protected by your own account, and open it from any browser,
 including your phone:
 
 ```bash
-curl -O https://raw.githubusercontent.com/dtymoszenko/FlyBudget/main/docker-compose.yml
-openssl rand -base64 32 > flybudget_data_key.txt   # encryption key for bank credentials
-sudo chown 1000:1000 flybudget_data_key.txt && sudo chmod 400 flybudget_data_key.txt
+curl -O https://raw.githubusercontent.com/ohmzi/OhmzBudget/main/docker-compose.yml
+openssl rand -base64 32 > ohmzbudget_data_key.txt   # encryption key for bank credentials
+sudo chown 1000:1000 ohmzbudget_data_key.txt && sudo chmod 400 ohmzbudget_data_key.txt
 docker compose up -d
-docker logs flybudget                              # prints the one-time setup code
+docker logs ohmzbudget                              # prints the one-time setup code
 ```
 
-Open `http://<your-server>:3001`, enter the setup code and choose your password. Images are
-published for amd64 and arm64 as `ghcr.io/dtymoszenko/flybudget`. The
+Open `http://<your-server>:3001`, enter the setup code and create the admin account (a username
+and a password). Images are published for amd64 and arm64 as `ghcr.io/ohmzi/ohmzbudget` (no image
+is published yet — build locally with the provided compose). The
 [self-hosting guide](https://flybudget.org/community/self-hosting) covers HTTPS, backups and
 updates.
 
@@ -158,7 +161,7 @@ updates.
   <tr>
     <td width="50%" valign="top">
       <h3>Never miss a bill</h3>
-      <p>Bills, subscriptions and paychecks for the month, as a list or a calendar. FlyBudget can even find them in your past transactions.</p>
+      <p>Bills, subscriptions and paychecks for the month, as a list or a calendar. OhmzBudget can even find them in your past transactions.</p>
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="website/static/img/screenshots/dark-recurring.webp" />
         <img src="website/static/img/screenshots/recurring.webp" alt="This month's recurring transactions" />
@@ -225,10 +228,10 @@ updates.
 
 ## 🛡️ Security you can check
 
-A budgeting app holds some of the most personal data you have, so FlyBudget treats security
+A budgeting app holds some of the most personal data you have, so OhmzBudget treats security
 as a feature, not an afterthought:
 
-- ✅ **Local-first.** No FlyBudget servers, accounts, telemetry or crash reports. Your data only
+- ✅ **Local-first.** No OhmzBudget servers, accounts, telemetry or crash reports. Your data only
   leaves your machine when bank sync talks to Plaid or SimpleFIN for you.
 - ✅ **Encrypted bank credentials.** Plaid and SimpleFIN secrets are stored with AES-256-GCM,
   under a key protected by your operating system (Windows DPAPI, macOS Keychain, Linux secret
@@ -243,7 +246,7 @@ as a feature, not an afterthought:
   from GitHub Actions. Check that a file was built from this repository:
 
   ```bash
-  gh attestation verify FlyBudget-Windows-Setup.exe -R dtymoszenko/FlyBudget
+  gh attestation verify OhmzBudget-Windows-Setup.exe -R ohmzi/OhmzBudget
   ```
 
 - ✅ **A careful supply chain.** Dependency install scripts never run, npm registry signatures
@@ -251,14 +254,14 @@ as a feature, not an afterthought:
 
 Read the full model in [SECURITY.md](SECURITY.md) or on the
 [security page](https://flybudget.org/community/security). Found a problem? Please
-[report it privately](https://github.com/dtymoszenko/FlyBudget/security/advisories/new).
+[report it privately](https://github.com/ohmzi/OhmzBudget/security/advisories/new).
 
 ## 💙 Built with care
 
 - **Tested on every change:** property-based tests check the budget math, rules engine and
   recurrence dates against hundreds of generated cases, and Playwright end-to-end tests drive
   the desktop app, the self-hosted server, a phone-sized screen and the demo.
-- **Never locks you out:** if the server drops, FlyBudget keeps showing your budget, queues new
+- **Never locks you out:** if the server drops, OhmzBudget keeps showing your budget, queues new
   transactions and reconnects on its own.
 - **Your data is portable:** download a full backup or CSV export whenever you like.
 - **Documented:** a [user guide](https://flybudget.org/docs/getting-started) for every feature,
@@ -273,8 +276,8 @@ Read the full model in [SECURITY.md](SECURITY.md) or on the
 You'll need Node.js and npm.
 
 ```bash
-git clone https://github.com/dtymoszenko/FlyBudget.git
-cd FlyBudget
+git clone https://github.com/ohmzi/OhmzBudget.git
+cd OhmzBudget
 npm ci && npm ci --prefix client && npm ci --prefix server
 npm run dev          # opens on http://localhost:5173
 npm run electron:dev # or run it as the desktop app
@@ -299,7 +302,7 @@ Ideas we're considering (not promises):
 - Bank connections for European banks
 - Multiple currencies
 
-Have an idea? [Open an issue](https://github.com/dtymoszenko/FlyBudget/issues).
+Have an idea? [Open an issue](https://github.com/ohmzi/OhmzBudget/issues).
 
 ## 🤝 Contributing
 
@@ -310,7 +313,7 @@ your first pull request is merged, you'll be asked to accept the
 
 ## 📄 License
 
-FlyBudget is free software under the [GNU Affero General Public License v3.0](LICENSE)
+OhmzBudget is free software under the [GNU Affero General Public License v3.0](LICENSE)
 (AGPL-3.0-only). You can use, study, share and modify it. Using it yourself, changed or not,
 asks nothing of you. If you give copies to others, their source code must be available to them
 under the same license. If you let other people use a modified version over a network, it must
@@ -320,5 +323,5 @@ offer it to the people who use it.
 
 <p align="center">
   <br />
-  If FlyBudget helps you, a ⭐ helps other people find it.
+  If OhmzBudget helps you, a ⭐ helps other people find it.
 </p>

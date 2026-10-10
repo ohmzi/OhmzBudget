@@ -1,0 +1,6 @@
+# Pinned because this host's Docker default address pools are exhausted.
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.88.0.0/24

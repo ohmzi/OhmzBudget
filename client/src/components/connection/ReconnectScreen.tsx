@@ -6,13 +6,13 @@ import { Button } from '../ui/Button';
 import { RetryProgress, retryLabel } from './RetryStatus';
 
 const TITLES: Record<AppMode, string> = {
-  desktop: 'FlyBudget is starting up again',
+  desktop: 'OhmzBudget is starting up again',
   server: 'Reconnecting to your server',
-  dev: 'Reconnecting to FlyBudget',
+  dev: 'Reconnecting to OhmzBudget',
 };
 
 /**
- * Shown instead of the app when FlyBudget's server can't be reached on startup. Keeps
+ * Shown instead of the app when OhmzBudget's server can't be reached on startup. Keeps
  * retrying on its own (see store/connectionStore.ts); the app loads, without a page
  * reload, as soon as the server answers.
  */
@@ -47,7 +47,7 @@ export function ReconnectScreen({ mode, onRetry }: { mode: AppMode; onRetry: () 
               <span className="w-2 h-2 rounded-full bg-caution shrink-0" aria-hidden />
             )}
             {serverError
-              ? "FlyBudget's server answered with an error."
+              ? "OhmzBudget's server answered with an error."
               : mode === 'desktop'
                 ? retryLabel(connection)
                 : `Can't reach it right now. ${retryLabel(connection)}`}
@@ -61,7 +61,7 @@ export function ReconnectScreen({ mode, onRetry }: { mode: AppMode; onRetry: () 
 
         {mode === 'desktop' && (
           <p className="text-xs text-text-tertiary leading-relaxed">
-            If this doesn't go away, quit FlyBudget and open it again. Your data is safe on this
+            If this doesn't go away, quit OhmzBudget and open it again. Your data is safe on this
             computer.
           </p>
         )}
@@ -81,13 +81,13 @@ export function ReconnectScreen({ mode, onRetry }: { mode: AppMode; onRetry: () 
               <div>
                 <p>Check that the container is running:</p>
                 <pre className="mt-1 px-2 py-1.5 rounded bg-surface-alt font-mono text-[11px] overflow-x-auto">
-                  docker ps --filter name=flybudget
+                  docker ps --filter name=ohmzbudget
                 </pre>
               </div>
               <div>
                 <p>See what it logged:</p>
                 <pre className="mt-1 px-2 py-1.5 rounded bg-surface-alt font-mono text-[11px] overflow-x-auto">
-                  docker logs --tail 50 flybudget
+                  docker logs --tail 50 ohmzbudget
                 </pre>
               </div>
               <p>

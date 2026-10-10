@@ -1,4 +1,4 @@
-# FlyBudget website
+# OhmzBudget website
 
 The source of [flybudget.org](https://flybudget.org): the homepage, the user guide (`docs/`),
 the tour of the app (`tour/`), community pages (`community/`) and the blog (`blog/`). It's built

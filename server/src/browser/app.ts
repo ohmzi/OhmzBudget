@@ -22,13 +22,14 @@ import { schedulesRouter } from '../routes/schedules.js';
 import { goalsRouter } from '../routes/goals.js';
 
 /** Answer for anything that needs a real server: bank connections, sign-in. */
-const NOT_IN_DEMO = "This isn't available in the demo. Download FlyBudget to use it.";
+const NOT_IN_DEMO = "This isn't available in the demo. Download OhmzBudget to use it.";
 
 const app = Router();
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.get('/auth/status', (_req, res) =>
-  res.json({ enabled: false, needsSetup: false, authenticated: true }),
+  // Same shape as routes/auth.ts: the demo has no accounts, so no signed-in user
+  res.json({ enabled: false, needsSetup: false, authenticated: true, user: null }),
 );
 app.get('/server/info', (_req, res) => res.json({ mode: 'demo', version: DEMO_VERSION }));
 
@@ -54,8 +55,8 @@ app.use('/plaid', (_req, res) => res.status(403).json({ error: NOT_IN_DEMO }));
 app.use('/simplefin', (_req, res) => res.status(403).json({ error: NOT_IN_DEMO }));
 app.use('/auth', (_req, res) => res.status(403).json({ error: NOT_IN_DEMO }));
 
-declare const __FLYBUDGET_VERSION__: string;
-const DEMO_VERSION = typeof __FLYBUDGET_VERSION__ === 'string' ? __FLYBUDGET_VERSION__ : 'demo';
+declare const __OHMZBUDGET_VERSION__: string;
+const DEMO_VERSION = typeof __OHMZBUDGET_VERSION__ === 'string' ? __OHMZBUDGET_VERSION__ : 'demo';
 
 export interface DemoRequest {
   method: string;

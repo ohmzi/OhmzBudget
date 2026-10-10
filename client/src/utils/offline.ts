@@ -1,6 +1,6 @@
 import type { CreateTransactionData, CreateTransferData } from '../api/transactions';
 
-// Offline copy: FlyBudget keeps what it last loaded on this device, so the app still opens
+// Offline copy: OhmzBudget keeps what it last loaded on this device, so the app still opens
 // (read-only) when its server can't be reached, and new transactions typed while offline
 // wait here until they can be sent. These are the pure parts; the storage lives in
 // src/offline/.

@@ -60,20 +60,20 @@ export function createSecretCipher(keyBase64: string | undefined): SecretCipher 
 }
 
 /**
- * The key, read once at startup: FLYBUDGET_DATA_KEY (electron/main.ts sets it and
- * removes it from the environment afterwards), or FLYBUDGET_DATA_KEY_FILE, a file
+ * The key, read once at startup: OHMZBUDGET_DATA_KEY (electron/main.ts sets it and
+ * removes it from the environment afterwards), or OHMZBUDGET_DATA_KEY_FILE, a file
  * containing it (Docker secrets are mounted as files).
  */
 function loadDataKey(): string | undefined {
-  if (process.env.FLYBUDGET_DATA_KEY) return process.env.FLYBUDGET_DATA_KEY;
-  const file = process.env.FLYBUDGET_DATA_KEY_FILE;
+  if (process.env.OHMZBUDGET_DATA_KEY) return process.env.OHMZBUDGET_DATA_KEY;
+  const file = process.env.OHMZBUDGET_DATA_KEY_FILE;
   if (!file) return undefined;
   try {
     return readFileSync(file, 'utf8').trim();
   } catch (err) {
     throw new Error(
       `Can't read the encryption key file ${file} (${(err as NodeJS.ErrnoException).code}). ` +
-        'It must exist and be readable by the user FlyBudget runs as (user id 1000 in Docker).',
+        'It must exist and be readable by the user OhmzBudget runs as (user id 1000 in Docker).',
     );
   }
 }

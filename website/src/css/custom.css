@@ -33,7 +33,7 @@
   height: 2.25rem;
 }
 
-/* The FlyBudget wordmark (src/theme/Logo): bolder and tighter than the menu links, so the
+/* The OhmzBudget wordmark (src/theme/Logo): bolder and tighter than the menu links, so the
    name reads as a logo. The logo never shrinks, or the name gets cut off on narrow screens. */
 .navbar__brand {
   flex: none;

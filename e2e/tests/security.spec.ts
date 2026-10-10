@@ -26,14 +26,14 @@ function rawRequest(
   });
 }
 
-const token = () => `flybudget_token=${process.env.E2E_API_TOKEN}`;
+const token = () => `ohmzbudget_token=${process.env.E2E_API_TOKEN}`;
 const localHost = `localhost:${DESKTOP_PORT}`;
 
 test.describe('API access', () => {
   test('requires the per-launch token', async () => {
     expect((await rawRequest('/api/accounts', { host: localHost })).status).toBe(401);
     expect(
-      (await rawRequest('/api/accounts', { host: localHost, cookie: 'flybudget_token=guess' }))
+      (await rawRequest('/api/accounts', { host: localHost, cookie: 'ohmzbudget_token=guess' }))
         .status,
     ).toBe(401);
     expect((await rawRequest('/api/accounts', { host: localHost, cookie: token() })).status).toBe(

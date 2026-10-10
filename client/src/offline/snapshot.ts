@@ -12,7 +12,7 @@ import {
 import { deleteValue, readValue, writeValue } from './storage';
 
 // The offline copy: what the app last loaded (accounts, budget, transactions, reports...)
-// saved on this device, so FlyBudget still opens when its server can't be reached. It's
+// saved on this device, so OhmzBudget still opens when its server can't be reached. It's
 // restored before the first render (which also makes every start instant), refreshed a
 // moment after new data arrives while connected, and deleted on sign-out, when the server
 // asks for a login again, or when turned off in Settings → Server. Each save keeps pages

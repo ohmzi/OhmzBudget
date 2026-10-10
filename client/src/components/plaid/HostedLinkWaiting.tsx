@@ -15,13 +15,13 @@ export function HostedLinkWaiting({
       <div>
         <h3 className="text-sm font-semibold text-text">Finish connecting in your browser</h3>
         <p className="text-xs text-text-secondary mt-1 max-w-sm mx-auto leading-relaxed">
-          Plaid opened in your web browser. Log in to your bank there — FlyBudget will continue
+          Plaid opened in your web browser. Log in to your bank there — OhmzBudget will continue
           automatically when you&apos;re done.
         </p>
       </div>
       <p className="inline-flex items-center gap-1.5 text-[11px] text-text-tertiary">
         <ShieldCheck size={12} /> Your bank login happens on Plaid&apos;s secure site, never in
-        FlyBudget.
+        OhmzBudget.
       </p>
       <div className="flex justify-center gap-2">
         <Button variant="secondary" onClick={onReopen}>

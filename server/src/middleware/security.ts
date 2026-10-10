@@ -15,7 +15,7 @@ export const DEV_CLIENT_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:51
 
 const LOCAL_HOSTNAMES = ['localhost', '127.0.0.1'];
 
-export const API_TOKEN_COOKIE = 'flybudget_token';
+export const API_TOKEN_COOKIE = 'ohmzbudget_token';
 
 const selfOrigins = (port: number) => LOCAL_HOSTNAMES.map((h) => `http://${h}:${port}`);
 
@@ -94,7 +94,7 @@ export function readCookie(header: string | undefined, name: string): string | u
 
 /**
  * Desktop app only: the Electron main process generates a random token per launch,
- * passes it here via FLYBUDGET_API_TOKEN, and sets it as an HttpOnly, SameSite=Strict
+ * passes it here via OHMZBUDGET_API_TOKEN, and sets it as an HttpOnly, SameSite=Strict
  * cookie in its own window. Anything else on the machine that finds the port —
  * another program or another OS user — can't read or change the user's data.
  */
@@ -172,7 +172,7 @@ export const bankRateLimit = rateLimit({
 });
 
 /**
- * Server mode behind a reverse proxy that FlyBudget wasn't told about: every request
+ * Server mode behind a reverse proxy that OhmzBudget wasn't told about: every request
  * seems to come from the proxy, so HTTPS isn't detected (cookies lose `Secure`) and new
  * browsers share one login rate limit. Says so once in the log.
  */
@@ -181,9 +181,9 @@ export const proxyConfigWarning: RequestHandler = (req, _res, next) => {
   if (serverMode && !trustProxy && !proxyWarned && req.headers['x-forwarded-for']) {
     proxyWarned = true;
     console.warn(
-      'FlyBudget is behind a reverse proxy, but FLYBUDGET_TRUST_PROXY is not set. Set it to ' +
-        'the number of proxies in front of FlyBudget (usually 1) so HTTPS and client ' +
-        'addresses are detected: https://flybudget.org/community/self-hosting',
+      'OhmzBudget is behind a reverse proxy, but OHMZBUDGET_TRUST_PROXY is not set. Set it to ' +
+        'the number of proxies in front of OhmzBudget (usually 1) so HTTPS and client ' +
+        'addresses are detected: https://github.com/ohmzi/OhmzBudget',
     );
   }
   next();

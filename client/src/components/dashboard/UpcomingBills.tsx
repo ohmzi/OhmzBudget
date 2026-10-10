@@ -57,7 +57,7 @@ export default function UpcomingBills() {
             compact
             icon={<CalendarClock size={20} />}
             title="Track your bills and paychecks"
-            description="Add rent, subscriptions and income that repeat, or let FlyBudget find them in your transactions."
+            description="Add rent, subscriptions and income that repeat, or let OhmzBudget find them in your transactions."
             actions={
               <ButtonLink size="sm" to="/recurring?add=1">
                 Add recurring

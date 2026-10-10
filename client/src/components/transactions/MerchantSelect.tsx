@@ -108,7 +108,7 @@ export function MerchantSelect({
           {query.trim() && !exactMatch && !canSave && (
             // New merchants are made on the server, so offline only existing ones can be picked
             <p className="px-3 py-2.5 text-xs text-caution border-t border-border-light">
-              New merchants can be added once FlyBudget reconnects.
+              New merchants can be added once OhmzBudget reconnects.
             </p>
           )}
           {query.trim() && !exactMatch && canSave && (

@@ -1,6 +1,6 @@
 import { apiFetch } from './client';
 
-// How FlyBudget runs (sidebar server status, Settings → Server). Signed-in only.
+// How OhmzBudget runs (sidebar server status, Settings → Server). Signed-in only.
 
 export type SecurityCheckId =
   'https' | 'trustProxy' | 'allowedHosts' | 'encryptionKey' | 'password';

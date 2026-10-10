@@ -7,7 +7,7 @@ test('the getting started checklist tracks progress and can be hidden', async ({
   await open(page, '/welcome');
   await page.getByRole('button', { name: 'Skip for now and look around' }).click();
 
-  const checklist = page.getByRole('heading', { name: 'Get started with FlyBudget' });
+  const checklist = page.getByRole('heading', { name: 'Get started with OhmzBudget' });
   await expect(checklist).toBeVisible();
   await expect(page.getByText('0 of 5 done')).toBeVisible();
 

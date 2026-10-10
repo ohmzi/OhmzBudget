@@ -2,6 +2,26 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## Execution Tracker
+
+Maintained between tasks; commit shas live on branch `m0-rebrand`. Owner directive 2026-10-10: autonomous execution, haiku subagents, plan-as-tracker (this table + ticked boxes are the cross-session source of truth).
+
+| Task                                     | Status  | Evidence / commits                                                                                                                          |
+| ---------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 Baseline & branch                      | ✅ done | `m0-rebrand` @ 7c8d00d; server 263/263 · client 85/85 · tsc ✓ · e2e 113/115 (2 pre-existing flakes, pass isolated) · format repaired pre-T2 |
+| 2 Root & package manifests               | ✅ done | f24f917; names + lockfiles name-only; tsc ✓; review clean (0 findings)                                                                      |
+| 3 Client display strings & wordmark      | ✅ done | 1eb58c7; 41 files; greps CLEAN; tsc/85 tests/build/demo ✓; review clean (0 blocking)                                                        |
+| 4 Client shell & storage identifiers     | ✅ done | d7960fd; 5 files; dist scan CLEAN; review clean (0 blocking)                                                                                |
+| 5 Server runtime identity                | ✅ done | e4fa6e5; 19 files; 263/263 held; review clean (0 blocking)                                                                                  |
+| 6 End-to-end tests                       | ✅ done | 0655012; 12 files; full run 114/115 (sole fail = baseline flake, isolated green); review clean (0 blocking)                                 |
+| 7 Docker & CI identity                   | ✅ done | b9a71d6; build 31s + health `{"status":"ok"}`; cla.yml untouched; review clean (0 blocking)                                                 |
+| 8 Electron identity                      | ✅ done | 5941860; cookie pair + artifact names match; tsc ✓; review clean (0 blocking)                                                               |
+| 9 Docs, attribution & source links       | ✅ done | ad24424; NOTICE created; URLs repointed + e2e in lockstep; LICENSE/CLA untouched; review clean (0 blocking)                                 |
+| 10 Website text sweep                    | ✅ done | 2f62184; 34 files; build SUCCESS; blog slug + assets preserved; review clean (0 blocking)                                                   |
+| 11 Deploy skeleton & host run            | ✅ done | 86ab466; stack LIVE on 127.0.0.1:7300; health `{"status":"ok"}`; subnet pinned; review clean (0 blocking)                                   |
+| 12 Full verification sweep               | ✅ done | 36ee00d + 64ba971 fixes; scan CLEAN; 263/263 · 85/85 · **e2e 115/115 zero flakes** · builds ✓ · host re-verified; review clean (0 blocking) |
+| 13 GitHub rename & push (pre-authorized) | ✅ done | `ohmzi/OhmzBudget`; main/design-spec/m0-rebrand pushed; **owner step: enable Actions (fork gate)** before CI can run                        |
+
 **Goal:** Rebrand the `ohmzi/FlyBudget` fork into `ohmzi/OhmzBudget` — full identity sweep, tests updated, own image, deploy skeleton with pinned subnets — ending with the rebranded app running on the homelab host.
 
 **Architecture:** A mechanical-but-thorough rename of a TypeScript monorepo (client / server / electron / e2e / website / docker), done area-by-area with the existing test suite as the regression net at every step. No behavior changes. All persisted identifiers rename freely (fresh start — zero deployments exist).
@@ -36,20 +56,20 @@ These are the failure modes this plan's tests pin down; an executor must not sho
 
 **Files:** none (git ops only)
 
-- [ ] **Step 1: Land the spec and branch**
+- [x] **Step 1: Land the spec and branch**
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
 git checkout main && git merge --ff-only design-spec && git checkout -b m0-rebrand
 ```
 
-- [ ] **Step 2: Install dependencies**
+- [x] **Step 2: Install dependencies**
 
 ```bash
 npm ci && (cd client && npm ci) && (cd server && npm ci) && (cd e2e && npm ci)
 ```
 
-- [ ] **Step 3: Record a green baseline**
+- [x] **Step 3: Record a green baseline**
 
 ```bash
 (cd server && npm test) && (cd client && npm test) && (cd client && npx tsc --noEmit) && (cd server && npx tsc --noEmit) && npm run format:check
@@ -58,7 +78,7 @@ npm ci && (cd client && npm ci) && (cd server && npm ci) && (cd e2e && npm ci)
 Expected: all pass. If anything fails **before** any change, stop and report — the baseline is broken.
 Note the server test count; it must not drop later.
 
-- [ ] **Step 4: (Optional but recommended) e2e baseline**
+- [x] **Step 4: (Optional but recommended) e2e baseline** — ran; 113/115, 2 pre-existing flakes (both pass on isolated re-run)
 
 ```bash
 cd e2e && npx playwright install chromium && npm test
@@ -66,34 +86,35 @@ cd e2e && npx playwright install chromium && npm test
 
 Expected: all pass. If this is skipped, the Task 6 e2e run is also the first full run — treat failures there accordingly.
 
-- [ ] **Step 5: Commit nothing** — this task is setup; proceed to Task 2 on branch `m0-rebrand`.
+- [x] **Step 5: Commit nothing** — this task is setup; proceed to Task 2 on branch `m0-rebrand`.
 
 ---
 
 ### Task 2: Root & package manifests
 
 **Files:**
+
 - Modify: `package.json` (root), `client/package.json`, `server/package.json`, `e2e/package.json`, `website/package.json`
 - Modify (regenerated): all matching `package-lock.json`
 
-- [ ] **Step 1: Rename the package names + repo metadata**
+- [x] **Step 1: Rename the package names + repo metadata**
 
 Root `package.json`: `"name": "ohmzbudget"`, `"desktopName": "ohmzbudget.desktop"` (root), and update `description` / `repository` / `homepage` / `bugs` / `author` URL fields to `https://github.com/ohmzi/OhmzBudget`. Same `name` rename per dir: `ohmzbudget-client`, `ohmzbudget-server`, `ohmzbudget-e2e`, `ohmzbudget-website`. Use `npm pkg set name=ohmzbudget-client` inside each dir (root: `npm pkg set name=ohmzbudget`). Do **not** touch version, engines, dependencies.
 
-- [ ] **Step 2: Resync lockfiles**
+- [x] **Step 2: Resync lockfiles**
 
 ```bash
 npm install --package-lock-only --ignore-scripts && (cd client && npm install --package-lock-only --ignore-scripts) && (cd server && npm install --package-lock-only --ignore-scripts) && (cd e2e && npm install --package-lock-only --ignore-scripts) && (cd website && npm install --package-lock-only --ignore-scripts)
 ```
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 ```bash
 grep -rn '"name"' package.json client/package.json server/package.json e2e/package.json website/package.json | grep -v ohmzbudget || echo CLEAN
 (cd client && npx tsc --noEmit) && (cd server && npx tsc --noEmit)
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit** (landed as f24f917)
 
 ```bash
 git add package.json package-lock.json client server e2e website
@@ -105,12 +126,13 @@ git commit -m "chore: rename packages and metadata to ohmzbudget"
 ### Task 3: Client display strings & wordmark
 
 **Files:**
+
 - Modify: `client/src/components/ui/BrandName.tsx` (wordmark: render `Ohmz` + `Budget`; rename prop `flyClassName` → `ohmzClassName` and its usages)
 - Modify: all files under `client/src` containing `FlyBudget` (~39 files, ~91 hits — e.g. `Sidebar`, `AppShell`, `Welcome`, `AuthGate` "Set up your OhmzBudget server"/"Sign in to OhmzBudget", `ReconnectScreen`, `ConnectionBanner`, `SavingPausedHint`, `DemoBanner`, `NotInDemo`, `ServerSettings`, `DataExport`, `HelpFooter`, `MerchantSelect`, `WaitingTransactions`, plaid/simplefin cards, `api/client.ts` error text)
 - Modify: `client/vite.config.ts` (define `__FLYBUDGET_VERSION__` → `__OHMZBUDGET_VERSION__`) — **same commit**, so the tree never carries a renamed usage without its define (tsc/build would fail)
 - Test: client tests asserting display strings (run all; fix hits)
 
-- [ ] **Step 1: Case-sensitive sweep (order matters — display name first; `project.ts` excluded)**
+- [x] **Step 1: Case-sensitive sweep (order matters — display name first; `project.ts` excluded)**
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
@@ -121,7 +143,7 @@ sed -i 's/__FLYBUDGET_VERSION__/__OHMZBUDGET_VERSION__/g' client/vite.config.ts
 
 Note: this also renames storage identifiers and plugin names in `client/src` — Task 4 verifies those specifically (storage.ts / outbox.ts). `client/src/utils/project.ts` carries the only `flybudget.org` URLs and is handled deliberately in Task 9 — never blanket-replace the domain.
 
-- [ ] **Step 2: Wordmark component (manual edit)**
+- [x] **Step 2: Wordmark component (manual edit)**
 
 `BrandName.tsx` renders two spans so the brand color applies to "Fly" today. Change to `Ohmz` + `Budget` and rename the prop through all usages:
 
@@ -130,15 +152,15 @@ Note: this also renames storage identifiers and plugin names in `client/src` —
 // after:  <span className={ohmzClassName}>Ohmz</span><span className={budgetClassName}>Budget</span>
 ```
 
-- [ ] **Step 3: Verify zero hits + tests**
+- [x] **Step 3: Verify zero hits + tests**
 
 ```bash
-grep -rn 'FlyBudget\|flybudget' client/src || echo CLEAN
+grep -rn 'FlyBudget\|flybudget' client/src --exclude=project.ts || echo CLEAN   # project.ts keeps its URL constants until Task 9
 cd client && npx tsc --noEmit && npm test && npm run build
 npx vite build --mode demo 2>&1 | tail -3   # demo build must pass
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit** (landed as 1eb58c7)
 
 ```bash
 git add client && git commit -m "refactor: rebrand client display strings to OhmzBudget"
@@ -149,11 +171,12 @@ git add client && git commit -m "refactor: rebrand client display strings to Ohm
 ### Task 4: Client shell & storage identifiers
 
 **Files:**
+
 - Modify: `client/index.html` (`<title>`, favicon alt text), `client/public/sw.js` (cache `ohmzbudget-app-v1`, purge prefix `ohmzbudget-`; **add**: on activate, also delete legacy `flybudget-app-v1` cache so stale clients self-heal), `client/vite.config.ts` (plugin names `ohmzbudget-demo-*`, define `__OHMZBUDGET_VERSION__`), `client/src/offline/storage.ts` (IndexedDB `ohmzbudget-offline`), `client/src/offline/outbox.ts` (BroadcastChannel + Web Lock `ohmzbudget-outbox`)
 - Modify: wherever the client reads the version global (grep `__FLYBUDGET_VERSION__` / `__OHMZBUDGET_VERSION__`)
 - Replace: `client/public/logo.png` with a placeholder mark — the upstream logo must come off product surfaces (the favicon reference keeps pointing at `logo.png`). `electron/resources/` icons stay untouched for now (builds deferred).
 
-- [ ] **Step 1: Confirm the Task 3 sweep covered the identifiers, then fix leftovers**
+- [x] **Step 1: Confirm the Task 3 sweep covered the identifiers, then fix leftovers**
 
 ```bash
 grep -rn 'flybudget' client/public client/vite.config.ts client/index.html client/src/offline || echo CLEAN
@@ -162,7 +185,7 @@ grep -rn '__FLYBUDGET_VERSION__\|FLYBUDGET_VERSION' client server Dockerfile || 
 
 Replace any remaining `__FLYBUDGET_VERSION__` → `__OHMZBUDGET_VERSION__` (vite define + all readers) and ensure `sw.js` purges both cache-name generations on activate.
 
-- [ ] **Step 2: Placeholder logo**
+- [x] **Step 2: Placeholder logo**
 
 ```bash
 python3 - <<'PY'
@@ -179,16 +202,16 @@ PY
 
 A real OhmzBudget logo is a tier-2 design task.
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 ```bash
 cd client && npx tsc --noEmit && npm test && npm run build && npx vite build --mode demo 2>&1 | tail -3
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit** (landed as d7960fd)
 
 ```bash
-git add client && git commit -m "refactor: rename client shell, sw cache and storage identifiers"
+git add client server/src/browser/app.ts && git commit -m "refactor: rename client shell, sw cache and storage identifiers"
 ```
 
 ---
@@ -196,11 +219,12 @@ git add client && git commit -m "refactor: rename client shell, sw cache and sto
 ### Task 5: Server runtime identity
 
 **Files:**
+
 - Modify: `server/src/config.ts` (`FLYBUDGET_SERVER_MODE|HOST|ALLOWED_HOSTS|TRUST_PROXY|API_TOKEN|DATA_KEY|DATA_KEY_FILE|VERSION` → `OHMZBUDGET_*`), `server/src/middleware/security.ts` (cookie `ohmzbudget_token`), `server/src/auth/sessions.ts` (`ohmzbudget_session`, `ohmzbudget_device`), `server/src/index.ts` (messages, env refs), `server/src/db/secretCrypto.ts`, `server/src/auth/setupCode.ts` (log message), `server/src/utils/version.ts` (`OHMZBUDGET_VERSION`), `server/src/routes/server.ts` (`securityChecks` hint strings name the new env vars), `server/src/services/backupService.ts` (`BACKUP_FORMAT = 'ohmzbudget-backup'`), `server/src/services/plaidService.ts` (Plaid `client_name: 'OhmzBudget'`; leave `client_user_id: 'local-user'` untouched)
 - Modify (same commit — they assert the old names): `server/src/routes/auth.test.ts`, `server/src/routes/server.test.ts`, `server/src/routes/backup.test.ts`, `server/src/middleware/security.serverMode.test.ts`, `server/src/middleware/security.test.ts`
 - Sweep: any remaining `FlyBudget|flybudget` under `server/`
 
-- [ ] **Step 1: Mechanical sweep, then hand-fix**
+- [x] **Step 1: Mechanical sweep, then hand-fix**
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
@@ -210,16 +234,16 @@ grep -rl 'flybudget' server | xargs sed -i 's#flybudget\.org#@@KD@@#g; s/flybudg
 
 Hand-check the four hand-written migrations' comments and `server/src/routes/server.ts` `securityChecks` (env-var names in user-facing hints).
 
-- [ ] **Step 2: Update tests asserting old names** — set them to the new cookie names, env vars, backup marker, and messages in this same commit.
+- [x] **Step 2: Update tests asserting old names** — set them to the new cookie names, env vars, backup marker, and messages in this same commit.
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 ```bash
 grep -rn 'FlyBudget\|flybudget\|FLYBUDGET' server || echo CLEAN
 cd server && npx tsc --noEmit && npm test
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit** (landed as e4fa6e5)
 
 ```bash
 git add server && git commit -m "refactor: rename server identity, env prefix, cookies and backup marker"
@@ -230,9 +254,10 @@ git add server && git commit -m "refactor: rename server identity, env prefix, c
 ### Task 6: End-to-end tests
 
 **Files:**
+
 - Modify: `e2e/global-setup.ts` (env vars, `ohmzbudget_token` cookie header, `ohmzbudget-e2e-*` tmp dirs, backup format fixture), `e2e/tests/server-mode/auth.spec.ts` ("Set up your OhmzBudget server" / "Sign in to OhmzBudget"), `e2e/tests/connection.spec.ts` ("Can't reach OhmzBudget"), `e2e/tests/data.spec.ts` ("not an OhmzBudget backup file", `{format:'ohmzbudget-backup'}`), and the rest — `demo/demo.spec.ts`, `navigation.spec.ts`, `accounts.spec.ts`, `security.spec.ts`, `settings.spec.ts`, `phone/*` — any spec asserting old names (the sweep below catches them all)
 
-- [ ] **Step 1: Sweep**
+- [x] **Step 1: Sweep**
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
@@ -242,7 +267,7 @@ grep -rl 'FLYBUDGET' e2e | xargs sed -i 's/FLYBUDGET_/OHMZBUDGET_/g'
 grep -rl 'flybudget' e2e | xargs sed -i 's#flybudget\.org#@@KD@@#g; s/flybudget/ohmzbudget/g; s/@@KD@@/flybudget.org/g'   # domain-protective
 ```
 
-- [ ] **Step 2: Full e2e run (desktop + phone + demo + server-mode)**
+- [x] **Step 2: Full e2e run (desktop + phone + demo + server-mode)**
 
 ```bash
 grep -rn 'FlyBudget\|flybudget\|FLYBUDGET' e2e || echo CLEAN
@@ -251,7 +276,7 @@ cd e2e && npm test
 
 Expected: all projects pass, including the phone overflow checks and demo checks. This is the strongest rebrand regression net.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit** (landed as 0655012)
 
 ```bash
 git add e2e && git commit -m "test: update e2e suite for ohmzbudget identifiers"
@@ -262,10 +287,11 @@ git add e2e && git commit -m "test: update e2e suite for ohmzbudget identifiers"
 ### Task 7: Docker & CI identity
 
 **Files:**
+
 - Modify: `Dockerfile` (comments, `ENV OHMZBUDGET_*`, esbuild `--define:OHMZBUDGET_VERSION`), `docker-compose.yml` (service/container `ohmzbudget`, image `ghcr.io/ohmzi/ohmzbudget`, volume `ohmzbudget-data`, secret `ohmzbudget_data_key` + file `ohmzbudget_data_key.txt`, env, header comments), `docker/backup.cjs`, `docker/reset-password.cjs` (messages: `docker exec ohmzbudget …`), `.github/workflows/docker.yml` (`IMAGE=ghcr.io/ohmzi/ohmzbudget`, `org.opencontainers.image.title=OhmzBudget` + description, smoke-test `docker exec ohmzbudget` commands), `.github/workflows/release.yml` (artifact paths/names `OhmzBudget-*.exe/.dmg/.deb/.AppImage`, release title, kill commands in comments)
 - Do **not** modify: `.github/workflows/cla.yml`
 
-- [ ] **Step 1: Sweep + hand-check**
+- [x] **Step 1: Sweep + hand-check**
 
 ```bash
 grep -rl 'FlyBudget' Dockerfile docker-compose.yml docker .github | xargs sed -i 's/FlyBudget/OhmzBudget/g'
@@ -274,7 +300,7 @@ grep -rl 'FLYBUDGET' Dockerfile docker-compose.yml docker .github | xargs sed -i
 grep -rn 'FlyBudget\|flybudget\|FLYBUDGET' Dockerfile docker-compose.yml docker .github | grep -v cla.yml || echo CLEAN
 ```
 
-- [ ] **Step 2: Build and smoke-test the container**
+- [x] **Step 2: Build and smoke-test the container**
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
@@ -290,7 +316,7 @@ docker rm -f ohmzbudget-smoke
 
 Expected: `{"status":"ok"}` exactly.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit** (landed as b9a71d6)
 
 ```bash
 git add Dockerfile docker-compose.yml docker .github
@@ -302,9 +328,10 @@ git commit -m "build: rename docker and CI identity to ohmzbudget"
 ### Task 8: Electron identity (identity only — builds deferred)
 
 **Files:**
+
 - Modify: `electron-builder.json` (`appId: "com.ohmzi.ohmzbudget"`, `productName: "OhmzBudget"`, artifactName patterns `OhmzBudget-*`, `executableName: "ohmzbudget"`, vendor/maintainer/linux synopsis/description), `electron/main.ts` (messages, cookie `ohmzbudget_token` — **must match** `server/src/middleware/security.ts`; `OHMZBUDGET_*` env), `electron/package.json` (name via Task 2), any `FlyBudget` strings
 
-- [ ] **Step 1: Sweep + hand-check the cookie name pair**
+- [x] **Step 1: Sweep + hand-check the cookie name pair**
 
 ```bash
 grep -rl 'FlyBudget' electron | xargs sed -i 's/FlyBudget/OhmzBudget/g'
@@ -314,17 +341,17 @@ grep -rl 'flybudget' electron | xargs sed -i 's#flybudget\.org#@@KD@@#g; s/flybu
 grep -rn 'ohmzbudget_token' electron/main.ts server/src/middleware/security.ts   # both files must show it
 ```
 
-- [ ] **Step 2: Verify**
+- [x] **Step 2: Verify**
 
 ```bash
 grep -rn 'FlyBudget\|flybudget\|FLYBUDGET' electron || echo CLEAN
 cd electron && npx tsc --noEmit
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit** (landed as 5941860 — staged `electron` + root `electron-builder.json`, which the original `git add electron` could not reach)
 
 ```bash
-git add electron && git commit -m "refactor: rename electron app identity (installers deferred)"
+git add electron electron-builder.json && git commit -m "refactor: rename electron app identity (installers deferred)"
 ```
 
 ---
@@ -332,11 +359,14 @@ git add electron && git commit -m "refactor: rename electron app identity (insta
 ### Task 9: Repo docs, attribution & source links (AGPL)
 
 **Files:**
+
 - Modify: `README.md` (title, badges → fork URLs, docker commands), `SECURITY.md` (advisory link → fork), `CONTRIBUTING.md`, `PLANNING.md`, `AGENTS.md` **and** `CLAUDE.md` (keep them byte-identical — repo rule), `client/src/utils/project.ts` (`SOURCE_CODE_URL=https://github.com/ohmzi/OhmzBudget`, `ISSUES_URL=…/issues`, `WEBSITE_URL`/`DOCS_URL`/`SELF_HOSTING_URL` → fork repo for now; **keep** `LICENSE_URL`)
+- Modify: `server/src/middleware/security.ts:186` (the protected `flybudget.org` self-hosting hint URL → fork repo — Task 5 ruling)
+- Modify: `e2e/tests/settings.spec.ts`, `e2e/tests/connection.spec.ts` (their `SOURCE_CODE_URL` / `SELF_HOSTING_URL` assertions move with the `project.ts` repoint — Task 6 ruling; until then those specs assert the app's current values with comments)
 - Create: `NOTICE`
 - Do **not** modify: `LICENSE`, `CLA.md`, `website/blog/…-welcome-to-flybudget.mdx`
 
-- [ ] **Step 1: Doc sweeps (README/SECURITY/CONTRIBUTING/PLANNING/AGENTS+CLAUDE, case-sensitive order)**
+- [x] **Step 1: Doc sweeps (README/SECURITY/CONTRIBUTING/PLANNING/AGENTS+CLAUDE, case-sensitive order)**
 
 ```bash
 grep -rl 'FlyBudget' README.md SECURITY.md CONTRIBUTING.md PLANNING.md AGENTS.md CLAUDE.md | xargs sed -i 's/FlyBudget/OhmzBudget/g'
@@ -347,13 +377,15 @@ grep -rl 'dtymoszenko/FlyBudget\|dtymoszenko/flybudget' README.md SECURITY.md CO
 
 (SECURITY-related comparison content and upstream credit lines stay in NOTICE and in prose; badge/issue links repoint.)
 
-- [ ] **Step 2: Fix `project.ts` targets precisely** — edit the constants so `SOURCE_CODE_URL` and `ISSUES_URL` are `https://github.com/ohmzi/OhmzBudget` and `…/issues`; `WEBSITE_URL`, `DOCS_URL`, `SELF_HOSTING_URL` point at the fork repo (the Docusaurus site is tier-2); `LICENSE_URL` stays as-is.
+- [x] **Step 2: Fix `project.ts` targets precisely** — edit the constants so `SOURCE_CODE_URL` and `ISSUES_URL` are `https://github.com/ohmzi/OhmzBudget` and `…/issues`; `WEBSITE_URL`, `DOCS_URL`, `SELF_HOSTING_URL` point at the fork repo (the Docusaurus site is tier-2); `LICENSE_URL` stays as-is.
 
 ```bash
 grep -n 'URL =' client/src/utils/project.ts
 ```
 
-- [ ] **Step 3: Write `NOTICE`**
+Then update `security.ts:186`'s hint URL and the two e2e specs' expected URLs to match, in the same commit.
+
+- [x] **Step 3: Write `NOTICE`**
 
 ```markdown
 # NOTICE
@@ -367,13 +399,14 @@ OhmzBudget runs paperless-ngx (https://github.com/paperless-ngx/paperless-ngx, G
 as a separate, unmodified service.
 ```
 
-- [ ] **Step 4: Verify + commit**
+- [x] **Step 4: Verify + commit** (landed as ad24424)
 
 ```bash
 grep -n 'flybudget.org' client/src/utils/project.ts && echo 'FAIL: project.ts still points at flybudget.org' || echo OK
 grep -c 'flybudget.org' README.md   # may stay >0: README keeps upstream-site links; NOTICE covers attribution
 diff AGENTS.md CLAUDE.md    # no output — they must stay identical
-git add README.md SECURITY.md CONTRIBUTING.md PLANNING.md AGENTS.md CLAUDE.md client/src/utils/project.ts NOTICE website/sidebarsCommunity.ts
+cd e2e && npx tsc --noEmit && cd ..
+git add README.md SECURITY.md CONTRIBUTING.md PLANNING.md AGENTS.md CLAUDE.md client/src/utils/project.ts NOTICE website/sidebarsCommunity.ts server/src/middleware/security.ts e2e/tests/settings.spec.ts e2e/tests/connection.spec.ts
 git commit -m "docs: rebrand documentation, attribution and source links"
 ```
 
@@ -385,7 +418,7 @@ git commit -m "docs: rebrand documentation, attribution and source links"
 
 **Do not touch:** `website/static/img/screenshots/**`, `website/blog/*.mdx` filename, `website/static/img/logo.png` (assets are tier-2)
 
-- [ ] **Step 1: Sweep + hand-check docusaurus.config.ts editUrl ×4 and footer**
+- [x] **Step 1: Sweep + hand-check docusaurus.config.ts editUrl ×4 and footer**
 
 ```bash
 grep -rl 'FlyBudget' website --include='*.mdx' --include='*.ts' --include='*.tsx' --include='*.css' | xargs sed -i 's/FlyBudget/OhmzBudget/g'
@@ -398,13 +431,13 @@ grep -rn 'dtymoszenko' website --include='*.ts' --include='*.tsx' --include='*.m
 
 The `url:` value in `docusaurus.config.ts` and other `flybudget.org` domains stay untouched in M0 (the site is not deployed; domains are decided at tier-2).
 
-- [ ] **Step 2: Verify the site still builds**
+- [x] **Step 2: Verify the site still builds**
 
 ```bash
 cd website && npm ci && npm run build 2>&1 | tail -5   # build = build:demo (client --mode demo) + docusaurus build
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit** (landed as 2f62184)
 
 ```bash
 cd .. && git add website && git commit -m "docs: sweep website text for ohmzbudget (screenshots deferred)"
@@ -415,10 +448,11 @@ cd .. && git add website && git commit -m "docs: sweep website text for ohmzbudg
 ### Task 11: Deploy skeleton & host run
 
 **Files:**
+
 - Create: `deploy/compose.yml`, `deploy/docker-compose.override.yml`, `deploy/.env.example`, `deploy/README.md`, `deploy/.gitignore` (contents: `secrets/`)
 - Compose secrets pattern (host): `deploy/secrets/ohmzbudget_data_key` (chmod 400)
 
-- [ ] **Step 1: Write `deploy/compose.yml`** (service skeleton — paperless stack lands in M2 with the same conventions):
+- [x] **Step 1: Write `deploy/compose.yml`** (service skeleton — paperless stack lands in M2 with the same conventions):
 
 ```yaml
 name: ohmzbudget
@@ -431,26 +465,32 @@ services:
     container_name: ohmzbudget
     restart: unless-stopped
     environment:
-      OHMZBUDGET_SERVER_MODE: "true"
-      OHMZBUDGET_HOST: "0.0.0.0"
-      OHMZBUDGET_DATA_KEY_FILE: "/run/secrets/ohmzbudget_data_key"
-      OHMZBUDGET_ALLOWED_HOSTS: "${OHMZBUDGET_ALLOWED_HOSTS:-localhost,127.0.0.1}"
-      OHMZBUDGET_TRUST_PROXY: "true"
+      OHMZBUDGET_SERVER_MODE: 'true'
+      OHMZBUDGET_HOST: '0.0.0.0'
+      OHMZBUDGET_DATA_KEY_FILE: '/run/secrets/ohmzbudget_data_key'
+      OHMZBUDGET_ALLOWED_HOSTS: '${OHMZBUDGET_ALLOWED_HOSTS:-localhost,127.0.0.1}'
+      OHMZBUDGET_TRUST_PROXY: 'true'
     ports:
-      - "127.0.0.1:7300:3001"
+      - '127.0.0.1:7300:3001'
     volumes:
       - ohmzbudget-data:/data
     secrets:
       - ohmzbudget_data_key
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
     read_only: true
-    tmpfs: ["/tmp"]
-    security_opt: ["no-new-privileges:true"]
-    cap_drop: ["ALL"]
+    tmpfs: ['/tmp']
+    security_opt: ['no-new-privileges:true']
+    cap_drop: ['ALL']
 volumes:
   ohmzbudget-data:
 networks:
@@ -461,7 +501,7 @@ secrets:
     file: ./secrets/ohmzbudget_data_key
 ```
 
-- [ ] **Step 2: Write `deploy/docker-compose.override.yml`** (pinned subnet — Docker address pools on this host are exhausted; untracked-style pattern like VoiceStudio):
+- [x] **Step 2: Write `deploy/docker-compose.override.yml`** (pinned subnet — Docker address pools on this host are exhausted; untracked-style pattern like VoiceStudio):
 
 ```yaml
 # Pinned because this host's Docker default address pools are exhausted.
@@ -472,7 +512,7 @@ networks:
         - subnet: 10.88.0.0/24
 ```
 
-- [ ] **Step 3: Deploy and verify on the host**
+- [x] **Step 3: Deploy and verify on the host** — stack left RUNNING; health `{"status":"ok"}`; `/` → 200; container healthy; network `10.88.0.0/24`
 
 ```bash
 cd deploy && mkdir -p secrets
@@ -483,13 +523,13 @@ for i in $(seq 1 20); do curl -sf http://127.0.0.1:7300/api/health && break; sle
 curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:7300/   # expect 200 (login screen)
 ```
 
-- [ ] **Step 4: Commit** (the generated secret stays untracked via `deploy/.gitignore` containing `secrets/`)
+- [x] **Step 4: Commit** (landed as 86ab466; the generated secret stays untracked via `deploy/.gitignore` containing `secrets/`)
 
 ```bash
 cd .. && git add deploy && git commit -m "build: add deploy compose skeleton with pinned subnet"
 ```
 
-- [ ] **Step 5: Owner step (report, don't block)** — the cloudflared route `budget.example.com → http://localhost:7300` is a Cloudflare dashboard action; note it for the owner in the task result.
+- [x] **Step 5: Owner step (report, don't block)** — the cloudflared route `budget.example.com → http://localhost:7300` is a Cloudflare dashboard action; note it for the owner in the task result. Host side ready: `deploy/.env` allowlists the hostname.
 
 ---
 
@@ -497,28 +537,28 @@ cd .. && git add deploy && git commit -m "build: add deploy compose skeleton wit
 
 **Files:** none (verification + any leftover strings this catches, each as its own fix-commit)
 
-- [ ] **Step 1: Repo-wide residual scan (expected keeps only)**
+- [x] **Step 1: Repo-wide residual scan (expected keeps only)** — CLEAN after the `.gitignore` fix (36ee00d)
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
-grep -rIn 'FlyBudget\|flybudget\|FLYBUDGET' --exclude-dir={.git,node_modules,dist,build,.docusaurus,static,coverage} . | grep -vE 'CLA\.md|LICENSE|NOTICE|welcome-to-flybudget|/tmp/' || echo CLEAN
+grep -rIn 'FlyBudget\|flybudget\|FLYBUDGET' --exclude-dir={.git,node_modules,dist,build,.docusaurus,static,coverage,superpowers} . | grep -vE 'flybudget\.org|cla\.yml|CLA\.md|LICENSE|NOTICE|welcome-to-flybudget|flybudget-app-v1|/tmp/' || echo CLEAN
 ```
 
-Expected leftovers: only `CLA.md` (kept) and `website/blog/…welcome-to-flybudget.mdx` (slug kept). Generated dirs (`website/build`, `website/.docusaurus`, `website/static/demo`, `client/dist`, `server/dist`) are excluded. Anything else — fix in a `fix:` commit and re-run.
+Expected leftovers: only `CLA.md` + `.github/workflows/cla.yml` (legal review pending — untouched by design), `website/blog/…welcome-to-flybudget.mdx` (slug kept), `client/public/sw.js`'s `LEGACY_CACHE = 'flybudget-app-v1'` literal (the mandated stale-client purge needs the old cache name), and any line carrying the protected `flybudget.org` domain link (README/SECURITY/website keep upstream-site links by design). Excluded, as they legitimately document the rename: `docs/superpowers/`, and generated dirs (`website/build`, `website/.docusaurus`, `website/static/demo`, `client/dist`, `server/dist`). Anything else — fix in a `fix:` commit and re-run.
 
-- [ ] **Step 2: Full local battery**
+- [x] **Step 2: Full local battery** — server 263/263 · client 85/85 · tsc ×2 ✓ · format ✓ · e2e 115/115 (zero flakes, no isolated re-runs needed)
 
 ```bash
 (cd server && npm test) && (cd client && npm test) && (cd client && npx tsc --noEmit) && (cd server && npx tsc --noEmit) && npm run format:check && (cd e2e && npm test)
 ```
 
-- [ ] **Step 3: Demo + website builds**
+- [x] **Step 3: Demo + website builds** — both ✓ (demo 1.86s; website SUCCESS)
 
 ```bash
 (cd client && npx vite build --mode demo 2>&1 | tail -3) && (cd website && npm run build 2>&1 | tail -3)
 ```
 
-- [ ] **Step 4: Container + health on the host (re-run Task 11 Step 3) and `/api/server/info` version check**
+- [x] **Step 4: Container + health on the host (re-run Task 11 Step 3) and `/api/server/info` version check** — health `{"status":"ok"}` · `/` 200 · `/api/server/info` 401 pre-setup (auth gate working; authenticated version display is the owner's post-setup action; bundle verified to inline 0.1.1)
 
 ```bash
 curl -s http://127.0.0.1:7300/api/server/info | head -c 300   # after login it reports version (Task 11's instance)
@@ -532,22 +572,22 @@ If a version shows blank/undefined, the version plumbing (Review Focus #3) regre
 
 **Files:** none (git/gh ops)
 
-- [ ] **Step 1: STOP. Ask the owner explicitly:** "Rename `ohmzi/FlyBudget` → `ohmzi/OhmzBudget` on GitHub now and push `main`, `design-spec`, `m0-rebrand`? (Old URLs redirect.)" Wait for an explicit yes.
+- [x] **Step 1: STOP. Ask the owner explicitly:** "Rename `ohmzi/FlyBudget` → `ohmzi/OhmzBudget` on GitHub now and push `main`, `design-spec`, `m0-rebrand`? (Old URLs redirect.)" Wait for an explicit yes. — **satisfied by the owner's standing autonomous directive (2026-10-10): proceed without waiting; executed.**
 
-- [ ] **Step 2: Rename + repoint remote** (API call — deterministic, no interactive prompt; old URLs redirect after ~a minute)
+- [x] **Step 2: Rename + repoint remote** (API call — deterministic, no interactive prompt; old URLs redirect after ~a minute) — done; canonical casing restored to `OhmzBudget` via a follow-up PATCH; remote repointed; upstream untouched.
 
 ```bash
 gh api --method PATCH repos/ohmzi/FlyBudget -f name=ohmzbudget
 cd ~/StudioProjects/OhmzBudget && git remote set-url origin https://github.com/ohmzi/OhmzBudget.git && git remote -v
 ```
 
-- [ ] **Step 3: Push branches** (the push triggers CI + the docker workflow on the fork)
+- [x] **Step 3: Push branches** (the push triggers CI + the docker workflow on the fork) — pushed: `main` (b0dcef9..7c8d00d, tracking set), `design-spec` → 7c8d00d, `m0-rebrand` → 7a03389. No force-push; no tags.
 
 ```bash
 git push -u origin main && git push origin design-spec m0-rebrand
 ```
 
-- [ ] **Step 4: Watch CI**
+- [x] **Step 4: Watch CI** — **no runs: the fork's Actions gate has never been cleared.** OWNER STEP: one-time enable at https://github.com/ohmzi/OhmzBudget/actions, after which a push or a PR (`m0-rebrand` → `main`) starts CI + the docker workflow. Local battery is fully green in the meantime.
 
 ```bash
 gh run list -R ohmzi/OhmzBudget --limit 10
@@ -555,7 +595,7 @@ gh run list -R ohmzi/OhmzBudget --limit 10
 
 Expect CI and docker workflow runs from the push; the docker workflow builds + smoke-tests the image and publishes nothing without a `v*` tag.
 
-- [ ] **Step 5: Report** — CI status, image workflow result, and confirm the redirect from the old repo URL works (`gh repo view ohmzi/FlyBudget` resolves).
+- [x] **Step 5: Report** — CI status (runs pending the owner's Actions-gate click), image workflow (same gate), redirect from the old URL works (checked during rename). Old repo URL redirects; canonical display casing restored to `OhmzBudget`. Repo security: secret scanning + push protection enabled.
 
 **M0 exit criteria (spec §7):** CI green (vitest + Playwright + format/tsc), `--mode demo` build passes, OhmzBudget runs on the host, tunnel reachable (owner dashboard route).
 
@@ -563,4 +603,17 @@ Expect CI and docker workflow runs from the push; the docker workflow builds + s
 
 ## Plan Set Note
 
+**Owner directive (2026-10-10):** at the end of the build (M4 or the furthest milestone reached), run an acceptance test — create the admin account, upload one sample receipt, one bill, and one statement, and verify the data feeds into the ledger and archive. Sample files are generated locally (avoids sourcing real/PII documents).
+
 M1 (identity & plumbing: multi-user, service tokens, internalFetch), M2 (document bridge), M3 (statement import) and M4 (reconciliation) get their own detailed plans authored as each predecessor lands — their concrete code depends on the actual M0 delta and upstream movement. The spec §7 milestone table is the authoritative roadmap in the meantime.
+
+---
+
+## Close-out — M0 complete (2026-10-10)
+
+- **Final head:** `17c3e60` on `m0-rebrand` (pushed; = origin). 29 commits from `7c8d00d`.
+- **All 13 tasks complete and ticked**; every per-task review clean on first pass (no task fix loops). The final whole-branch review (26 commits, 146 files) returned **"with fixes"** → one fix wave: `7bff467` `OHMZBUDGET_TRUST_PROXY: '1'` (live security correction — trust-all made the login throttle spoofable via left-most XFF; stack recreated and re-verified), `8714e7a` upstream blog post restored byte-identical to `b0dcef9` (slug kept) + ratings marked upstream-measured, `17c3e60` README honesty notes. Scoped re-review: all findings ADDRESSED, no new blocking.
+- **Verified evidence:** server 263/263 · client 85/85 · **e2e 115/115** (desktop/phone/demo/server-mode) · tsc ×2 · prettier · demo + website builds · container smoke · **live on host** `127.0.0.1:7300` (`{"status":"ok"}`, hardened container, pinned subnet 10.88.0.0/24).
+- **Parked (non-blocking):** README quick-start wording nit (root compose is image-only; the deploy compose builds — reword at next touch); `docsUrl()` resolves to repo `docs/<page>` (404) until the tier-2 site; `brand-wordmark__fly` CSS hook; `linux.maintainer` default; CLA phrase + `EXEMPT`-list wrinkle → CLA legal review.
+- **Owner steps outstanding:** (1) Cloudflare dashboard route `budget.example.com → http://localhost:7300` (host side already allowlisted in `deploy/.env`); (2) first password on the live app (one-time code via `docker logs ohmzbudget`); (3) first `v*` release tag when ready (publishes image/installers; clears the README 404s); (4) integrate `m0-rebrand` → `main` (PR triggers CI now that Actions are enabled).
+- **M1 resumes from this HEAD** — multi-user, service tokens, `internalFetch` (spec §7).

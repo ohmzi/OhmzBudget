@@ -5,55 +5,57 @@ sidebar_label: Security
 
 # Security
 
-FlyBudget handles something personal: your money. We've tried to be as careful as we possibly can with it, and this page explains, in plain language, everything we do to keep your data and your bank connections safe.
+OhmzBudget handles something personal: your money. We've tried to be as careful as we possibly can with it, and this page explains, in plain language, everything we do to keep your data and your bank connections safe.
 
 :::tip[Found a security problem? Tell us privately]
 
-If you think you've found a security issue, no matter how small or unlikely, please **[report it privately on GitHub](https://github.com/dtymoszenko/FlyBudget/security/advisories/new)** rather than opening a public issue. Only the maintainers can see private reports, which gives us time to fix the problem before anyone can take advantage of it. We aim to respond within 7 days, and we'll credit you when the fix ships (unless you'd rather stay anonymous). Our full policy is in [SECURITY.md](https://github.com/dtymoszenko/FlyBudget/blob/main/SECURITY.md).
+If you think you've found a security issue, no matter how small or unlikely, please **[report it privately on GitHub](https://github.com/ohmzi/OhmzBudget/security/advisories/new)** rather than opening a public issue. Only the maintainers can see private reports, which gives us time to fix the problem before anyone can take advantage of it. We aim to respond within 7 days, and we'll credit you when the fix ships (unless you'd rather stay anonymous). Our full policy is in [SECURITY.md](https://github.com/ohmzi/OhmzBudget/blob/main/SECURITY.md).
 
 :::
 
 ## The short version
 
-- **Your data stays on your computer.** No FlyBudget account, no online FlyBudget service, no tracking, and no crash reports.
+- **Your data stays on your computer.** No OhmzBudget account, no online OhmzBudget service, no tracking, and no crash reports.
 - **Your bank credentials are encrypted** in the desktop app, with a key protected by your operating system.
-- **You log in on Plaid's, SimpleFIN's, or your bank's own website,** never inside FlyBudget.
+- **You log in on Plaid's, SimpleFIN's, or your bank's own website,** never inside OhmzBudget.
 - **Every release comes with a verifiable build signature,** so you can confirm the download is genuinely ours.
 - **Every change is automatically tested and scanned** for security problems.
 
 ## Our security ratings
 
-We don't just say FlyBudget is secure. We let independent tools check it, publicly.
+We don't just say OhmzBudget is secure. We let independent tools check it, publicly.
+
+_The figures below were measured on the upstream FlyBudget project at the time of the fork; OhmzBudget's own scorecard will be re-measured once its CI runs._
 
 | Check                                                                                             | Result (September 2026) |
 | ------------------------------------------------------------------------------------------------- | ----------------------- |
-| [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/dtymoszenko/FlyBudget)           | **8.6 / 10**            |
+| [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/ohmzi/OhmzBudget)                | **8.6 / 10**            |
 | Known vulnerabilities in dependencies (Dependabot)                                                | **0 open**              |
 | Security issues found in our code ([CodeQL](https://codeql.github.com/), extended security rules) | **0 open**              |
 | Leaked secrets in the repository (GitHub secret scanning, full history)                           | **0 found**             |
 
 The live score is always here:
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/dtymoszenko/FlyBudget/badge)](https://scorecard.dev/viewer/?uri=github.com/dtymoszenko/FlyBudget)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/ohmzi/OhmzBudget/badge)](https://scorecard.dev/viewer/?uri=github.com/ohmzi/OhmzBudget)
 
-The [OpenSSF Scorecard](https://openssf.org/projects/scorecard/) is an independent rating from the Open Source Security Foundation. FlyBudget scores a perfect 10 on 12 of its checks, including signed releases, pinned dependencies, least-privilege automation, dependency updates, fuzz testing, and having no known vulnerabilities. The points we don't have yet mostly reflect how new FlyBudget is. For example, Scorecard wants a second person to review every change, which will come naturally as more contributors join the project.
+The [OpenSSF Scorecard](https://openssf.org/projects/scorecard/) is an independent rating from the Open Source Security Foundation. OhmzBudget scores a perfect 10 on 12 of its checks, including signed releases, pinned dependencies, least-privilege automation, dependency updates, fuzz testing, and having no known vulnerabilities. The points we don't have yet mostly reflect how new OhmzBudget is. For example, Scorecard wants a second person to review every change, which will come naturally as more contributors join the project.
 
 ## Your data stays yours
 
-FlyBudget is **local-first**. Your budget lives in a database file on your own computer, and the app talks to its own small built-in server that only listens on your machine (`127.0.0.1`). There is no FlyBudget cloud to be breached, no account to be phished, and no analytics.
+OhmzBudget is **local-first**. Your budget lives in a database file on your own computer, and the app talks to its own small built-in server that only listens on your machine (`127.0.0.1`). There is no OhmzBudget cloud to be breached, no account to be phished, and no analytics.
 
-The only time FlyBudget talks to the internet is when bank sync connects to **Plaid** or **SimpleFIN** on your behalf, always over encrypted HTTPS.
+The only time OhmzBudget talks to the internet is when bank sync connects to **Plaid** or **SimpleFIN** on your behalf, always over encrypted HTTPS.
 
-## If you host FlyBudget yourself
+## If you host OhmzBudget yourself
 
-You can also [run FlyBudget on your own server with Docker](./self-hosting.mdx) and open it in a browser. Then your data lives on _your_ server instead of your computer, and a few extra protections apply:
+You can also [run OhmzBudget on your own server with Docker](./self-hosting.mdx) and open it in a browser. Then your data lives on _your_ server instead of your computer, and a few extra protections apply:
 
-- **A password protects everything.** You create it on the first visit, using a one-time setup code that only appears in the server's log, so nobody else can claim your server before you do. It's stored as a scrypt hash, never in plain text, and after 10 wrong attempts logins are blocked for 15 minutes.
-- **Login sessions are hard to steal.** Each one is a random 256-bit token kept in a cookie that scripts can't read and other websites can't send, stored on the server only as a hash, and expiring after 30 days. Changing your password signs out every other device.
+- **Accounts protect everything.** The first visit creates the **admin account** (a username and a password), using a one-time setup code that only appears in the server's log, so nobody else can claim your server before you do. Passwords are stored as scrypt hashes, never in plain text, and after 10 wrong attempts logins are blocked for 15 minutes. The admin adds an account for each person (with a **member** or **admin** role); only admins can manage accounts and API tokens.
+- **Login sessions are hard to steal.** Each one is a random 256-bit token kept in a cookie that scripts can't read and other websites can't send, stored on the server only as a hash, and expiring after 30 days. Changing your password signs out your other devices.
 - **Bank credentials are always encrypted.** The server refuses to start without an encryption key, which you keep outside the database as a Docker secret.
 - **The container is locked down.** It runs as an unprivileged user, and the example setup makes its filesystem read-only and drops all Linux privileges.
 - **Images are verifiable.** They're built by GitHub from the public source, with a signed build attestation (just like the desktop installer) and a software bill of materials, and they're scanned for known vulnerabilities every week.
-- **HTTPS stays HTTPS.** Behind an HTTPS proxy, FlyBudget tells browsers never to fall back to plain HTTP for your address.
+- **HTTPS stays HTTPS.** Behind an HTTPS proxy, OhmzBudget tells browsers never to fall back to plain HTTP for your address.
 
 Use HTTPS (through a reverse proxy like Caddy) before making your server reachable from the internet. The [self-hosting guide](./self-hosting.mdx) shows how.
 
@@ -61,22 +63,22 @@ Use HTTPS (through a reverse proxy like Caddy) before making your server reachab
 
 ### Plaid
 
-- **You log in on Plaid's own page, in your web browser.** When you connect a bank, FlyBudget opens Plaid's secure hosted page in your browser, the same browser you already trust with your bank, where your password manager works and banks that use OAuth (like Chase and Wells Fargo) are supported. Your bank password never passes through FlyBudget.
+- **You log in on Plaid's own page, in your web browser.** When you connect a bank, OhmzBudget opens Plaid's secure hosted page in your browser, the same browser you already trust with your bank, where your password manager works and banks that use OAuth (like Chase and Wells Fargo) are supported. Your bank password never passes through OhmzBudget.
 - **Tokens never reach the app's screen.** Plaid gives the built-in server a token for reading your transactions. It's exchanged and stored on the server side only, and the interface never sees it.
 - **Tokens are encrypted** before they're saved (see below).
-- **Disconnecting really disconnects.** When you remove a bank, FlyBudget tells Plaid to **revoke** access, not just forget it locally. We tested this against Plaid: after disconnecting, the old token is rejected. If Plaid can't be reached at that moment, FlyBudget keeps the connection and asks you to try again, rather than leaving a live token behind.
-- **You use your own Plaid keys,** so there's no FlyBudget service in the middle: it's just you, Plaid, and your bank.
+- **Disconnecting really disconnects.** When you remove a bank, OhmzBudget tells Plaid to **revoke** access, not just forget it locally. We tested this against Plaid: after disconnecting, the old token is rejected. If Plaid can't be reached at that moment, OhmzBudget keeps the connection and asks you to try again, rather than leaving a live token behind.
+- **You use your own Plaid keys,** so there's no OhmzBudget service in the middle: it's just you, Plaid, and your bank.
 
 ### SimpleFIN
 
 - **Your SimpleFIN access is encrypted** before it's saved.
-- **Protected against tricks.** A SimpleFIN setup token is really a web address. FlyBudget only follows secure public `https` addresses, checks the real destination at the moment it connects, and re-checks every redirect, so a malicious token can't point FlyBudget at your home network or other private systems.
+- **Protected against tricks.** A SimpleFIN setup token is really a web address. OhmzBudget only follows secure public `https` addresses, checks the real destination at the moment it connects, and re-checks every redirect, so a malicious token can't point OhmzBudget at your home network or other private systems.
 - **Bank data is double-checked.** Everything SimpleFIN sends is validated before it's saved, and amounts are converted to exact cents, so malformed data can't corrupt your budget.
-- **Disconnecting:** SimpleFIN doesn't offer a way for apps to revoke access, so FlyBudget deletes its copy and reminds you to also remove the app in your [SimpleFIN Bridge](https://bridge.simplefin.org) account.
+- **Disconnecting:** SimpleFIN doesn't offer a way for apps to revoke access, so OhmzBudget deletes its copy and reminds you to also remove the app in your [SimpleFIN Bridge](https://bridge.simplefin.org) account.
 
 ## Encryption
 
-Your most sensitive secrets (your Plaid keys, your Plaid access tokens, and your SimpleFIN access) are encrypted with **AES-256-GCM**, the same standard used by banks and governments. The encryption key itself is protected by your operating system (Windows DPAPI, the macOS Keychain, or the Linux secret service), so it only works for your user account on your computer. This applies to the FlyBudget desktop app; on a system without OS secure storage (for example some Linux setups without a keyring), credentials are stored without this extra layer.
+Your most sensitive secrets (your Plaid keys, your Plaid access tokens, and your SimpleFIN access) are encrypted with **AES-256-GCM**, the same standard used by banks and governments. The encryption key itself is protected by your operating system (Windows DPAPI, the macOS Keychain, or the Linux secret service), so it only works for your user account on your computer. This applies to the OhmzBudget desktop app; on a system without OS secure storage (for example some Linux setups without a keyring), credentials are stored without this extra layer.
 
 That means a copied or backed-up database file **does not** give anyone access to your bank accounts.
 
@@ -84,11 +86,11 @@ Your budget and transactions themselves are protected by your operating system a
 
 ## The app itself
 
-**The built-in server only answers FlyBudget.** Other websites you have open can't read your data or quietly make changes, even though the server is running on your computer. In the desktop app, every request also needs a secret that's created fresh each time you open FlyBudget, so other programs and other users on the same computer can't get in either.
+**The built-in server only answers OhmzBudget.** Other websites you have open can't read your data or quietly make changes, even though the server is running on your computer. In the desktop app, every request also needs a secret that's created fresh each time you open OhmzBudget, so other programs and other users on the same computer can't get in either.
 
-**A strict Content Security Policy.** In the desktop app, the page is only allowed to run FlyBudget's own code and only allowed to talk to its own server. No third-party scripts, fonts, trackers, or frames are loaded at all, even the fonts are bundled with the app.
+**A strict Content Security Policy.** In the desktop app, the page is only allowed to run OhmzBudget's own code and only allowed to talk to its own server. No third-party scripts, fonts, trackers, or frames are loaded at all, even the fonts are bundled with the app.
 
-**A locked-down desktop app.** The FlyBudget window:
+**A locked-down desktop app.** The OhmzBudget window:
 
 - runs in a sandbox with no direct access to your computer,
 - can't be steered to other websites,
@@ -104,14 +106,14 @@ Your budget and transactions themselves are protected by your operating system a
 Every release is built by GitHub from the public source code and signed with [Sigstore](https://www.sigstore.dev/), with [SLSA build provenance](https://slsa.dev/) that records exactly how and where it was built. You can check that the file you downloaded is genuine with the [GitHub CLI](https://cli.github.com/) (use the name of the file you downloaded):
 
 ```bash
-gh attestation verify FlyBudget-Windows-Setup.exe -R dtymoszenko/FlyBudget
+gh attestation verify OhmzBudget-Windows-Setup.exe -R ohmzi/OhmzBudget
 ```
 
-If the file was modified in any way, even by a single byte, verification fails. Only download FlyBudget from [our download page](/download) or our [GitHub Releases page](https://github.com/dtymoszenko/FlyBudget/releases). Each release also lists every file's SHA-256 in `SHA256SUMS.txt`.
+If the file was modified in any way, even by a single byte, verification fails. Only download OhmzBudget from [our download page](/download) or our [GitHub Releases page](https://github.com/ohmzi/OhmzBudget/releases). Each release also lists every file's SHA-256 in `SHA256SUMS.txt`.
 
 The app isn't signed with a paid Microsoft certificate or notarized by Apple yet, so Windows may show an "unknown publisher" warning and macOS asks you to allow it in Privacy & Security the first time you open it (the [install guide](/docs/installing#desktop-app) shows how). Code signing is next on our list; until then, the command above is the way to confirm your download is genuine.
 
-## How we build FlyBudget
+## How we build OhmzBudget
 
 Security isn't a one-time checklist, so these run automatically, all the time:
 
@@ -125,12 +127,12 @@ Security isn't a one-time checklist, so these run automatically, all the time:
 
 ## What you can do
 
-FlyBudget can protect you from a lot, but not from someone who already controls your computer. A few simple habits make a big difference:
+OhmzBudget can protect you from a lot, but not from someone who already controls your computer. A few simple habits make a big difference:
 
 - **Turn on full-disk encryption:** BitLocker on Windows, FileVault on Mac.
 - **Use a strong password** for your computer login.
 - **Treat exports and backups as private.** They contain your full financial history (but never your bank credentials).
-- **Download FlyBudget only from our GitHub Releases page,** and verify it with the command above.
+- **Download OhmzBudget only from our GitHub Releases page,** and verify it with the command above.
 - **Disconnect banks you no longer use.**
 
 ## Being honest about what we can't do
@@ -138,11 +140,11 @@ FlyBudget can protect you from a lot, but not from someone who already controls 
 No software can promise to be perfectly secure, and we'd rather be upfront than overpromise:
 
 - Anyone who can log in to your computer as you can see your budget. Full-disk encryption and a strong login password are your best protection.
-- FlyBudget is a young project, built by one developer today and growing. As more contributors join, we look forward to adding more reviewers and, down the road, independent security audits.
+- OhmzBudget is a young project, built by one developer today and growing. As more contributors join, we look forward to adding more reviewers and, down the road, independent security audits.
 - Plaid and SimpleFIN are separate services with their own security. Issues with them should be reported to them directly.
 
 ## Report a vulnerability
 
-If you find anything that could put FlyBudget users at risk, please **[report it privately on GitHub](https://github.com/dtymoszenko/FlyBudget/security/advisories/new)**. Include what you found, how to reproduce it, and why you think it matters. Please don't post it publicly until we've had a chance to fix it.
+If you find anything that could put OhmzBudget users at risk, please **[report it privately on GitHub](https://github.com/ohmzi/OhmzBudget/security/advisories/new)**. Include what you found, how to reproduce it, and why you think it matters. Please don't post it publicly until we've had a chance to fix it.
 
-Thank you for helping keep FlyBudget and everyone who uses it safe. 💙
+Thank you for helping keep OhmzBudget and everyone who uses it safe. 💙

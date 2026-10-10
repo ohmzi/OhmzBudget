@@ -1,10 +1,10 @@
 import { Router, type Request } from 'express';
 import { allowedHosts, appMode, trustProxy, type AppMode } from '../config.js';
 import { secretCipher } from '../db/secretCrypto.js';
-import { isPasswordSet } from '../auth/sessions.js';
+import { isSetupNeeded } from '../auth/users.js';
 import { appVersion } from '../utils/version.js';
 
-// GET /api/server/info: how this FlyBudget runs, for the sidebar's server status and
+// GET /api/server/info: how this OhmzBudget runs, for the sidebar's server status and
 // Settings → Server. It sits behind requireSession, so in server mode only a signed-in
 // browser can read it (anonymous visitors learn nothing new; /api/health stays
 // `{"status":"ok"}`). It never includes secrets, keys, hashes, tokens or file paths:
@@ -76,7 +76,8 @@ function checksFor(req: Request): SecurityCheck[] {
     trustProxyConfigured: Boolean(trustProxy),
     allowedHostsConfigured: allowedHosts.length > 0,
     encryptionKey: secretCipher.enabled,
-    passwordSet: isPasswordSet(),
+    // Set = some account has a real password, not merely that the auth_config row exists
+    passwordSet: !isSetupNeeded(),
   });
 }
 

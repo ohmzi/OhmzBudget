@@ -49,7 +49,7 @@ if (!IS_DEV) {
   process.env.MIGRATIONS_PATH = path.join(process.resourcesPath, 'migrations');
   // client/dist/ is two levels up from electron/dist/
   process.env.CLIENT_DIST = path.join(__dirname, '../../client/dist');
-  process.env.FLYBUDGET_API_TOKEN = API_TOKEN;
+  process.env.OHMZBUDGET_API_TOKEN = API_TOKEN;
 }
 process.env.EXPRESS_PORT = String(PORT);
 
@@ -177,7 +177,7 @@ app.on('web-contents-created', (_event, contents) => {
 app.whenReady().then(async () => {
   if (!isPrimaryInstance) return;
 
-  // FlyBudget needs no camera, microphone, location, notifications, etc.
+  // OhmzBudget needs no camera, microphone, location, notifications, etc.
   session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) =>
     callback(false),
   );
@@ -185,25 +185,25 @@ app.whenReady().then(async () => {
 
   if (!IS_DEV) {
     const dataKey = loadCredentialKey();
-    if (dataKey) process.env.FLYBUDGET_DATA_KEY = dataKey;
+    if (dataKey) process.env.OHMZBUDGET_DATA_KEY = dataKey;
     // Shown in the app's server status (the bundled server can't read package.json)
-    process.env.FLYBUDGET_VERSION = app.getVersion();
+    process.env.OHMZBUDGET_VERSION = app.getVersion();
     // server.js is in the same directory as main.js (electron/dist/)
     const { startServer } = require(path.join(__dirname, 'server.js')) as {
       startServer: (port: number) => Promise<void>;
     };
     // The server read its secrets on load; don't leave them in the environment
-    delete process.env.FLYBUDGET_DATA_KEY;
-    delete process.env.FLYBUDGET_API_TOKEN;
+    delete process.env.OHMZBUDGET_DATA_KEY;
+    delete process.env.OHMZBUDGET_API_TOKEN;
     try {
       await startServer(PORT);
       await waitForServer(PORT);
     } catch (err) {
       // e.g. the port is taken by another program. Don't open a window that would load it.
-      console.error('FlyBudget failed to start:', err);
+      console.error('OhmzBudget failed to start:', err);
       dialog.showErrorBox(
-        'FlyBudget could not start',
-        `FlyBudget's local server could not start on port ${PORT}. If FlyBudget is already ` +
+        'OhmzBudget could not start',
+        `OhmzBudget's local server could not start on port ${PORT}. If OhmzBudget is already ` +
           'running, close it and try again; otherwise another program may be using the port.\n\n' +
           String((err as Error)?.message ?? err),
       );
@@ -213,7 +213,7 @@ app.whenReady().then(async () => {
     // Session cookie (no expiry), SameSite=Strict so other sites can never send it
     await session.defaultSession.cookies.set({
       url: `http://localhost:${PORT}`,
-      name: 'flybudget_token',
+      name: 'ohmzbudget_token',
       value: API_TOKEN!,
       httpOnly: true,
       sameSite: 'strict',

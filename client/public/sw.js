@@ -1,12 +1,15 @@
-// FlyBudget's service worker: keeps the app itself (its page, scripts, styles and fonts)
-// on this device, so FlyBudget still opens when its server can't be reached. Budget data
+// OhmzBudget's service worker: keeps the app itself (its page, scripts, styles and fonts)
+// on this device, so OhmzBudget still opens when its server can't be reached. Budget data
 // never goes through here: /api requests always go to the server, and the app's own
 // offline copy (src/offline/) covers them.
 //
 // Registered only by the built web app (self-hosted servers), never in dev or the desktop
 // app. Browsers allow service workers on https:// and localhost only.
 
-const CACHE = 'flybudget-app-v1';
+const CACHE = 'ohmzbudget-app-v1';
+// The cache name the app wrote before the rename: deleted on activate, so a client that
+// first loaded the old app self-heals instead of keeping the old shell forever
+const LEGACY_CACHE = 'flybudget-app-v1';
 // The page every in-app URL serves (/budget, /accounts/…): the app routes on its own
 const SHELL = '/';
 // Hashed build files pile up across updates; keep the newest ones
@@ -39,12 +42,15 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate: remove caches from older versions of this worker and take over open tabs
+// Activate: remove caches from older versions of this worker, and the one the app wrote
+// under its old name, then take over open tabs
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       for (const name of await caches.keys()) {
-        if (name.startsWith('flybudget-') && name !== CACHE) await caches.delete(name);
+        if (name === LEGACY_CACHE || (name.startsWith('ohmzbudget-') && name !== CACHE)) {
+          await caches.delete(name);
+        }
       }
       await self.clients.claim();
     })(),

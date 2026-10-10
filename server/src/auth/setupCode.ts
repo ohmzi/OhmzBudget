@@ -4,7 +4,7 @@ import { createHash, randomInt, timingSafeEqual } from 'crypto';
 // Until a password is set, whoever reaches the server first could set it, including
 // a malicious website using DNS rebinding. Setup therefore also needs this code,
 // which is only printed in the server log, so only someone with access to the
-// server (`docker logs flybudget`) can complete it. It lives in memory: a restart
+// server (`docker logs ohmzbudget`) can complete it. It lives in memory: a restart
 // prints a new one, and it's discarded once the password is set.
 
 // 32 characters without look-alikes (0/O, 1/I): 16 characters = 80 random bits
@@ -21,7 +21,7 @@ export function setupCode(): string {
   if (!code) {
     code = Array.from({ length: LENGTH }, () => ALPHABET[randomInt(ALPHABET.length)]).join('');
     console.log(
-      '\nFlyBudget needs a password. Open it in your browser and enter this setup code:\n\n' +
+      '\nOhmzBudget needs its first account: open it in your browser and enter this setup code:\n\n' +
         `    ${formatSetupCode(code)}\n`,
     );
   }

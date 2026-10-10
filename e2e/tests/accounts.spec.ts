@@ -27,11 +27,11 @@ test.describe('accounts', () => {
     await expect(
       page.getByRole('complementary').getByRole('link', { name: 'Budget' }),
     ).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Get started with FlyBudget' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Get started with OhmzBudget' })).toBeVisible();
 
     await page.reload();
     await expect(page).toHaveURL(/#\/dashboard$/);
-    await expect(page.getByRole('heading', { name: 'Get started with FlyBudget' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Get started with OhmzBudget' })).toBeVisible();
   });
 
   test('the assets and liabilities summary lists only the kinds of accounts you have', async ({

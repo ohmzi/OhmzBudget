@@ -150,9 +150,9 @@ export function TransactionFormRow({
       }
       title={
         !canAdd
-          ? 'Save (paused until FlyBudget reconnects)'
+          ? 'Save (paused until OhmzBudget reconnects)'
           : onDevice
-            ? 'Save on this device (sent when FlyBudget reconnects)'
+            ? 'Save on this device (sent when OhmzBudget reconnects)'
             : 'Save'
       }
       aria-label="Save"

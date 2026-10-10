@@ -47,7 +47,7 @@ export function useConnection(): Connection {
 }
 
 /**
- * False while FlyBudget can't reach its server. Save buttons are disabled then, so
+ * False while OhmzBudget can't reach its server. Save buttons are disabled then, so
  * nothing looks saved that wasn't (show <SavingPausedHint /> next to them).
  */
 export const useCanSave = () => useConnectionStore((s) => s.status === 'connected');

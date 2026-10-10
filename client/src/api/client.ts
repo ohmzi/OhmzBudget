@@ -2,12 +2,12 @@ import { API_BASE } from './base';
 import { reportNetworkFailure, reportServerReachable } from '../store/connectionStore';
 import { isUnreachableResponse } from '../utils/connection';
 
-export const AUTH_REQUIRED_EVENT = 'flybudget:auth-required';
+export const AUTH_REQUIRED_EVENT = 'ohmzbudget:auth-required';
 
-/** The request never reached FlyBudget's server (it's restarting, stopped, or offline). */
+/** The request never reached OhmzBudget's server (it's restarting, stopped, or offline). */
 export class NetworkError extends Error {
   constructor() {
-    super("Can't reach FlyBudget right now. Nothing was saved; try again once it reconnects.");
+    super("Can't reach OhmzBudget right now. Nothing was saved; try again once it reconnects.");
     this.name = 'NetworkError';
   }
 }

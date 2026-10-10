@@ -66,7 +66,7 @@ export default function SettingsPage() {
           {activeTab === 'server' && <ServerSettings onOpenTab={setActiveTab} />}
 
           <p className="mt-10 pt-4 border-t border-border-light text-xs text-text-tertiary">
-            FlyBudget is free software under the{' '}
+            OhmzBudget is free software under the{' '}
             <a
               href={LICENSE_URL}
               target="_blank"

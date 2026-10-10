@@ -3,8 +3,8 @@ import http from 'http';
 import type { AddressInfo } from 'net';
 
 // Server mode + an allowlist are read from the environment when modules load
-process.env.FLYBUDGET_SERVER_MODE = 'true';
-process.env.FLYBUDGET_ALLOWED_HOSTS = 'budget.example.com, 192.168.1.20:3001';
+process.env.OHMZBUDGET_SERVER_MODE = 'true';
+process.env.OHMZBUDGET_ALLOWED_HOSTS = 'budget.example.com, 192.168.1.20:3001';
 
 const express = (await import('express')).default;
 const { hostGuard, originGuard } = await import('./security.js');
