@@ -63,7 +63,7 @@ app.disable('x-powered-by');
 app.use(proxyConfigWarning);
 app.use(hostGuard);
 app.use(originGuard);
-app.use(apiTokenGuard(process.env.FLYBUDGET_API_TOKEN));
+app.use(apiTokenGuard(process.env.OHMZBUDGET_API_TOKEN));
 app.use(securityHeaders, hstsWhenSecure);
 // The Vite dev server and the packaged Electron app (which serves the client from
 // this server, see startServer) are same-origin already; this covers direct
@@ -100,8 +100,8 @@ app.use('/api', apiNotFound);
 export async function startServer(port: number | string): Promise<void> {
   if (serverMode && !secretCipher.enabled) {
     throw new Error(
-      'Server mode requires an encryption key for bank credentials: set FLYBUDGET_DATA_KEY_FILE ' +
-        '(or FLYBUDGET_DATA_KEY) to a 32-byte base64 key, e.g. from `openssl rand -base64 32`.',
+      'Server mode requires an encryption key for bank credentials: set OHMZBUDGET_DATA_KEY_FILE ' +
+        '(or OHMZBUDGET_DATA_KEY) to a 32-byte base64 key, e.g. from `openssl rand -base64 32`.',
     );
   }
   // Apply pending migrations on startup. The packaged app (Electron) and Docker ship them at
@@ -216,7 +216,7 @@ function runStartupTasks() {
 // Auto-start unless bundled for Electron production (where main.ts calls startServer directly)
 if (!process.env.ELECTRON_PROD) {
   startServer(process.env.EXPRESS_PORT ?? process.env.PORT ?? 3001).catch((err) => {
-    console.error('FlyBudget failed to start:', err);
+    console.error('OhmzBudget failed to start:', err);
     process.exit(1);
   });
 }

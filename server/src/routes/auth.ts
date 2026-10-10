@@ -59,7 +59,7 @@ function startSession(req: Request, res: Response) {
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: 'strict',
-    // Behind an HTTPS reverse proxy (with FLYBUDGET_TRUST_PROXY set), mark it Secure
+    // Behind an HTTPS reverse proxy (with OHMZBUDGET_TRUST_PROXY set), mark it Secure
     secure: req.secure,
     maxAge: SESSION_TTL_MS,
     path: '/',

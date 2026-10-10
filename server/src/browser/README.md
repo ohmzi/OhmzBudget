@@ -1,6 +1,6 @@
 # The in-browser demo
 
-The website's **Try the demo** button opens the real FlyBudget app with a sample budget, running
+The website's **Try the demo** button opens the real OhmzBudget app with a sample budget, running
 entirely in the visitor's browser. There is no demo server: the server's own routes run in a Web
 Worker, on SQLite compiled to WebAssembly ([sql.js](https://github.com/sql-js/sql.js)). Every
 visitor gets a private copy that disappears when they close the tab, and nothing is sent anywhere.
@@ -10,7 +10,7 @@ visitor gets a private copy that disappears when they close the tab, and nothing
 - `client/`: `vite build --mode demo` builds the app with `IS_DEMO` (`client/src/demo/demoApi.ts`)
   set. `startDemoApi()` starts the worker and sends every `fetch` to `/api/...` there, so the rest
   of the app works unchanged. The demo also uses hash routing, relative asset paths, no offline
-  copy or service worker, and shows `DemoBanner` ("Back to home", "Start over", "Download FlyBudget").
+  copy or service worker, and shows `DemoBanner` ("Back to home", "Start over", "Download OhmzBudget").
 - `vite.config.ts` (`demoServerModules`) swaps the server's Node-only modules for the stand-ins in
   this folder, for files under `server/src` only:
   - `express` → `expressShim.ts`: routers with plain and `:param` segments, `router.param`,
@@ -21,7 +21,7 @@ visitor gets a private copy that disappears when they close the tab, and nothing
   - `path` → `path.ts`: throws if used (only restore's safety copy of the database file needs it).
 - `app.ts` mounts the budget routers like `index.ts` does and answers `/health`, `/auth/status` and
   `/server/info` itself. Bank connections (`/plaid`, `/simplefin`) and sign-in are refused, and the
-  app shows "needs the FlyBudget app" instead of their setup screens (`NotInDemo`).
+  app shows "needs the OhmzBudget app" instead of their setup screens (`NotInDemo`).
 - `worker.ts` opens an in-memory database, runs every migration in `db/migrations`, and loads the
   demo budget. "Start over" does the same again.
 - `../demo/demoBudget.ts` is the budget itself (pure: rows from today's date, the same every time

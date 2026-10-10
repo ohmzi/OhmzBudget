@@ -5,7 +5,7 @@ import { Agent, fetch, Headers, type RequestInit, type Response } from 'undici';
 
 // Outbound HTTP for URLs that come from outside the app (SimpleFIN setup tokens
 // and access URLs). Hardened against server-side request forgery (SSRF): a
-// crafted token must not be able to make FlyBudget talk to localhost, the LAN,
+// crafted token must not be able to make OhmzBudget talk to localhost, the LAN,
 // or cloud metadata endpoints, or leak bank credentials through redirects.
 //
 // Unlike a check-then-fetch approach, the address is validated at connect time

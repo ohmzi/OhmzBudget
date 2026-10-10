@@ -3,7 +3,7 @@ import type { AddressInfo } from 'net';
 import type { Server } from 'http';
 
 // Server mode is read from the environment when modules load, so set it first
-process.env.FLYBUDGET_SERVER_MODE = 'true';
+process.env.OHMZBUDGET_SERVER_MODE = 'true';
 
 const express = (await import('express')).default;
 const { migrate } = await import('drizzle-orm/better-sqlite3/migrator');
@@ -41,7 +41,7 @@ const sessionCookie = (res: Response) => res.headers.get('set-cookie')?.split(';
 const deviceCookie = (res: Response) =>
   res.headers
     .getSetCookie()
-    .find((c) => c.startsWith('flybudget_device='))
+    .find((c) => c.startsWith('ohmzbudget_device='))
     ?.split(';')[0];
 
 describe('server mode login', () => {
@@ -78,7 +78,7 @@ describe('server mode login', () => {
     const res = await post('/auth/setup', { password: 'first password 123', setupCode: code });
     expect(res.status).toBe(204);
     const setCookie = res.headers.get('set-cookie') ?? '';
-    expect(setCookie).toMatch(/^flybudget_session=[A-Za-z0-9_-]{43};/);
+    expect(setCookie).toMatch(/^ohmzbudget_session=[A-Za-z0-9_-]{43};/);
     expect(setCookie).toMatch(/HttpOnly/i);
     expect(setCookie).toMatch(/SameSite=Strict/i);
     cookie = sessionCookie(res)!;
@@ -102,7 +102,7 @@ describe('server mode login', () => {
 
   it('rejects wrong passwords and forged or missing sessions', async () => {
     expect((await post('/auth/login', { password: 'wrong password' })).status).toBe(401);
-    expect((await get('/accounts', 'flybudget_session=forged')).status).toBe(401);
+    expect((await get('/accounts', 'ohmzbudget_session=forged')).status).toBe(401);
     expect((await get('/accounts')).status).toBe(401);
   });
 
@@ -142,7 +142,7 @@ describe('server mode login', () => {
     const before = await post('/auth/login', { password: 'second password 456' });
     voidedDevice = deviceCookie(before)!;
     const session = sessionCookie(before)!;
-    expect(voidedDevice).toMatch(/^flybudget_device=[\w-]+\.[\w-]+$/);
+    expect(voidedDevice).toMatch(/^ohmzbudget_device=[\w-]+\.[\w-]+$/);
     expect(before.headers.getSetCookie().join()).toMatch(/Path=\/api\/auth/);
     // Changing the password voids old device cookies and gives this browser a new one
     const changed = await post(
@@ -174,7 +174,7 @@ describe('server mode login', () => {
     );
     // Forged, tampered or voided device cookies fall back to the address's limit
     for (const fake of [
-      'flybudget_device=forged.cookie',
+      'ohmzbudget_device=forged.cookie',
       device.slice(0, -2) + 'AA',
       voidedDevice,
     ]) {

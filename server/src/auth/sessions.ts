@@ -8,7 +8,7 @@ import { hashPassword, verifyPassword } from './password.js';
 // server password), set by the first visitor. Sessions are random 256-bit tokens;
 // only their SHA-256 is stored, so a leaked database doesn't leak live sessions.
 
-export const SESSION_COOKIE = 'flybudget_session';
+export const SESSION_COOKIE = 'ohmzbudget_session';
 export const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const CONFIG_ID = 'server';
 
@@ -58,7 +58,7 @@ export async function changePassword(newPassword: string, keepSessionToken?: str
 // or NAT, can't lock the owner out. The cookie is an HMAC keyed by the password
 // hash, so only this server can issue one, and changing the password voids them all.
 
-export const DEVICE_COOKIE = 'flybudget_device';
+export const DEVICE_COOKIE = 'ohmzbudget_device';
 export const DEVICE_TTL_MS = 400 * 24 * 60 * 60 * 1000; // the longest browsers keep a cookie
 
 function deviceSignature(id: string): Buffer | null {

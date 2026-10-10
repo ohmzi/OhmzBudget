@@ -4,7 +4,7 @@ import type { AddressInfo } from 'net';
 import type { Server } from 'http';
 
 // Server mode is read from the environment when modules load, so set it first
-process.env.FLYBUDGET_SERVER_MODE = 'true';
+process.env.OHMZBUDGET_SERVER_MODE = 'true';
 
 const express = (await import('express')).default;
 const { migrate } = await import('drizzle-orm/better-sqlite3/migrator');
@@ -73,7 +73,7 @@ describe('GET /api/server/info (server mode)', () => {
     cookie = sessionCookie(res)!;
 
     expect((await request('GET', '/server/info')).status).toBe(401);
-    expect((await request('GET', '/server/info', 'flybudget_session=forged')).status).toBe(401);
+    expect((await request('GET', '/server/info', 'ohmzbudget_session=forged')).status).toBe(401);
     expect(await (await request('GET', '/health')).json()).toEqual({ status: 'ok' });
   });
 
@@ -106,7 +106,7 @@ describe('GET /api/server/info (server mode)', () => {
   it('never includes secrets, hashes, tokens or paths', async () => {
     const text = await (await request('GET', '/server/info', cookie)).text();
     const secrets = [
-      process.env.FLYBUDGET_DATA_KEY!,
+      process.env.OHMZBUDGET_DATA_KEY!,
       cookie.split('=')[1],
       PASSWORD,
       ...db.$client
@@ -186,7 +186,7 @@ describe('signed-in devices', () => {
     const list = await (await request('GET', '/auth/sessions', laptop)).json();
     const res = await request('DELETE', `/auth/sessions/${list[0].id}`, laptop);
     expect(res.status).toBe(204);
-    expect(res.headers.get('set-cookie')).toMatch(/flybudget_session=;/);
+    expect(res.headers.get('set-cookie')).toMatch(/ohmzbudget_session=;/);
     expect((await request('GET', '/server/info', laptop)).status).toBe(401);
   });
 });

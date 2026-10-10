@@ -1,8 +1,8 @@
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
-// FlyBudget's version (the root package.json). Bundled builds get it from outside: the
-// Docker image inlines FLYBUDGET_VERSION with esbuild's --define (see Dockerfile), and
+// OhmzBudget's version (the root package.json). Bundled builds get it from outside: the
+// Docker image inlines OHMZBUDGET_VERSION with esbuild's --define (see Dockerfile), and
 // the desktop app passes Electron's app.getVersion() (electron/main.ts). `npm run dev`
 // reads the root package.json.
 
@@ -24,7 +24,7 @@ export function resolveVersion(candidates: (string | undefined)[]): string {
 }
 
 export const appVersion = resolveVersion([
-  process.env.FLYBUDGET_VERSION,
+  process.env.OHMZBUDGET_VERSION,
   fromRootPackage(),
   process.env.npm_package_version,
 ]);

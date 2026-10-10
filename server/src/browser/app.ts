@@ -22,7 +22,7 @@ import { schedulesRouter } from '../routes/schedules.js';
 import { goalsRouter } from '../routes/goals.js';
 
 /** Answer for anything that needs a real server: bank connections, sign-in. */
-const NOT_IN_DEMO = "This isn't available in the demo. Download FlyBudget to use it.";
+const NOT_IN_DEMO = "This isn't available in the demo. Download OhmzBudget to use it.";
 
 const app = Router();
 

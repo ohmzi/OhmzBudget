@@ -4,7 +4,7 @@ import { secretCipher } from '../db/secretCrypto.js';
 import { isPasswordSet } from '../auth/sessions.js';
 import { appVersion } from '../utils/version.js';
 
-// GET /api/server/info: how this FlyBudget runs, for the sidebar's server status and
+// GET /api/server/info: how this OhmzBudget runs, for the sidebar's server status and
 // Settings → Server. It sits behind requireSession, so in server mode only a signed-in
 // browser can read it (anonymous visitors learn nothing new; /api/health stays
 // `{"status":"ok"}`). It never includes secrets, keys, hashes, tokens or file paths:

@@ -29,7 +29,7 @@ import {
 // connected banks keep syncing into the same accounts when the backup came from
 // this installation.
 
-export const BACKUP_FORMAT = 'flybudget-backup';
+export const BACKUP_FORMAT = 'ohmzbudget-backup';
 export const BACKUP_VERSION = 2;
 
 /** Every table in a backup, parents before the tables that reference them. */
@@ -78,15 +78,15 @@ type Row = Record<string, unknown>;
  */
 export function parseBackup(input: unknown): Record<BackupTable, Row[]> {
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
-    throw new InvalidBackupError('This is not a FlyBudget backup file');
+    throw new InvalidBackupError('This is not an OhmzBudget backup file');
   }
   const body = input as Record<string, unknown>;
   const isV1 = body.format === undefined && Array.isArray(body.accounts);
   if (!isV1 && body.format !== BACKUP_FORMAT) {
-    throw new InvalidBackupError('This is not a FlyBudget backup file');
+    throw new InvalidBackupError('This is not an OhmzBudget backup file');
   }
   if (typeof body.version === 'number' && body.version > BACKUP_VERSION) {
-    throw new InvalidBackupError('This backup was made by a newer version of FlyBudget');
+    throw new InvalidBackupError('This backup was made by a newer version of OhmzBudget');
   }
 
   const result = {} as Record<BackupTable, Row[]>;
