@@ -13,7 +13,7 @@ Maintained between tasks; commit shas live on branch `m0-rebrand`. Owner directi
 | 3 Client display strings & wordmark      | ✅ done        | 1eb58c7; 41 files; greps CLEAN; tsc/85 tests/build/demo ✓; review clean (0 blocking)                                                        |
 | 4 Client shell & storage identifiers     | ✅ done        | d7960fd; 5 files; dist scan CLEAN; review clean (0 blocking)                                                                                |
 | 5 Server runtime identity                | ✅ done        | e4fa6e5; 19 files; 263/263 held; review clean (0 blocking)                                                                                  |
-| 6 End-to-end tests                       | ⬜ not started |                                                                                                                                             |
+| 6 End-to-end tests                       | ✅ done        | 0655012; 12 files; full run 114/115 (sole fail = baseline flake, isolated green); review clean (0 blocking)                                 |
 | 7 Docker & CI identity                   | ⬜ not started |                                                                                                                                             |
 | 8 Electron identity                      | ⬜ not started |                                                                                                                                             |
 | 9 Docs, attribution & source links       | ⬜ not started |                                                                                                                                             |
@@ -257,7 +257,7 @@ git add server && git commit -m "refactor: rename server identity, env prefix, c
 
 - Modify: `e2e/global-setup.ts` (env vars, `ohmzbudget_token` cookie header, `ohmzbudget-e2e-*` tmp dirs, backup format fixture), `e2e/tests/server-mode/auth.spec.ts` ("Set up your OhmzBudget server" / "Sign in to OhmzBudget"), `e2e/tests/connection.spec.ts` ("Can't reach OhmzBudget"), `e2e/tests/data.spec.ts` ("not an OhmzBudget backup file", `{format:'ohmzbudget-backup'}`), and the rest — `demo/demo.spec.ts`, `navigation.spec.ts`, `accounts.spec.ts`, `security.spec.ts`, `settings.spec.ts`, `phone/*` — any spec asserting old names (the sweep below catches them all)
 
-- [ ] **Step 1: Sweep**
+- [x] **Step 1: Sweep**
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
@@ -267,7 +267,7 @@ grep -rl 'FLYBUDGET' e2e | xargs sed -i 's/FLYBUDGET_/OHMZBUDGET_/g'
 grep -rl 'flybudget' e2e | xargs sed -i 's#flybudget\.org#@@KD@@#g; s/flybudget/ohmzbudget/g; s/@@KD@@/flybudget.org/g'   # domain-protective
 ```
 
-- [ ] **Step 2: Full e2e run (desktop + phone + demo + server-mode)**
+- [x] **Step 2: Full e2e run (desktop + phone + demo + server-mode)**
 
 ```bash
 grep -rn 'FlyBudget\|flybudget\|FLYBUDGET' e2e || echo CLEAN
@@ -276,7 +276,7 @@ cd e2e && npm test
 
 Expected: all projects pass, including the phone overflow checks and demo checks. This is the strongest rebrand regression net.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit** (landed as 0655012)
 
 ```bash
 git add e2e && git commit -m "test: update e2e suite for ohmzbudget identifiers"
@@ -361,6 +361,8 @@ git add electron && git commit -m "refactor: rename electron app identity (insta
 **Files:**
 
 - Modify: `README.md` (title, badges → fork URLs, docker commands), `SECURITY.md` (advisory link → fork), `CONTRIBUTING.md`, `PLANNING.md`, `AGENTS.md` **and** `CLAUDE.md` (keep them byte-identical — repo rule), `client/src/utils/project.ts` (`SOURCE_CODE_URL=https://github.com/ohmzi/OhmzBudget`, `ISSUES_URL=…/issues`, `WEBSITE_URL`/`DOCS_URL`/`SELF_HOSTING_URL` → fork repo for now; **keep** `LICENSE_URL`)
+- Modify: `server/src/middleware/security.ts:186` (the protected `flybudget.org` self-hosting hint URL → fork repo — Task 5 ruling)
+- Modify: `e2e/tests/settings.spec.ts`, `e2e/tests/connection.spec.ts` (their `SOURCE_CODE_URL` / `SELF_HOSTING_URL` assertions move with the `project.ts` repoint — Task 6 ruling; until then those specs assert the app's current values with comments)
 - Create: `NOTICE`
 - Do **not** modify: `LICENSE`, `CLA.md`, `website/blog/…-welcome-to-flybudget.mdx`
 
@@ -380,6 +382,8 @@ grep -rl 'dtymoszenko/FlyBudget\|dtymoszenko/flybudget' README.md SECURITY.md CO
 ```bash
 grep -n 'URL =' client/src/utils/project.ts
 ```
+
+Then update `security.ts:186`'s hint URL and the two e2e specs' expected URLs to match, in the same commit.
 
 - [ ] **Step 3: Write `NOTICE`**
 
@@ -536,10 +540,10 @@ cd .. && git add deploy && git commit -m "build: add deploy compose skeleton wit
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
-grep -rIn 'FlyBudget\|flybudget\|FLYBUDGET' --exclude-dir={.git,node_modules,dist,build,.docusaurus,static,coverage} . | grep -vE 'CLA\.md|LICENSE|NOTICE|welcome-to-flybudget|flybudget-app-v1|/tmp/' || echo CLEAN
+grep -rIn 'FlyBudget\|flybudget\|FLYBUDGET' --exclude-dir={.git,node_modules,dist,build,.docusaurus,static,coverage} . | grep -vE 'cla\.yml|CLA\.md|LICENSE|NOTICE|welcome-to-flybudget|flybudget-app-v1|/tmp/' || echo CLEAN
 ```
 
-Expected leftovers: only `CLA.md` (kept), `website/blog/…welcome-to-flybudget.mdx` (slug kept), and `client/public/sw.js`'s `LEGACY_CACHE = 'flybudget-app-v1'` literal (the mandated stale-client purge needs the old cache name). Generated dirs (`website/build`, `website/.docusaurus`, `website/static/demo`, `client/dist`, `server/dist`) are excluded. Anything else — fix in a `fix:` commit and re-run.
+Expected leftovers: only `CLA.md` + `.github/workflows/cla.yml` (legal review pending — untouched by design), `website/blog/…welcome-to-flybudget.mdx` (slug kept), and `client/public/sw.js`'s `LEGACY_CACHE = 'flybudget-app-v1'` literal (the mandated stale-client purge needs the old cache name). Generated dirs (`website/build`, `website/.docusaurus`, `website/static/demo`, `client/dist`, `server/dist`) are excluded. Anything else — fix in a `fix:` commit and re-run.
 
 - [ ] **Step 2: Full local battery**
 
