@@ -8,6 +8,9 @@ import { deleteExpiredSessions } from './auth/sessions.js';
 import { isSetupNeeded } from './auth/users.js';
 import { setupCode } from './auth/setupCode.js';
 import { authRouter, requireSession } from './routes/auth.js';
+import { serviceAuth } from './middleware/serviceAuth.js';
+import { serviceRouter } from './routes/service.js';
+import { ingestRouter } from './routes/ingest.js';
 import {
   DEV_CLIENT_ORIGINS,
   apiNotFound,
@@ -80,6 +83,11 @@ app.use((req, res, next) => (req.path === RESTORE_PATH ? next() : jsonBody(req, 
 
 // Server mode: login routes, then a valid session is required for the rest of the API
 app.use('/api/auth', authRouter);
+// Machine callers (paperless webhook, sidecar) use a scoped bearer token instead of a
+// cookie. Mounted before requireSession, so these two paths — and only these — skip the
+// session gate; each route still requires the token to carry its scope.
+app.use('/api/service', serviceAuth('service'), serviceRouter);
+app.use('/api/ingest', serviceAuth('ingest'), ingestRouter);
 app.use('/api', requireSession);
 
 // Kept minimal: anyone who can reach the server may call it (health checks, reconnecting)

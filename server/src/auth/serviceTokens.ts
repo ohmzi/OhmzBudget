@@ -84,6 +84,27 @@ export function verifyBearer(
   return { id: row.id, name: row.name, scopes: parseScopes(row.scopes) };
 }
 
+// How often "last used" is written for a token that keeps making requests. Mirrors
+// touchSession in auth/sessions.ts, for the same reason: the Settings list wants to show
+// recent activity without a write on every request.
+const TOUCH_INTERVAL_MS = 5 * 60 * 1000;
+const lastTouched = new Map<string, number>();
+
+/** Records that a token was used (at most every few minutes per token). */
+export function touchToken(id: string) {
+  const now = Date.now();
+  if (now - (lastTouched.get(id) ?? 0) < TOUCH_INTERVAL_MS) return;
+  lastTouched.set(id, now);
+  // Don't let the map grow with tokens that were revoked long ago
+  if (lastTouched.size > 1000) {
+    for (const [key, at] of lastTouched) if (now - at >= TOUCH_INTERVAL_MS) lastTouched.delete(key);
+  }
+  db.update(serviceTokens)
+    .set({ lastUsedAt: new Date(now).toISOString() })
+    .where(eq(serviceTokens.id, id))
+    .run();
+}
+
 /** Revokes a token. False when no such token exists (already-revoked stays true). */
 export function revokeToken(id: string): boolean {
   return (
