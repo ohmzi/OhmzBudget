@@ -2,6 +2,24 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## Execution Tracker
+
+Maintained between tasks; commit shas live on branch `m1-identity`. Owner directive 2026-10-10: autonomous execution, haiku subagents, plan-as-tracker (this table + ticked boxes are the cross-session source of truth).
+
+| Task                                                        | Status         | Evidence / commits |
+| ----------------------------------------------------------- | -------------- | ------------------ |
+| 1 Branch, baseline & tracker                                | ⬜ not started | —                  |
+| 2 Schema, migration 0021, startup backfill                  | ⬜ not started | —                  |
+| 3 Auth services (users, tokens, per-user sessions)          | ⬜ not started | —                  |
+| 4 Auth routes grow a username (and per-user semantics)      | ⬜ not started | —                  |
+| 5 Admin routes (users + service tokens) and the admin guard | ⬜ not started | —                  |
+| 6 Service-token middleware and the provable sidecar path    | ⬜ not started | —                  |
+| 7 `internalFetch` for allowlisted private hosts             | ⬜ not started | —                  |
+| 8 The client (username login, Users, API tokens)            | ⬜ not started | —                  |
+| 9 End-to-end coverage for the new identity                  | ⬜ not started | —                  |
+| 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                  |
+| 11 Verification battery and close-out                       | ⬜ not started | —                  |
+
 **Goal:** Real multi-user identity (users, roles, per-user sessions, an account-creating setup flow), scoped service tokens for machine callers, and `internalFetch` for allowlisted private hosts — the seams M2's document bridge needs.
 
 **Architecture:** Additive only. A `users` table owned by a new `auth` service layer; sessions gain `user_id`; the old single-password `auth_config` row becomes migration input (one backfill creates the `admin` user) plus the install secret that keeps the device-cookie lockout defense working. Service tokens are hashed at rest, scoped, revoked by timestamp, and accepted only under `/api/service/*` and `/api/ingest/*` via an `Authorization: Bearer ozb_…` header that bypasses session auth but never the host/origin guards. The budget itself stays shared — every user sees the same data (spec D3).
