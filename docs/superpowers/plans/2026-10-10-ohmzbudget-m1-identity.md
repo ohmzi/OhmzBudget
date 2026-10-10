@@ -17,7 +17,7 @@ Maintained between tasks; commit shas live on branch `m1-identity`. Owner direct
 | 7 `internalFetch` for allowlisted private hosts             | ✅ done        | e9aa653; 344/344 (+9); SSRF bound verified (manual redirects, exact host match); review clean           |
 | 8 The client (username login, Users, API tokens)            | ✅ done        | 63a9db7; labels pinned + browser-smoked; fail-closed gating; review clean (0 blocking)                  |
 | 9 End-to-end coverage for the new identity                  | ✅ done        | e6770c7; **e2e 119/119 zero flakes**; rate-limit coupling documented + moved; review clean (0 blocking) |
-| 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                                                                                                       |
+| 10 Docs, deploy notes, and the acceptance hook              | ✅ done        | 9e59725 + e924e6a (reset script fix) + 77eeaaa + 582a6d1; build SUCCESS; review clean (0 blocking)      |
 | 11 Verification battery and close-out                       | ⬜ not started | —                                                                                                       |
 
 **Goal:** Real multi-user identity (users, roles, per-user sessions, an account-creating setup flow), scoped service tokens for machine callers, and `internalFetch` for allowlisted private hosts — the seams M2's document bridge needs.
@@ -518,8 +518,8 @@ New coverage (serial with the existing spec's server): admin opens Settings → 
 - Modify: `deploy/.env.example` (add `OHMZBUDGET_INTERNAL_FETCH_ALLOW=` with a comment; it stays unused until M2. Also extend the `OHMZBUDGET_ALLOWED_HOSTS` example/comment to include the compose service hostname `ohmzbudget` — M2's container-to-container calls carry `Host: ohmzbudget:3001` and hostGuard would 403 them without it)
 - Do NOT touch: `client/src/utils/project.ts`, the protected domains, `cla.yml`.
 
-- [ ] **Step 1: Edits; `cd website && npm run build 2>&1 | tail -3` → SUCCESS.**
-- [ ] **Step 2: Commit** — `git commit -m "docs: multi-user and service-token guidance"`
+- [x] **Step 1: Edits; `cd website && npm run build 2>&1 | tail -3` → SUCCESS.** — plus fix round: reset-password.cjs resets accounts (scratch-DB proof) and the stale-sentence sweep (incl. the 5 final wording nits, 582a6d1)
+- [x] **Step 2: Commit** — `git commit -m "docs: multi-user and service-token guidance"` (landed as 9e59725)
 
 ---
 
