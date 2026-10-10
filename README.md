@@ -33,7 +33,7 @@
   <a href="https://flybudget.org">Website</a> ·
   <a href="https://flybudget.org/tour/intro">Tour</a> ·
   <a href="https://flybudget.org/docs/getting-started">User guide</a> ·
-  <a href="https://flybudget.org/community/security">Security</a> ·
+  <a href="https://flybudget.org/community/security">Security</a> (upstream project site) ·
   <a href="#roadmap">Roadmap</a> ·
   <a href="CONTRIBUTING.md">Contributing</a>
 </p>
@@ -80,6 +80,8 @@ wipes it.
 
 **2. Install the desktop app.**
 
+No releases are published for this fork yet; installers appear here after the first tagged release.
+
 | Platform    | Download                                                                                                                                                                                                                                                                  | Requires                   |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
 | **Windows** | [Installer (.exe)](https://github.com/ohmzi/OhmzBudget/releases/latest/download/OhmzBudget-Windows-Setup.exe)                                                                                                                                                             | Windows 10 or 11, 64-bit   |
@@ -112,7 +114,8 @@ docker logs ohmzbudget                              # prints the one-time setup 
 ```
 
 Open `http://<your-server>:3001`, enter the setup code and choose your password. Images are
-published for amd64 and arm64 as `ghcr.io/ohmzi/ohmzbudget`. The
+published for amd64 and arm64 as `ghcr.io/ohmzi/ohmzbudget` (no image is published yet — build
+locally with the provided compose). The
 [self-hosting guide](https://flybudget.org/community/self-hosting) covers HTTPS, backups and
 updates.
 
