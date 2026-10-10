@@ -6,19 +6,19 @@
 
 Maintained between tasks; commit shas live on branch `m1-identity`. Owner directive 2026-10-10: autonomous execution, haiku subagents, plan-as-tracker (this table + ticked boxes are the cross-session source of truth).
 
-| Task                                                        | Status         | Evidence / commits                                                           |
-| ----------------------------------------------------------- | -------------- | ---------------------------------------------------------------------------- |
-| 1 Branch, baseline & tracker                                | ✅ done        | 23807fc; baseline 263/85 green                                               |
-| 2 Schema, migration 0021, startup backfill                  | ✅ done        | a9e5603; fix round C1+I2 verified; 267 tests; snapshot proven by re-generate |
-| 3 Auth services (users, tokens, per-user sessions)          | ⬜ not started | —                                                                            |
-| 4 Auth routes grow a username (and per-user semantics)      | ⬜ not started | —                                                                            |
-| 5 Admin routes (users + service tokens) and the admin guard | ⬜ not started | —                                                                            |
-| 6 Service-token middleware and the provable sidecar path    | ⬜ not started | —                                                                            |
-| 7 `internalFetch` for allowlisted private hosts             | ⬜ not started | —                                                                            |
-| 8 The client (username login, Users, API tokens)            | ⬜ not started | —                                                                            |
-| 9 End-to-end coverage for the new identity                  | ⬜ not started | —                                                                            |
-| 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                                                                            |
-| 11 Verification battery and close-out                       | ⬜ not started | —                                                                            |
+| Task                                                        | Status         | Evidence / commits                                                               |
+| ----------------------------------------------------------- | -------------- | -------------------------------------------------------------------------------- |
+| 1 Branch, baseline & tracker                                | ✅ done        | 23807fc; baseline 263/85 green                                                   |
+| 2 Schema, migration 0021, startup backfill                  | ✅ done        | a9e5603; fix round C1+I2 verified; 267 tests; snapshot proven by re-generate     |
+| 3 Auth services (users, tokens, per-user sessions)          | ✅ done        | 807a697; 286/286 (+19); scoping + token-hash verified; review clean (0 blocking) |
+| 4 Auth routes grow a username (and per-user semantics)      | ⬜ not started | —                                                                                |
+| 5 Admin routes (users + service tokens) and the admin guard | ⬜ not started | —                                                                                |
+| 6 Service-token middleware and the provable sidecar path    | ⬜ not started | —                                                                                |
+| 7 `internalFetch` for allowlisted private hosts             | ⬜ not started | —                                                                                |
+| 8 The client (username login, Users, API tokens)            | ⬜ not started | —                                                                                |
+| 9 End-to-end coverage for the new identity                  | ⬜ not started | —                                                                                |
+| 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                                                                                |
+| 11 Verification battery and close-out                       | ⬜ not started | —                                                                                |
 
 **Goal:** Real multi-user identity (users, roles, per-user sessions, an account-creating setup flow), scoped service tokens for machine callers, and `internalFetch` for allowlisted private hosts — the seams M2's document bridge needs.
 
@@ -288,7 +288,7 @@ git commit -m "feat: users and service-token schema with startup backfill"
   - `serviceTokens.ts`: `type Scope = 'service' | 'ingest'`; `mintToken(name: string, scopes: Scope[]): { token: string; id: string }`; `verifyBearer(header: string | undefined): { id: string; name: string; scopes: Scope[] } | null`; `listTokens(): { id, name, scopes, createdAt, lastUsedAt, revokedAt }[]`; `revokeToken(id: string): boolean`.
   - `sessions.ts`: `createSession(userId, userAgent?): { token; expiresAt }`; `listSessions(userId, currentToken)`; `deleteOtherSessions(userId, currentToken): number`; `deleteSessionsForUser(userId): number`; `isValidSession` unchanged in name (now also requires a live user).
 
-- [ ] **Step 1: Failing tests — users API** (extend `users.test.ts`):
+- [x] **Step 1: Failing tests — users API** (extend `users.test.ts`):
 
 ```ts
 it('creates, verifies and lists users; username is case-insensitively unique', async () => {
@@ -311,7 +311,7 @@ it('deleting a user removes their sessions', async () => {
 });
 ```
 
-- [ ] **Step 2: Failing tests — tokens** (`serviceTokens.test.ts`):
+- [x] **Step 2: Failing tests — tokens** (`serviceTokens.test.ts`):
 
 ```ts
 it('mints a prefixed token, stores only its hash, verifies and lists without the hash', () => {
@@ -329,11 +329,11 @@ it('rejects unknown, malformed and revoked tokens', () => {
 });
 ```
 
-- [ ] **Step 3: Implement** — mirror `password.ts`/`sessions.ts` style. `verifyLogin` hashes a dummy password when the user is missing (copy `checkPassword`'s timing note). Password changes/resets call `deleteSessionsForUser` except the caller's kept token. `verifyBearer` = `createHash('sha256')` lookup + `revokedAt === null`; parse scopes JSON defensively. Sessions: `createSession` writes `userId`; `isValidSession` joins `users` (`users.id = sessions.userId`); device HMAC switches from `authConfig.passwordHash` to `authConfig.secret` (read the fresh row each call).
+- [x] **Step 3: Implement** — mirror `password.ts`/`sessions.ts` style. `verifyLogin` hashes a dummy password when the user is missing (copy `checkPassword`'s timing note). Password changes/resets call `deleteSessionsForUser` except the caller's kept token. `verifyBearer` = `createHash('sha256')` lookup + `revokedAt === null`; parse scopes JSON defensively. Sessions: `createSession` writes `userId`; `isValidSession` joins `users` (`users.id = sessions.userId`); device HMAC switches from `authConfig.passwordHash` to `authConfig.secret` (read the fresh row each call).
 
-- [ ] **Step 4: Full server suite + tsc → green** (update the existing `sessions`-asserting tests where signatures changed).
+- [x] **Step 4: Full server suite + tsc → green** (update the existing `sessions`-asserting tests where signatures changed). — 286/286, tsc clean
 
-- [ ] **Step 5: Commit** — `git commit -m "feat: user accounts, scoped service tokens and per-user sessions"`
+- [x] **Step 5: Commit** — `git commit -m "feat: user accounts, scoped service tokens and per-user sessions"` (landed as 807a697)
 
 ---
 
@@ -513,7 +513,8 @@ New coverage (serial with the existing spec's server): admin opens Settings → 
 
 **Files:**
 
-- Modify: `website/docs/settings.mdx` (Server section: describe accounts, roles, API tokens) and `website/community/self-hosting.mdx` (first-run now creates an admin account; add `OHMZBUDGET_INTERNAL_FETCH_ALLOW` row to the env table)
+- Modify: `CLAUDE.md` **and** `AGENTS.md` (same change in both — its auth/security sections describe the old single-password model and "changing the password voids device cookies"; update to accounts/roles and note device cookies persist across password changes by design (rate-limit keys only) — Task 3 review, minor 4)
+- Modify: `website/docs/settings.mdx` (Server section: describe accounts, roles, API tokens) and `website/community/self-hosting.mdx` (first-run now creates an admin account; add `OHMZBUDGET_INTERNAL_FETCH_ALLOW` row to the env table; fix the "voids device cookies" sentence)
 - Modify: `deploy/.env.example` (add `OHMZBUDGET_INTERNAL_FETCH_ALLOW=` with a comment; it stays unused until M2. Also extend the `OHMZBUDGET_ALLOWED_HOSTS` example/comment to include the compose service hostname `ohmzbudget` — M2's container-to-container calls carry `Host: ohmzbudget:3001` and hostGuard would 403 them without it)
 - Do NOT touch: `client/src/utils/project.ts`, the protected domains, `cla.yml`.
 
