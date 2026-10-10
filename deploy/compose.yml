@@ -12,7 +12,7 @@ services:
       OHMZBUDGET_HOST: '0.0.0.0'
       OHMZBUDGET_DATA_KEY_FILE: '/run/secrets/ohmzbudget_data_key'
       OHMZBUDGET_ALLOWED_HOSTS: '${OHMZBUDGET_ALLOWED_HOSTS:-localhost,127.0.0.1}'
-      OHMZBUDGET_TRUST_PROXY: 'true'
+      OHMZBUDGET_TRUST_PROXY: '1'
     ports:
       - '127.0.0.1:7300:3001'
     volumes:
