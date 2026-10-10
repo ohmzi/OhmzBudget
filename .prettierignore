@@ -13,3 +13,6 @@ e2e/playwright-report
 
 # The in-browser demo, built by website/scripts/build-demo.mjs
 website/static/demo
+
+# SDD workspace (git-ignored scratch)
+.superpowers

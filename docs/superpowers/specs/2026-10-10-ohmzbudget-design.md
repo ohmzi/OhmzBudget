@@ -16,17 +16,17 @@ One self-hosted, mobile-first household finance + document system with a single 
 
 ## 2. Locked decisions
 
-| # | Decision |
-|---|----------|
-| D1 | Rename the FlyBudget repo in place → OhmzBudget (keep history, attribution, license). GitHub rename at M0. |
-| D2 | Fresh start — no data migration from any prior system. |
-| D3 | Household access: **separate logins, shared household budget** (admin/member roles; no per-user data partitioning in v1). |
-| D4 | Access anywhere via the existing cloudflared private tunnel; loopback binds (ufw is default-deny; published Docker ports bypass ufw). |
-| D5 | Dropzone intake: PDF bills/receipts, phone photos (JPG/HEIC/PNG), CSV/OFX bank exports, PDF bank statements. |
-| D6 | No Firefly III anywhere. `trip-reconciler` deleted (source archived privately at `ohmzi/trip-reconciler`). |
-| D7 | Composition: **"One App"** — everything new lives inside the rebranded fork; paperless is the only sidecar. |
-| D8 | v1 never auto-writes money: statement rows create transactions only via the reviewed import flow; reconciliation only links documents; the matcher never edits amounts. |
-| D9 | New code isolated under `server/src/modules/{documents,imports,reconcile}` + `client/src/features/*`; upstream files touched minimally; rebase cadence against upstream main. |
+| #   | Decision                                                                                                                                                                      |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | Rename the FlyBudget repo in place → OhmzBudget (keep history, attribution, license). GitHub rename at M0.                                                                    |
+| D2  | Fresh start — no data migration from any prior system.                                                                                                                        |
+| D3  | Household access: **separate logins, shared household budget** (admin/member roles; no per-user data partitioning in v1).                                                     |
+| D4  | Access anywhere via the existing cloudflared private tunnel; loopback binds (ufw is default-deny; published Docker ports bypass ufw).                                         |
+| D5  | Dropzone intake: PDF bills/receipts, phone photos (JPG/HEIC/PNG), CSV/OFX bank exports, PDF bank statements.                                                                  |
+| D6  | No Firefly III anywhere. `trip-reconciler` deleted (source archived privately at `ohmzi/trip-reconciler`).                                                                    |
+| D7  | Composition: **"One App"** — everything new lives inside the rebranded fork; paperless is the only sidecar.                                                                   |
+| D8  | v1 never auto-writes money: statement rows create transactions only via the reviewed import flow; reconciliation only links documents; the matcher never edits amounts.       |
+| D9  | New code isolated under `server/src/modules/{documents,imports,reconcile}` + `client/src/features/*`; upstream files touched minimally; rebase cadence against upstream main. |
 
 ## 3. Architecture & topology
 
@@ -56,23 +56,23 @@ One self-hosted, mobile-first household finance + document system with a single 
 
 ### Verified code seams (evidence for the plan)
 
-| Fact | Location (v0.1.1) | Consequence |
-|---|---|---|
-| Import seam: `importRowSchema = {date, amount(cents, signed), payeeName, notes, importedId}`, max 100k rows; `preview` + `confirm`; dedupe on `(accountId, importedId)`; rules engine runs on confirm | `server/src/routes/transactions.ts:59-66, ~342-386` | Statement imports ride this; no new write path needed |
-| No header/token auth; `requireSession` cookie-only; `apiTokenGuard` is Electron-only | `server/src/routes/auth.ts:194-202`, `server/src/middleware/security.ts:101-113` | M1 must add service-token middleware |
-| `originGuard` rejects only requests carrying `Origin`/cross-site `Sec-Fetch-Site` — headerless server-to-server passes | `server/src/middleware/security.ts:59-77` | Container→app calls work once hostGuard allows |
-| `hostGuard` requires `ALLOWED_HOSTS` entries in server mode | `security.ts:38-44` | Add `ohmzbudget` container hostname |
-| `safeFetch` is https-only + refuses loopback/RFC1918 | `server/src/services/safeFetch.ts` | Needs separate `internalFetch` for paperless (http, private) |
-| Client CSP is self-only | helmet config | All document views via server proxy routes |
-| Backups: `BACKUP_TABLES = Object.keys(TABLES)` over a 14-table map; format marker `flybudget-backup` v2 | `server/src/services/backupService.ts:23-54` | New tables must be added to `TABLES` or backups silently skip them |
-| Session cookies `flybudget_session/_device/_token`; IndexedDB `flybudget-offline`; outbox lock; SW cache | `server/src/auth/sessions.ts`, `client/src/offline/*` | Rename all at M0 (fresh start → free) |
-| AGPL §13 source link + URL constants | `client/src/utils/project.ts` | Repoint to fork at M0 |
-| Publish identity | `.github/workflows/docker.yml` (`IMAGE`), `docker-compose.yml`, `electron-builder.json` | Rename at M0; image → `ghcr.io/ohmzi/ohmzbudget` |
-| Rules engine runs on every insert (caller-set category/notes are lock-protected) | `server/src/services/rulesEngine.ts` | Imported rows get categorized by payee rules — by design |
-| Schedule matcher (reusable scoring/dismissal patterns) | `server/src/services/matchingEngine.ts` | Model the receipt matcher on it |
-| Paperless upload: `POST /api/documents/post_document/`, multipart field **`document`** → bare task UUID; poll `GET /api/tasks/?task_id=` | paperless v3.3.0 | Bridge contract; pre-hash files (v3 accepts duplicates by default) |
-| Paperless webhook = workflow action (`WorkflowActionWebhook`), custom headers supported; internal HTTP targets allowed by default | paperless models/settings | Ingest route auth via service token in a header |
-| **Unverified:** whether workflow CONSUMPTION triggers fire for API uploads | — | M2 verifies; polling is the guaranteed path either way |
+| Fact                                                                                                                                                                                                  | Location (v0.1.1)                                                                       | Consequence                                                        |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Import seam: `importRowSchema = {date, amount(cents, signed), payeeName, notes, importedId}`, max 100k rows; `preview` + `confirm`; dedupe on `(accountId, importedId)`; rules engine runs on confirm | `server/src/routes/transactions.ts:59-66, ~342-386`                                     | Statement imports ride this; no new write path needed              |
+| No header/token auth; `requireSession` cookie-only; `apiTokenGuard` is Electron-only                                                                                                                  | `server/src/routes/auth.ts:194-202`, `server/src/middleware/security.ts:101-113`        | M1 must add service-token middleware                               |
+| `originGuard` rejects only requests carrying `Origin`/cross-site `Sec-Fetch-Site` — headerless server-to-server passes                                                                                | `server/src/middleware/security.ts:59-77`                                               | Container→app calls work once hostGuard allows                     |
+| `hostGuard` requires `ALLOWED_HOSTS` entries in server mode                                                                                                                                           | `security.ts:38-44`                                                                     | Add `ohmzbudget` container hostname                                |
+| `safeFetch` is https-only + refuses loopback/RFC1918                                                                                                                                                  | `server/src/services/safeFetch.ts`                                                      | Needs separate `internalFetch` for paperless (http, private)       |
+| Client CSP is self-only                                                                                                                                                                               | helmet config                                                                           | All document views via server proxy routes                         |
+| Backups: `BACKUP_TABLES = Object.keys(TABLES)` over a 14-table map; format marker `flybudget-backup` v2                                                                                               | `server/src/services/backupService.ts:23-54`                                            | New tables must be added to `TABLES` or backups silently skip them |
+| Session cookies `flybudget_session/_device/_token`; IndexedDB `flybudget-offline`; outbox lock; SW cache                                                                                              | `server/src/auth/sessions.ts`, `client/src/offline/*`                                   | Rename all at M0 (fresh start → free)                              |
+| AGPL §13 source link + URL constants                                                                                                                                                                  | `client/src/utils/project.ts`                                                           | Repoint to fork at M0                                              |
+| Publish identity                                                                                                                                                                                      | `.github/workflows/docker.yml` (`IMAGE`), `docker-compose.yml`, `electron-builder.json` | Rename at M0; image → `ghcr.io/ohmzi/ohmzbudget`                   |
+| Rules engine runs on every insert (caller-set category/notes are lock-protected)                                                                                                                      | `server/src/services/rulesEngine.ts`                                                    | Imported rows get categorized by payee rules — by design           |
+| Schedule matcher (reusable scoring/dismissal patterns)                                                                                                                                                | `server/src/services/matchingEngine.ts`                                                 | Model the receipt matcher on it                                    |
+| Paperless upload: `POST /api/documents/post_document/`, multipart field **`document`** → bare task UUID; poll `GET /api/tasks/?task_id=`                                                              | paperless v3.3.0                                                                        | Bridge contract; pre-hash files (v3 accepts duplicates by default) |
+| Paperless webhook = workflow action (`WorkflowActionWebhook`), custom headers supported; internal HTTP targets allowed by default                                                                     | paperless models/settings                                                               | Ingest route auth via service token in a header                    |
+| **Unverified:** whether workflow CONSUMPTION triggers fire for API uploads                                                                                                                            | —                                                                                       | M2 verifies; polling is the guaranteed path either way             |
 
 **Upstream conventions this design honors** (from the repo's CLAUDE.md/AGENTS.md): new capabilities come as pure-logic + DB-service pairs (like `rulesEngine.ts`/`ruleService.ts`) so logic re-runs anywhere; writes route through shared service functions; schema changes are add-only; and the new routes mount in `server/src/index.ts` **only** — the in-browser demo worker (`server/src/browser/app.ts`) must not load Node-dependent document code, and client features gate behind `IS_DEMO` (`NotInDemo`) so the `--mode demo` build and its e2e suite stay green.
 
@@ -115,27 +115,27 @@ All new tables in `budget.db` via drizzle migration; **every table registered in
 
 ## 7. Phasing & testing
 
-| Milestone | Content | Exit criteria |
-|---|---|---|
-| **M0 Rebrand ship** | Repo rename (owner go), sweep, identifiers, tests updated, image, compose skeleton + pinned subnets | CI green (vitest + Playwright + format/tsc), `--mode demo` build passes, OhmzBudget runs on host, tunnel reachable |
-| **M1 Identity & plumbing** | `users`/roles/sessions, service-token middleware, `internalFetch`, hostGuard entries | New auth + token tests pass; sidecar-call path provable via curl |
-| **M2 Document bridge** | paperless stack in compose; documents module: upload, links, polling, proxy, webhook ingest, receipt panel on transaction detail | Upload → OCR → visible → linkable end-to-end; contract tests vs pinned paperless container. *System becomes useful here.* |
-| **M3 Statement import** | CSV profiles → OFX → PDF text → scanned-via-OCR; `statement_imports` | Golden-file tests per format + bank templates; real bank file imported with review |
-| **M4 Reconciliation** | Matcher, suggestions, review inbox, dismissals | Scoring unit tests; e2e tap-to-resolve; first real receipt matched |
+| Milestone                  | Content                                                                                                                          | Exit criteria                                                                                                             |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **M0 Rebrand ship**        | Repo rename (owner go), sweep, identifiers, tests updated, image, compose skeleton + pinned subnets                              | CI green (vitest + Playwright + format/tsc), `--mode demo` build passes, OhmzBudget runs on host, tunnel reachable        |
+| **M1 Identity & plumbing** | `users`/roles/sessions, service-token middleware, `internalFetch`, hostGuard entries                                             | New auth + token tests pass; sidecar-call path provable via curl                                                          |
+| **M2 Document bridge**     | paperless stack in compose; documents module: upload, links, polling, proxy, webhook ingest, receipt panel on transaction detail | Upload → OCR → visible → linkable end-to-end; contract tests vs pinned paperless container. _System becomes useful here._ |
+| **M3 Statement import**    | CSV profiles → OFX → PDF text → scanned-via-OCR; `statement_imports`                                                             | Golden-file tests per format + bank templates; real bank file imported with review                                        |
+| **M4 Reconciliation**      | Matcher, suggestions, review inbox, dismissals                                                                                   | Scoring unit tests; e2e tap-to-resolve; first real receipt matched                                                        |
 
 **Testing strategy:** extend the existing harness (server vitest incl. fast-check property tests, client tests, 18 Playwright e2e specs). New tests live beside new modules. Paperless interactions get contract tests against the pinned container. Each milestone ends with the full suite green + a homelab smoke test.
 
 ## 8. Risk register
 
-| Risk | Mitigation |
-|---|---|
-| Upstream drift (young, fast, one-maintainer project) | Minimal-touch module layout (D9), pinned v0.1.1 base, `upstream` remote, scheduled rebase; isolate diffs to new files where possible |
-| Multi-user surgery touches core auth | Confine to auth middleware + sessions + users table; no data-scoping changes (shared budget) |
-| PDF statement parsing is open-ended | Template backlog, never-guess, archive-fallback; only build templates for banks actually used |
-| Webhook path unverified for API uploads | Polling is the guaranteed path; M2 verifies |
-| Docker address pools exhausted / host has 79 containers, swap 29/31 GiB | Pinned subnets mandatory; stack is light (≤5 containers); avoid AI/GPU workloads; monitor |
-| AGPL/GPL compliance drift | Public repo + repointed source link + NOTICE; paperless stays unmodified; no data-importer code copied |
-| Import API semantics (no transfers/tags/currencies in the row schema) | v1 scope: rows are transactions; transfers created via the app's own two-leg endpoint manually; multi-currency deferred |
+| Risk                                                                    | Mitigation                                                                                                                           |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Upstream drift (young, fast, one-maintainer project)                    | Minimal-touch module layout (D9), pinned v0.1.1 base, `upstream` remote, scheduled rebase; isolate diffs to new files where possible |
+| Multi-user surgery touches core auth                                    | Confine to auth middleware + sessions + users table; no data-scoping changes (shared budget)                                         |
+| PDF statement parsing is open-ended                                     | Template backlog, never-guess, archive-fallback; only build templates for banks actually used                                        |
+| Webhook path unverified for API uploads                                 | Polling is the guaranteed path; M2 verifies                                                                                          |
+| Docker address pools exhausted / host has 79 containers, swap 29/31 GiB | Pinned subnets mandatory; stack is light (≤5 containers); avoid AI/GPU workloads; monitor                                            |
+| AGPL/GPL compliance drift                                               | Public repo + repointed source link + NOTICE; paperless stays unmodified; no data-importer code copied                               |
+| Import API semantics (no transfers/tags/currencies in the row schema)   | v1 scope: rows are transactions; transfers created via the app's own two-leg endpoint manually; multi-currency deferred              |
 
 ## 9. Out of scope (v1)
 
