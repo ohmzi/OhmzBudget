@@ -38,3 +38,12 @@ export const appMode: AppMode = serverMode
   : process.env.OHMZBUDGET_API_TOKEN
     ? 'desktop'
     : 'dev';
+
+/**
+ * Private-network hosts internalFetch may reach, comma-separated "host" or "host:port"
+ * (e.g. "ohmzbudget,paperless:8000"). Empty = nothing is reachable.
+ */
+export const internalFetchAllow = (process.env.OHMZBUDGET_INTERNAL_FETCH_ALLOW ?? '')
+  .split(',')
+  .map((h) => h.trim().toLowerCase())
+  .filter(Boolean);
