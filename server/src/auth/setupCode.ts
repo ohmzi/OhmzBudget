@@ -21,7 +21,7 @@ export function setupCode(): string {
   if (!code) {
     code = Array.from({ length: LENGTH }, () => ALPHABET[randomInt(ALPHABET.length)]).join('');
     console.log(
-      '\nOhmzBudget needs a password. Open it in your browser and enter this setup code:\n\n' +
+      '\nOhmzBudget needs its first account: open it in your browser and enter this setup code:\n\n' +
         `    ${formatSetupCode(code)}\n`,
     );
   }

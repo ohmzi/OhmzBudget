@@ -236,7 +236,7 @@ function describeCheck(check: SecurityCheck): CheckText {
           };
     case 'password':
       return check.ok
-        ? { label: 'A password protects this server' }
+        ? { label: 'Accounts and their roles protect this server' }
         : { label: 'No password is set yet' };
   }
 }
@@ -309,7 +309,7 @@ function SignedInDevices() {
     <section className="pt-6 border-t border-border-light">
       <SectionTitle>Signed-in devices</SectionTitle>
       <p className="text-xs text-text-tertiary mt-1">
-        Browsers signed in to this server. Sign out any you don't recognize, then change the
+        Browsers signed in to your account. Sign out any you don't recognize, then change your
         password.
       </p>
       {isLoading && <Loader2 size={16} className="animate-spin text-text-tertiary mt-3" />}
@@ -398,7 +398,8 @@ function SelfHostedSettings() {
       <section className="pt-6 border-t border-border-light max-w-md">
         <SectionTitle>Change password</SectionTitle>
         <p className="text-xs text-text-tertiary mt-1">
-          This password protects your OhmzBudget server. Changing it signs out every other device.
+          This password protects your account. Changing it signs out your other devices, not anyone
+          else's.
         </p>
         <form onSubmit={changePassword} className="space-y-3 mt-4">
           <div>
