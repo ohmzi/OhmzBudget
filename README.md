@@ -102,7 +102,7 @@ every feature.
 
 ### 🐳 Self-host with Docker
 
-Run OhmzBudget on your own server, protected by a password, and open it from any browser,
+Run OhmzBudget on your own server, protected by your own account, and open it from any browser,
 including your phone:
 
 ```bash
