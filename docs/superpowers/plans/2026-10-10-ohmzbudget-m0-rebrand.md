@@ -12,7 +12,7 @@ Maintained between tasks; commit shas live on branch `m0-rebrand`. Owner directi
 | 2 Root & package manifests               | ✅ done        | f24f917; names + lockfiles name-only; tsc ✓; review clean (0 findings)                                                                      |
 | 3 Client display strings & wordmark      | ✅ done        | 1eb58c7; 41 files; greps CLEAN; tsc/85 tests/build/demo ✓; review clean (0 blocking)                                                        |
 | 4 Client shell & storage identifiers     | ✅ done        | d7960fd; 5 files; dist scan CLEAN; review clean (0 blocking)                                                                                |
-| 5 Server runtime identity                | ⬜ not started |                                                                                                                                             |
+| 5 Server runtime identity                | ✅ done        | e4fa6e5; 19 files; 263/263 held; review clean (0 blocking)                                                                                  |
 | 6 End-to-end tests                       | ⬜ not started |                                                                                                                                             |
 | 7 Docker & CI identity                   | ⬜ not started |                                                                                                                                             |
 | 8 Electron identity                      | ⬜ not started |                                                                                                                                             |
@@ -224,7 +224,7 @@ git add client server/src/browser/app.ts && git commit -m "refactor: rename clie
 - Modify (same commit — they assert the old names): `server/src/routes/auth.test.ts`, `server/src/routes/server.test.ts`, `server/src/routes/backup.test.ts`, `server/src/middleware/security.serverMode.test.ts`, `server/src/middleware/security.test.ts`
 - Sweep: any remaining `FlyBudget|flybudget` under `server/`
 
-- [ ] **Step 1: Mechanical sweep, then hand-fix**
+- [x] **Step 1: Mechanical sweep, then hand-fix**
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
@@ -234,16 +234,16 @@ grep -rl 'flybudget' server | xargs sed -i 's#flybudget\.org#@@KD@@#g; s/flybudg
 
 Hand-check the four hand-written migrations' comments and `server/src/routes/server.ts` `securityChecks` (env-var names in user-facing hints).
 
-- [ ] **Step 2: Update tests asserting old names** — set them to the new cookie names, env vars, backup marker, and messages in this same commit.
+- [x] **Step 2: Update tests asserting old names** — set them to the new cookie names, env vars, backup marker, and messages in this same commit.
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 ```bash
 grep -rn 'FlyBudget\|flybudget\|FLYBUDGET' server || echo CLEAN
 cd server && npx tsc --noEmit && npm test
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit** (landed as e4fa6e5)
 
 ```bash
 git add server && git commit -m "refactor: rename server identity, env prefix, cookies and backup marker"
