@@ -10,7 +10,7 @@ Maintained between tasks; commit shas live on branch `m0-rebrand`. Owner directi
 | ---------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1 Baseline & branch                      | ✅ done        | `m0-rebrand` @ 7c8d00d; server 263/263 · client 85/85 · tsc ✓ · e2e 113/115 (2 pre-existing flakes, pass isolated) · format repaired pre-T2 |
 | 2 Root & package manifests               | ✅ done        | f24f917; names + lockfiles name-only; tsc ✓; review clean (0 findings)                                                                      |
-| 3 Client display strings & wordmark      | ⬜ not started |                                                                                                                                             |
+| 3 Client display strings & wordmark      | ✅ done        | 1eb58c7; 41 files; greps CLEAN; tsc/85 tests/build/demo ✓; review clean (0 blocking)                                                        |
 | 4 Client shell & storage identifiers     | ⬜ not started |                                                                                                                                             |
 | 5 Server runtime identity                | ⬜ not started |                                                                                                                                             |
 | 6 End-to-end tests                       | ⬜ not started |                                                                                                                                             |
@@ -132,7 +132,7 @@ git commit -m "chore: rename packages and metadata to ohmzbudget"
 - Modify: `client/vite.config.ts` (define `__FLYBUDGET_VERSION__` → `__OHMZBUDGET_VERSION__`) — **same commit**, so the tree never carries a renamed usage without its define (tsc/build would fail)
 - Test: client tests asserting display strings (run all; fix hits)
 
-- [ ] **Step 1: Case-sensitive sweep (order matters — display name first; `project.ts` excluded)**
+- [x] **Step 1: Case-sensitive sweep (order matters — display name first; `project.ts` excluded)**
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
@@ -143,7 +143,7 @@ sed -i 's/__FLYBUDGET_VERSION__/__OHMZBUDGET_VERSION__/g' client/vite.config.ts
 
 Note: this also renames storage identifiers and plugin names in `client/src` — Task 4 verifies those specifically (storage.ts / outbox.ts). `client/src/utils/project.ts` carries the only `flybudget.org` URLs and is handled deliberately in Task 9 — never blanket-replace the domain.
 
-- [ ] **Step 2: Wordmark component (manual edit)**
+- [x] **Step 2: Wordmark component (manual edit)**
 
 `BrandName.tsx` renders two spans so the brand color applies to "Fly" today. Change to `Ohmz` + `Budget` and rename the prop through all usages:
 
@@ -152,7 +152,7 @@ Note: this also renames storage identifiers and plugin names in `client/src` —
 // after:  <span className={ohmzClassName}>Ohmz</span><span className={budgetClassName}>Budget</span>
 ```
 
-- [ ] **Step 3: Verify zero hits + tests**
+- [x] **Step 3: Verify zero hits + tests**
 
 ```bash
 grep -rn 'FlyBudget\|flybudget' client/src --exclude=project.ts || echo CLEAN   # project.ts keeps its URL constants until Task 9
@@ -160,7 +160,7 @@ cd client && npx tsc --noEmit && npm test && npm run build
 npx vite build --mode demo 2>&1 | tail -3   # demo build must pass
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit** (landed as 1eb58c7)
 
 ```bash
 git add client && git commit -m "refactor: rebrand client display strings to OhmzBudget"
@@ -211,7 +211,7 @@ cd client && npx tsc --noEmit && npm test && npm run build && npx vite build --m
 - [ ] **Step 4: Commit**
 
 ```bash
-git add client && git commit -m "refactor: rename client shell, sw cache and storage identifiers"
+git add client server/src/browser/app.ts && git commit -m "refactor: rename client shell, sw cache and storage identifiers"
 ```
 
 ---
