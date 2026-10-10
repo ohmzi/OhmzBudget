@@ -140,8 +140,8 @@ function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () =>
           </span>
           {isSetup && (
             <span className="block mt-2">
-              Create the password that protects this server. Anyone who can reach it will need this
-              password.
+              Create the admin account that protects this server. Anyone who can reach it will need
+              to sign in.
             </span>
           )}
         </>
