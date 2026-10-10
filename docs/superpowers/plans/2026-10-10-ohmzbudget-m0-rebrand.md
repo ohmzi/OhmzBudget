@@ -606,3 +606,14 @@ Expect CI and docker workflow runs from the push; the docker workflow builds + s
 **Owner directive (2026-10-10):** at the end of the build (M4 or the furthest milestone reached), run an acceptance test — create the admin account, upload one sample receipt, one bill, and one statement, and verify the data feeds into the ledger and archive. Sample files are generated locally (avoids sourcing real/PII documents).
 
 M1 (identity & plumbing: multi-user, service tokens, internalFetch), M2 (document bridge), M3 (statement import) and M4 (reconciliation) get their own detailed plans authored as each predecessor lands — their concrete code depends on the actual M0 delta and upstream movement. The spec §7 milestone table is the authoritative roadmap in the meantime.
+
+---
+
+## Close-out — M0 complete (2026-10-10)
+
+- **Final head:** `17c3e60` on `m0-rebrand` (pushed; = origin). 29 commits from `7c8d00d`.
+- **All 13 tasks complete and ticked**; every per-task review clean on first pass (no task fix loops). The final whole-branch review (26 commits, 146 files) returned **"with fixes"** → one fix wave: `7bff467` `OHMZBUDGET_TRUST_PROXY: '1'` (live security correction — trust-all made the login throttle spoofable via left-most XFF; stack recreated and re-verified), `8714e7a` upstream blog post restored byte-identical to `b0dcef9` (slug kept) + ratings marked upstream-measured, `17c3e60` README honesty notes. Scoped re-review: all findings ADDRESSED, no new blocking.
+- **Verified evidence:** server 263/263 · client 85/85 · **e2e 115/115** (desktop/phone/demo/server-mode) · tsc ×2 · prettier · demo + website builds · container smoke · **live on host** `127.0.0.1:7300` (`{"status":"ok"}`, hardened container, pinned subnet 10.88.0.0/24).
+- **Parked (non-blocking):** README quick-start wording nit (root compose is image-only; the deploy compose builds — reword at next touch); `docsUrl()` resolves to repo `docs/<page>` (404) until the tier-2 site; `brand-wordmark__fly` CSS hook; `linux.maintainer` default; CLA phrase + `EXEMPT`-list wrinkle → CLA legal review.
+- **Owner steps outstanding:** (1) Cloudflare dashboard route `budget.example.com → http://localhost:7300` (host side already allowlisted in `deploy/.env`); (2) first password on the live app (one-time code via `docker logs ohmzbudget`); (3) first `v*` release tag when ready (publishes image/installers; clears the README 404s); (4) integrate `m0-rebrand` → `main` (PR triggers CI now that Actions are enabled).
+- **M1 resumes from this HEAD** — multi-user, service tokens, `internalFetch` (spec §7).
