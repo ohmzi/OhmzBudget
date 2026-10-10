@@ -6,19 +6,19 @@
 
 Maintained between tasks; commit shas live on branch `m1-identity`. Owner directive 2026-10-10: autonomous execution, haiku subagents, plan-as-tracker (this table + ticked boxes are the cross-session source of truth).
 
-| Task                                                        | Status         | Evidence / commits                                                               |
-| ----------------------------------------------------------- | -------------- | -------------------------------------------------------------------------------- |
-| 1 Branch, baseline & tracker                                | ✅ done        | 23807fc; baseline 263/85 green                                                   |
-| 2 Schema, migration 0021, startup backfill                  | ✅ done        | a9e5603; fix round C1+I2 verified; 267 tests; snapshot proven by re-generate     |
-| 3 Auth services (users, tokens, per-user sessions)          | ✅ done        | 807a697; 286/286 (+19); scoping + token-hash verified; review clean (0 blocking) |
-| 4 Auth routes grow a username (and per-user semantics)      | ⬜ not started | —                                                                                |
-| 5 Admin routes (users + service tokens) and the admin guard | ⬜ not started | —                                                                                |
-| 6 Service-token middleware and the provable sidecar path    | ⬜ not started | —                                                                                |
-| 7 `internalFetch` for allowlisted private hosts             | ⬜ not started | —                                                                                |
-| 8 The client (username login, Users, API tokens)            | ⬜ not started | —                                                                                |
-| 9 End-to-end coverage for the new identity                  | ⬜ not started | —                                                                                |
-| 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                                                                                |
-| 11 Verification battery and close-out                       | ⬜ not started | —                                                                                |
+| Task                                                        | Status         | Evidence / commits                                                                        |
+| ----------------------------------------------------------- | -------------- | ----------------------------------------------------------------------------------------- |
+| 1 Branch, baseline & tracker                                | ✅ done        | 23807fc; baseline 263/85 green                                                            |
+| 2 Schema, migration 0021, startup backfill                  | ✅ done        | a9e5603; fix round C1+I2 verified; 267 tests; snapshot proven by re-generate              |
+| 3 Auth services (users, tokens, per-user sessions)          | ✅ done        | 807a697; 286/286 (+19); scoping + token-hash verified; review clean (0 blocking)          |
+| 4 Auth routes grow a username (and per-user semantics)      | ✅ done        | 0ec327e; 289/289 (+3); contract pinned by exact-equality tests; review clean (0 blocking) |
+| 5 Admin routes (users + service tokens) and the admin guard | ⬜ not started | —                                                                                         |
+| 6 Service-token middleware and the provable sidecar path    | ⬜ not started | —                                                                                         |
+| 7 `internalFetch` for allowlisted private hosts             | ⬜ not started | —                                                                                         |
+| 8 The client (username login, Users, API tokens)            | ⬜ not started | —                                                                                         |
+| 9 End-to-end coverage for the new identity                  | ⬜ not started | —                                                                                         |
+| 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                                                                                         |
+| 11 Verification battery and close-out                       | ⬜ not started | —                                                                                         |
 
 **Goal:** Real multi-user identity (users, roles, per-user sessions, an account-creating setup flow), scoped service tokens for machine callers, and `internalFetch` for allowlisted private hosts — the seams M2's document bridge needs.
 
@@ -348,7 +348,7 @@ it('rejects unknown, malformed and revoked tokens', () => {
 
 - Consumes: Task 3 APIs. Produces (wire contract): `GET /api/auth/status` → `{ enabled, needsSetup, authenticated, user: { id, username, role } | null }`; `POST /api/auth/setup { username, password, setupCode }`; `POST /api/auth/login { username, password }`; `POST /api/auth/change-password { currentPassword, newPassword }` (caller's own); session routes unchanged in shape, now scoped to the caller.
 
-- [ ] **Step 1: Update the existing tests first** — every `setup`/`login` body gains `username: 'owner'`; sign-in assertions read `status.user.username === 'owner'`. Add:
+- [x] **Step 1: Update the existing tests first** — every `setup`/`login` body gains `username: 'owner'`; sign-in assertions read `status.user.username === 'owner'`. Add:
 
 ```ts
 it('the setup username must be valid and unique', async () => {
@@ -363,11 +363,11 @@ it('signing out others never touches another user’s sessions', async () => {
 });
 ```
 
-- [ ] **Step 2: Implement** — `/setup` validates `username` (`z.string().min(1).max(64).regex(/^[a-zA-Z0-9._-]+$/)`), replaces the password check with `isSetupNeeded()`, calls `createUser(..., 'admin')`; **when a user row already exists with that username AND an empty `passwordHash` (the interim-window phantom from review finding T2-C1), upgrade that row in place instead of 409ing**; `/login` keys on `verifyLogin`, error text unchanged (`Incorrect password`) to avoid enumeration; `/status` includes `user` via `sessionUser(token)`; `requireSession` attaches `res.locals.user = sessionUser(token)` (declare `interface AuthedLocals { user?: SessionUser; service?: { name: string; scopes: string[] } }` exported from a shared `server/src/types.ts` and use `Response<unknown, AuthedLocals>` where needed); `signedIn()` helpers return `{ token, user }`.
+- [x] **Step 2: Implement** — `/setup` validates `username` (`z.string().min(1).max(64).regex(/^[a-zA-Z0-9._-]+$/)`), replaces the password check with `isSetupNeeded()`, calls `createUser(..., 'admin')`; **when a user row already exists with that username AND an empty `passwordHash` (the interim-window phantom from review finding T2-C1), upgrade that row in place instead of 409ing**; `/login` keys on `verifyLogin`, error text unchanged (`Incorrect password`) to avoid enumeration; `/status` includes `user` via `sessionUser(token)`; `requireSession` attaches `res.locals.user = sessionUser(token)` (declare `interface AuthedLocals { user?: SessionUser; service?: { name: string; scopes: string[] } }` exported from a shared `server/src/types.ts` and use `Response<unknown, AuthedLocals>` where needed); `signedIn()` helpers return `{ token, user }`.
 
-- [ ] **Step 3: `cd server && npx tsc --noEmit && npm test` → green.**
+- [x] **Step 3: `cd server && npx tsc --noEmit && npm test` → green.** — 289/289
 
-- [ ] **Step 4: Commit** — `git commit -m "feat: username-based setup and login, per-user sessions"`
+- [x] **Step 4: Commit** — `git commit -m "feat: username-based setup and login, per-user sessions"` (landed as 0ec327e)
 
 ---
 
@@ -385,7 +385,7 @@ it('signing out others never touches another user’s sessions', async () => {
 - `GET /api/users` → `SessionUser[]`; `POST /api/users { username, password, role }` → `201 { user }` | `409 username_taken`; `PATCH /api/users/:id { role }`; `POST /api/users/:id/reset-password { password }`; `DELETE /api/users/:id`.
 - `GET /api/service-tokens` → list (no hashes); `POST /api/service-tokens { name, scopes }` → `201 { id, name, scopes, token }` (**only time the token appears**); `DELETE /api/service-tokens/:id` (revoke).
 
-- [ ] **Step 1: Failing tests** — non-admin → 403 on every route; admin CRUD happy paths; last-admin demote → `409 last_admin`; self-delete → `409 self`; token create response contains the token exactly once and list never does.
+- [ ] **Step 1: Failing tests** — non-admin → 403 on every route; admin CRUD happy paths; last-admin demote → `409 last_admin`; self-delete → `409 self`; token create response contains the token exactly once and list never does. **Also from the T4 review, same commit:** (a) serialize `/setup` (an in-flight flag in `routes/auth.ts` around the gate + create — two concurrent valid-code setups ⇒ exactly one admin, the loser gets 409; closes the bounded TOCTOU race); (b) `listUsers()` excludes users with an empty `passwordHash` (ghost rows can never sign in). Test both.
 - [ ] **Step 2: Implement** with zod validation mirroring existing routers' style.
 - [ ] **Step 3: `npx tsc --noEmit && npm test` → green.**
 - [ ] **Step 4: Commit** — `git commit -m "feat: admin APIs for users and service tokens"`
