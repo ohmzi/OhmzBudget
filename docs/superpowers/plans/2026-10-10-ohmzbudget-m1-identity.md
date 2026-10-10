@@ -15,7 +15,7 @@ Maintained between tasks; commit shas live on branch `m1-identity`. Owner direct
 | 5 Admin routes (users + service tokens) and the admin guard | ✅ done        | 837c8d1; 321/321 (+32); guard + token-once + carry-overs verified; review clean (0 blocking)  |
 | 6 Service-token middleware and the provable sidecar path    | ✅ done        | 81331ed; 335/335; **M1 exit check passed by hand**; review clean (0 blocking)                 |
 | 7 `internalFetch` for allowlisted private hosts             | ✅ done        | e9aa653; 344/344 (+9); SSRF bound verified (manual redirects, exact host match); review clean |
-| 8 The client (username login, Users, API tokens)            | ⬜ not started | —                                                                                             |
+| 8 The client (username login, Users, API tokens)            | ✅ done        | 63a9db7; labels pinned + browser-smoked; fail-closed gating; review clean (0 blocking)        |
 | 9 End-to-end coverage for the new identity                  | ⬜ not started | —                                                                                             |
 | 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                                                                                             |
 | 11 Verification battery and close-out                       | ⬜ not started | —                                                                                             |
@@ -485,11 +485,11 @@ it('allows a redirect within the allowlist', async () => {
 
 **Interfaces:** consumes Task 5's routes; labels the e2e task relies on: buttons `Add user`, `Create token`; fields `Username`, `Password`, `Name`, `Scopes` (two checkboxes labelled `service` and `ingest`); the created token appears in a `role="status"` block with a `Copy` button and the warning `Copy this token now — it will not be shown again.`; row menus `Reset password`, `Make admin` / `Make member`, `Remove user`, `Revoke`.
 
-- [ ] **Step 1: Implement the API wrappers + AuthGate fields** (above).
-- [ ] **Step 2: `UsersSection`** — TanStack Query `['users']`; table (Username, Role `Badge`, Created, Last login) using the existing table-row idiom; `Add user` opens the shared `Modal` with username/password/role select; row `RowMenu` per the labels above; destructive ones through `ConfirmModal`. Errors surface via the existing error string convention.
-- [ ] **Step 3: `ApiTokensSection`** — query `['service-tokens']`; table (Name, Scopes badges, Created, Last used); create dialog per labels; after create, show the one-time token block; `Revoke` via `ConfirmModal`.
-- [ ] **Step 4: Verify** — `cd client && npx tsc --noEmit && npm test && npm run build && npx vite build --mode demo 2>&1 | tail -3` (demo must pass; the sections simply won't render in demo/serve mode).
-- [ ] **Step 5: Commit** — `git commit -m "feat: multi-user login, user management and API tokens in the client"`
+- [x] **Step 1: Implement the API wrappers + AuthGate fields** (above).
+- [x] **Step 2: `UsersSection`** — TanStack Query `['users']`; table (Username, Role `Badge`, actions — Created/Last-login dropped per the T5 `SessionUser[]` ruling); `Add user` opens the shared `Modal` with username/password/role select; row `RowMenu` per the labels above; destructive ones through `ConfirmModal`. Errors surface via the existing error string convention.
+- [x] **Step 3: `ApiTokensSection`** — query `['service-tokens']`; table (Name, Scopes badges, Created, Last used); create dialog per labels; after create, show the one-time token block; `Revoke` via `ConfirmModal`.
+- [x] **Step 4: Verify** — `cd client && npx tsc --noEmit && npm test && npm run build && npx vite build --mode demo 2>&1 | tail -3` (demo must pass; the sections simply won't render in demo/serve mode). — all green + a browser smoke against a real server instance
+- [x] **Step 5: Commit** — `git commit -m "feat: multi-user login, user management and API tokens in the client"` (landed as 63a9db7)
 
 ---
 
