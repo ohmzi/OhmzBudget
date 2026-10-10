@@ -6,19 +6,19 @@
 
 Maintained between tasks; commit shas live on branch `m1-identity`. Owner directive 2026-10-10: autonomous execution, haiku subagents, plan-as-tracker (this table + ticked boxes are the cross-session source of truth).
 
-| Task                                                        | Status         | Evidence / commits |
-| ----------------------------------------------------------- | -------------- | ------------------ |
-| 1 Branch, baseline & tracker                                | ⬜ not started | —                  |
-| 2 Schema, migration 0021, startup backfill                  | ⬜ not started | —                  |
-| 3 Auth services (users, tokens, per-user sessions)          | ⬜ not started | —                  |
-| 4 Auth routes grow a username (and per-user semantics)      | ⬜ not started | —                  |
-| 5 Admin routes (users + service tokens) and the admin guard | ⬜ not started | —                  |
-| 6 Service-token middleware and the provable sidecar path    | ⬜ not started | —                  |
-| 7 `internalFetch` for allowlisted private hosts             | ⬜ not started | —                  |
-| 8 The client (username login, Users, API tokens)            | ⬜ not started | —                  |
-| 9 End-to-end coverage for the new identity                  | ⬜ not started | —                  |
-| 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                  |
-| 11 Verification battery and close-out                       | ⬜ not started | —                  |
+| Task                                                        | Status         | Evidence / commits             |
+| ----------------------------------------------------------- | -------------- | ------------------------------ |
+| 1 Branch, baseline & tracker                                | ✅ done        | 23807fc; baseline 263/85 green |
+| 2 Schema, migration 0021, startup backfill                  | ⬜ not started | —                              |
+| 3 Auth services (users, tokens, per-user sessions)          | ⬜ not started | —                              |
+| 4 Auth routes grow a username (and per-user semantics)      | ⬜ not started | —                              |
+| 5 Admin routes (users + service tokens) and the admin guard | ⬜ not started | —                              |
+| 6 Service-token middleware and the provable sidecar path    | ⬜ not started | —                              |
+| 7 `internalFetch` for allowlisted private hosts             | ⬜ not started | —                              |
+| 8 The client (username login, Users, API tokens)            | ⬜ not started | —                              |
+| 9 End-to-end coverage for the new identity                  | ⬜ not started | —                              |
+| 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                              |
+| 11 Verification battery and close-out                       | ⬜ not started | —                              |
 
 **Goal:** Real multi-user identity (users, roles, per-user sessions, an account-creating setup flow), scoped service tokens for machine callers, and `internalFetch` for allowlisted private hosts — the seams M2's document bridge needs.
 
@@ -56,7 +56,7 @@ Maintained between tasks; commit shas live on branch `m1-identity`. Owner direct
 
 **Files:** none in the repo except the plan file's tracker.
 
-- [ ] **Step 1: Branch from the M0 tip**
+- [x] **Step 1: Branch from the M0 tip**
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
@@ -64,7 +64,7 @@ git checkout main && git merge --ff-only origin/main 2>/dev/null; git checkout m
 git checkout -b m1-identity
 ```
 
-- [ ] **Step 2: Baseline (fast suites)**
+- [x] **Step 2: Baseline (fast suites)** — server 263/263 (24 files), client 85/85 (12 files), tsc ×2, format ✓
 
 ```bash
 (cd server && npm test) && (cd client && npm test) && (cd client && npx tsc --noEmit) && (cd server && npx tsc --noEmit) && npm run format:check
@@ -72,11 +72,11 @@ git checkout -b m1-identity
 
 Expected: all green (server 263, client 85). If not, stop and report — the baseline is broken.
 
-- [ ] **Step 3: Seed the plan tracker**
+- [x] **Step 3: Seed the plan tracker**
 
 Add an `## Execution Tracker` table under the header (same shape as the M0 plan's) with Tasks 1–11 as `⬜ not started`.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit** (landed as 23807fc)
 
 ```bash
 git add docs/superpowers/plans/2026-10-10-ohmzbudget-m1-identity.md
