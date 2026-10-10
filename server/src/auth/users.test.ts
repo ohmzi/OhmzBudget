@@ -1,8 +1,9 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 process.env.OHMZBUDGET_SERVER_MODE = 'true';
 const { migrate } = await import('drizzle-orm/better-sqlite3/migrator');
+const { eq } = await import('drizzle-orm');
 const { db } = await import('../db/index.js');
-const { users, authConfig } = await import('../db/schema.js');
+const { users, authConfig, sessions } = await import('../db/schema.js');
 const {
   changeOwnPassword,
   countUsers,
@@ -109,6 +110,11 @@ describe('user accounts', () => {
     const [admin] = listUsers().filter((u) => u.role === 'admin');
     expect(deleteUser(created.user.id, admin.id)).toEqual({ ok: true });
     expect(isValidSession(token)).toBe(false); // the ON DELETE CASCADE took the session
+    // The row itself is gone: listSessions and sessionUserId join `users`, so a stale row
+    // would still read as invalid while lingering in the table (T3 review, minor 2)
+    expect(db.select().from(sessions).where(eq(sessions.userId, created.user.id)).all()).toEqual(
+      [],
+    );
     expect(listUsers().map((u) => u.username)).not.toContain('deletee');
   });
 });

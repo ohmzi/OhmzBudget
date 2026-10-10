@@ -28,7 +28,8 @@ const app = Router();
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.get('/auth/status', (_req, res) =>
-  res.json({ enabled: false, needsSetup: false, authenticated: true }),
+  // Same shape as routes/auth.ts: the demo has no accounts, so no signed-in user
+  res.json({ enabled: false, needsSetup: false, authenticated: true, user: null }),
 );
 app.get('/server/info', (_req, res) => res.json({ mode: 'demo', version: DEMO_VERSION }));
 

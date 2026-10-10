@@ -94,22 +94,41 @@ export async function createUser(
   { ok: true; user: SessionUser } | { ok: false; error: 'username_taken' | 'invalid_username' }
 > {
   if (!USERNAME_PATTERN.test(username)) return { ok: false, error: 'invalid_username' };
-  if (byUsername(username)) return { ok: false, error: 'username_taken' };
+  const existing = byUsername(username);
+  // A row with an empty hash is a phantom from the setup interim window (review finding
+  // T2-C1), not an account: nobody can sign in as it and it holds no sessions, so the
+  // owner setting up can claim it in place instead of being turned away.
+  if (existing && existing.passwordHash) return { ok: false, error: 'username_taken' };
   const passwordHash = await hashPassword(password);
+  if (existing) {
+    db.update(users)
+      .set({ passwordHash, role, updatedAt: now() })
+      .where(eq(users.id, existing.id))
+      .run();
+    return { ok: true, user: toSessionUser({ ...existing, role }) };
+  }
   const id = nanoid();
   try {
     db.insert(users).values({ id, username, passwordHash, role }).run();
-  } catch {
-    // The unique index is the real check: two creates of the same name can race
+  } catch (err) {
+    // The unique index is the real check: two creates of the same name can race. Only a
+    // constraint failure means the name was taken; anything else (a full disk, a closed
+    // database) must surface instead of reading as "username_taken" (T3 review, minor 3).
+    if (!isConstraintError(err)) throw err;
     return { ok: false, error: 'username_taken' };
   }
   return { ok: true, user: { id, username, role } };
 }
 
+/** Whether an error is SQLite refusing a constraint (better-sqlite3's error codes). */
+const isConstraintError = (err: unknown) =>
+  typeof (err as { code?: unknown })?.code === 'string' &&
+  (err as { code: string }).code.startsWith('SQLITE_CONSTRAINT');
+
 /**
  * Checks a username/password pair. Returns the account or null; a missing user (or one
  * without a password, as in the setup interim window) still spends the hashing time, so
- * neither wrong usernames nor wrong passwords can be told apart (see checkPassword's note).
+ * neither wrong usernames nor wrong passwords can be told apart.
  */
 export async function verifyLogin(username: string, password: string): Promise<SessionUser | null> {
   const row = byUsername(username);

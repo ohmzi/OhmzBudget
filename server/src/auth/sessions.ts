@@ -2,7 +2,6 @@ import { createHash, createHmac, randomBytes, timingSafeEqual } from 'crypto';
 import { and, eq, gt, lte, ne } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { authConfig, sessions, users } from '../db/schema.js';
-import { hashPassword, verifyPassword } from './password.js';
 
 // Server-mode login: accounts live in `users` and every session belongs to one of them,
 // so sessions are listed and signed out per user and die with their row. Sessions are
@@ -14,37 +13,6 @@ export const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const CONFIG_ID = 'server';
 
 const digest = (token: string) => createHash('sha256').update(token).digest('hex');
-
-/** Whether the legacy single-password row exists (kept for the interim single-password routes). */
-export function isPasswordSet(): boolean {
-  return db.select({ id: authConfig.id }).from(authConfig).get() !== undefined;
-}
-
-/** First-run setup. Returns false if a password already exists (setup can't be repeated). */
-export async function setInitialPassword(password: string): Promise<boolean> {
-  const hash = await hashPassword(password);
-  // The insert is the check: a second concurrent setup hits the primary key
-  try {
-    // The row also carries the install secret (the device-cookie HMAC key).
-    // ensureAuthReady fills it on installs that already have a row.
-    db.insert(authConfig).values({ id: CONFIG_ID, passwordHash: hash, secret: randomKey() }).run();
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-const randomKey = () => randomBytes(32).toString('base64url');
-
-export async function checkPassword(password: string): Promise<boolean> {
-  const row = db.select().from(authConfig).where(eq(authConfig.id, CONFIG_ID)).get();
-  // Still spend the hashing time when no password is set, so timing reveals nothing
-  if (!row) {
-    await hashPassword(password);
-    return false;
-  }
-  return verifyPassword(password, row.passwordHash);
-}
 
 // --- Trusted devices ---
 // Browsers that have signed in get a long-lived "device" cookie (OWASP's defense

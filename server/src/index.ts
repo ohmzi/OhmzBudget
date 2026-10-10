@@ -4,7 +4,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { listenHost, serverMode, trustProxy } from './config.js';
 import { secretCipher } from './db/secretCrypto.js';
-import { deleteExpiredSessions, isPasswordSet } from './auth/sessions.js';
+import { deleteExpiredSessions } from './auth/sessions.js';
+import { isSetupNeeded } from './auth/users.js';
 import { setupCode } from './auth/setupCode.js';
 import { authRouter, requireSession } from './routes/auth.js';
 import {
@@ -143,7 +144,9 @@ export async function startServer(port: number | string): Promise<void> {
       );
       if (serverMode) {
         console.log('Server mode: login required.');
-        if (!isPasswordSet()) setupCode();
+        // A fresh install prints its one-time setup code now (`docker logs ohmzbudget`);
+        // a phantom empty-hash row from the setup interim window doesn't count as set up
+        if (isSetupNeeded()) setupCode();
         deleteExpiredSessions();
         setInterval(
           () => runStartupTask('Session cleanup', deleteExpiredSessions),

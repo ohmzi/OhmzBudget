@@ -14,33 +14,37 @@ import {
   deleteOtherSessions,
   deleteSession,
   deleteSessionByPublicId,
-  isPasswordSet,
-  isValidSession,
   listSessions,
-  setInitialPassword,
   touchSession,
   verifyDeviceToken,
 } from '../auth/sessions.js';
 import {
   changeOwnPassword,
   createUser,
-  listUsers,
+  isSetupNeeded,
   sessionUser,
   verifyLogin,
   type SessionUser,
 } from '../auth/users.js';
 import { checkSetupCode, clearSetupCode, setupCode } from '../auth/setupCode.js';
+import type { AuthedLocals } from '../types.js';
 
-// Login for server mode (Docker / self-hosted). Sessions belong to a user (see auth/users.ts).
-//
-// INTERIM: this interim layer still signs in the server's single account with the password
-// from the old auth_config row. Task 4 replaces it with username-based setup and login
-// (`createUser` from the request, `verifyLogin`, `sessionUser` in /status), which is also
-// when `isPasswordSet()` gives way to `isSetupNeeded()`.
+// Login for server mode (Docker / self-hosted): accounts live in `users` (see
+// auth/users.ts), every session belongs to one of them, and the routes below are
+// scoped to the caller. The first visit creates the admin account with the one-time
+// setup code from the server log (see auth/setupCode.ts).
 
 export const authRouter = Router();
 
 const password = z.string().min(MIN_PASSWORD_LENGTH).max(MAX_PASSWORD_LENGTH);
+// Mirrors USERNAME_PATTERN in auth/users.ts
+const username = z
+  .string()
+  .min(1)
+  .max(64)
+  .regex(/^[a-zA-Z0-9._-]+$/);
+const usernameError =
+  'Username must be 1-64 characters of letters, digits, dots, dashes or underscores';
 
 /**
  * Slows password guessing: failed attempts are limited per IP, or per trusted device
@@ -61,15 +65,6 @@ const authRateLimit = rateLimit({
 });
 
 const sessionToken = (req: Request) => readCookie(req.headers.cookie, SESSION_COOKIE);
-
-/** The interim single-password layer's account: the one account this server has. */
-const singleUser = (): SessionUser | null => listUsers()[0] ?? null;
-
-/** Creates the interim `admin` account for a fresh single-password setup. */
-async function createSingleAccount(password: string): Promise<SessionUser | null> {
-  const created = await createUser('admin', password, 'admin');
-  return created.ok ? created.user : null;
-}
 
 function startSession(req: Request, res: Response, user: SessionUser) {
   const { token } = createSession(user.id, req.headers['user-agent']);
@@ -99,49 +94,63 @@ function trustDevice(req: Request, res: Response) {
 }
 
 authRouter.get('/status', (req, res) => {
-  const needsSetup = serverMode && !isPasswordSet();
-  // Make sure a setup code has been printed to the log (e.g. after reset-password)
+  // sessionUser answers both questions at once: a live session whose account still exists
+  const user = serverMode ? sessionUser(sessionToken(req)) : null;
+  const needsSetup = serverMode && isSetupNeeded();
+  // Make sure a setup code has been printed to the log (e.g. right after a restart)
   if (needsSetup) setupCode();
   res.json({
     enabled: serverMode,
     needsSetup,
-    authenticated: !serverMode || isValidSession(sessionToken(req)),
+    authenticated: !serverMode || user !== null,
+    user,
   });
 });
 
 authRouter.post('/setup', authRateLimit, async (req, res) => {
   if (!serverMode) return res.status(404).json({ error: 'Not found' });
   const parsed = z
-    .object({ password, setupCode: z.string().max(100).optional() })
+    .object({ username, password, setupCode: z.string().max(100).optional() })
     .safeParse(req.body);
+  // The body is validated before the already-set-up gate, so a malformed one is always
+  // a 400 naming the field that is wrong
   if (!parsed.success) {
+    const usernameOk = username.safeParse(
+      (req.body as { username?: unknown } | undefined)?.username,
+    ).success;
     return res.status(400).json({
-      error: `Password must be ${MIN_PASSWORD_LENGTH}-${MAX_PASSWORD_LENGTH} characters`,
+      error: usernameOk
+        ? `Password must be ${MIN_PASSWORD_LENGTH}-${MAX_PASSWORD_LENGTH} characters`
+        : usernameError,
     });
   }
-  if (isPasswordSet()) return res.status(409).json({ error: 'A password has already been set' });
+  if (!isSetupNeeded()) return res.status(409).json({ error: 'A password has already been set' });
   if (!checkSetupCode(parsed.data.setupCode)) {
     return res.status(403).json({ error: 'Incorrect setup code' });
   }
-  if (!(await setInitialPassword(parsed.data.password))) {
-    return res.status(409).json({ error: 'A password has already been set' });
+  // createUser adopts an empty-hash phantom row with this name (the setup interim window)
+  // instead of turning it down; a name of a real account or a lost race is still a 409
+  const created = await createUser(parsed.data.username, parsed.data.password, 'admin');
+  if (!created.ok) {
+    return created.error === 'username_taken'
+      ? res.status(409).json({ error: 'A password has already been set' })
+      : res.status(400).json({ error: usernameError });
   }
   clearSetupCode();
-  // An upgraded install already has the backfilled admin; a fresh one gets `admin` here.
-  const user = singleUser() ?? (await createSingleAccount(parsed.data.password));
-  if (!user) return res.status(409).json({ error: 'A password has already been set' });
-  startSession(req, res, user);
+  startSession(req, res, created.user);
   res.status(204).send();
 });
 
 authRouter.post('/login', authRateLimit, async (req, res) => {
   if (!serverMode) return res.status(404).json({ error: 'Not found' });
-  const parsed = z.object({ password: z.string().max(MAX_PASSWORD_LENGTH) }).safeParse(req.body);
+  const parsed = z
+    .object({ username: z.string().max(64), password: z.string().max(MAX_PASSWORD_LENGTH) })
+    .safeParse(req.body);
+  // One message and one timing for every failure (unknown account, phantom row, wrong
+  // password): nothing here may reveal whether a username exists
   if (!parsed.success) return res.status(401).json({ error: 'Incorrect password' });
-  const user = singleUser();
-  // A missing account still spends a hash (verifyLogin), so timing reveals nothing
-  const matched = await verifyLogin(user?.username ?? '', parsed.data.password);
-  if (!user || !matched) return res.status(401).json({ error: 'Incorrect password' });
+  const user = await verifyLogin(parsed.data.username, parsed.data.password);
+  if (!user) return res.status(401).json({ error: 'Incorrect password' });
   startSession(req, res, user);
   res.status(204).send();
 });
@@ -182,7 +191,10 @@ authRouter.post('/change-password', authRateLimit, async (req, res) => {
 // to the caller's own sessions.
 
 /** The caller's session (token and user), or null after answering 404 / 401. */
-function signedIn(req: Request, res: Response): { token: string; user: SessionUser } | null {
+function signedIn(
+  req: Request,
+  res: Response<unknown, AuthedLocals>,
+): { token: string; user: SessionUser } | null {
   if (!serverMode) {
     res.status(404).json({ error: 'Not found' });
     return null;
@@ -223,8 +235,11 @@ authRouter.delete('/sessions/:id', (req, res) => {
 export const requireSession: RequestHandler = (req, res, next) => {
   if (!serverMode || req.path === '/health' || req.path.startsWith('/auth/')) return next();
   const token = sessionToken(req);
-  if (isValidSession(token)) {
+  const user = sessionUser(token);
+  if (user) {
     touchSession(token);
+    // Routes behind this read the caller from res.locals (see AuthedLocals)
+    (res.locals as AuthedLocals).user = user;
     return next();
   }
   res.status(401).json({ error: 'Login required' });
