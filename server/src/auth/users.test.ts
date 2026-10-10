@@ -161,3 +161,22 @@ describe('isSetupNeeded', () => {
     expect(isSetupNeeded()).toBe(false);
   });
 });
+
+describe('ghost rows (empty password hash)', () => {
+  it('are not accounts: unlisted, and never count as the last admin', async () => {
+    // A ghost from the setup interim window (review finding T2-C1) can never sign in, so
+    // listUsers() leaves it out (T4 review fix)...
+    db.delete(users).run();
+    db.insert(users)
+      .values({ id: 'ghost-admin', username: 'admin', passwordHash: '', role: 'admin' })
+      .run();
+    const created = await createUser('owner', 'long enough password', 'admin');
+    if (!created.ok) throw new Error(`failed to create owner: ${created.error}`);
+    expect(listUsers()).toEqual([{ id: created.user.id, username: 'owner', role: 'admin' }]);
+    // ...and counting it as an admin would let the last admin who can sign in demote or
+    // delete themselves, locking everyone out of user management
+    expect(setUserRole(created.user.id, 'member')).toEqual({ ok: false, error: 'last_admin' });
+    expect(deleteUser(created.user.id, 'someone-else')).toEqual({ ok: false, error: 'last_admin' });
+    expect(listUsers()).toHaveLength(1);
+  });
+});

@@ -45,4 +45,17 @@ describe('service tokens', () => {
     db.$client.prepare('update service_tokens set scopes = ? where id = ?').run('["admin",1]', id);
     expect(listTokens().find((t) => t.id === id)?.scopes).toEqual([]);
   });
+
+  it('normalizes createdAt to ISO UTC (SQLite writes datetime("now") without T and Z)', () => {
+    const { id } = mintToken('clock', ['service']);
+    // The column default is SQLite's datetime('now'): UTC, but not ISO, and the client
+    // would parse a "2026-10-10 08:18:45" string as local time (T4 review fix)
+    const stored = db.$client
+      .prepare('select created_at from service_tokens where id = ?')
+      .get(id) as { created_at: string };
+    expect(stored.created_at).toMatch(/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/);
+    const createdAt = listTokens().find((t) => t.id === id)!.createdAt;
+    expect(createdAt).toBe(`${stored.created_at.replace(' ', 'T')}Z`);
+    expect(createdAt).toMatch(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/);
+  });
 });

@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { eq, ne, sql } from 'drizzle-orm';
+import { and, eq, ne, sql } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { db } from '../db/index.js';
 import { authConfig, users } from '../db/schema.js';
@@ -39,8 +39,15 @@ const byUsername = (username: string) =>
 
 const byId = (id: string) => db.select().from(users).where(eq(users.id, id)).get();
 
+// Ghost rows with an empty hash (the setup interim window, review finding T2-C1) can
+// never sign in, so they are not admins: counting one would let the last admin who can
+// sign in demote or delete themselves and lock everyone out of user management.
 const countAdmins = () =>
-  db.select({ id: users.id }).from(users).where(eq(users.role, 'admin')).all().length;
+  db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(users.role, 'admin'), ne(users.passwordHash, '')))
+    .all().length;
 
 export function countUsers(): number {
   return db.select({ id: users.id }).from(users).all().length;
@@ -76,11 +83,16 @@ export function isSetupNeeded(): boolean {
   );
 }
 
-/** Every account, oldest first. Never includes password hashes. */
+/**
+ * Every account, oldest first. Never includes password hashes, and never empty-hash
+ * ghost rows (the setup interim window, review finding T2-C1): they can't sign in, so
+ * they are not accounts to list, manage or count.
+ */
 export function listUsers(): SessionUser[] {
   return db
     .select({ id: users.id, username: users.username, role: users.role })
     .from(users)
+    .where(ne(users.passwordHash, ''))
     .orderBy(users.createdAt, users.username)
     .all()
     .map(toSessionUser);

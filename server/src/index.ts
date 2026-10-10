@@ -20,7 +20,10 @@ import {
   securityHeaders,
   hstsWhenSecure,
 } from './middleware/security.js';
+import { requireAdmin } from './middleware/adminGuard.js';
 import { accountsRouter } from './routes/accounts.js';
+import { usersRouter } from './routes/users.js';
+import { serviceTokensRouter } from './routes/serviceTokens.js';
 import { categoriesRouter } from './routes/categories.js';
 import { transactionsRouter } from './routes/transactions.js';
 import { budgetRouter } from './routes/budget.js';
@@ -82,6 +85,11 @@ app.use('/api', requireSession);
 // Kept minimal: anyone who can reach the server may call it (health checks, reconnecting)
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/server', serverRouter);
+// Server mode's administration, behind requireSession above and the admin guard: user
+// accounts (multi-user identity) and machine callers' tokens. Never mounted in
+// browser/app.ts — the demo has no accounts.
+app.use('/api/users', requireAdmin, usersRouter);
+app.use('/api/service-tokens', requireAdmin, serviceTokensRouter);
 app.use('/api/accounts', accountsRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/transactions', transactionsRouter);

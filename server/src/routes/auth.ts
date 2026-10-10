@@ -107,6 +107,11 @@ authRouter.get('/status', (req, res) => {
   });
 });
 
+// Set once the gate below has been passed and spans the create: two concurrent valid-code
+// setups must not both see isSetupNeeded() true and each create an admin (T4 review fix).
+// The loser is turned away with the same 409 a later setup gets.
+let setupInFlight = false;
+
 authRouter.post('/setup', authRateLimit, async (req, res) => {
   if (!serverMode) return res.status(404).json({ error: 'Not found' });
   const parsed = z
@@ -124,21 +129,30 @@ authRouter.post('/setup', authRateLimit, async (req, res) => {
         : usernameError,
     });
   }
-  if (!isSetupNeeded()) return res.status(409).json({ error: 'A password has already been set' });
+  if (setupInFlight || !isSetupNeeded()) {
+    return res.status(409).json({ error: 'A password has already been set' });
+  }
   if (!checkSetupCode(parsed.data.setupCode)) {
     return res.status(403).json({ error: 'Incorrect setup code' });
   }
-  // createUser adopts an empty-hash phantom row with this name (the setup interim window)
-  // instead of turning it down; a name of a real account or a lost race is still a 409
-  const created = await createUser(parsed.data.username, parsed.data.password, 'admin');
-  if (!created.ok) {
-    return created.error === 'username_taken'
-      ? res.status(409).json({ error: 'A password has already been set' })
-      : res.status(400).json({ error: usernameError });
+  // From here to createUser there is no await, so a second request can only see the flag:
+  // exactly one setup can be in flight, and one admin comes out of it
+  setupInFlight = true;
+  try {
+    // createUser adopts an empty-hash phantom row with this name (the setup interim window)
+    // instead of turning it down; a name of a real account or a lost race is still a 409
+    const created = await createUser(parsed.data.username, parsed.data.password, 'admin');
+    if (!created.ok) {
+      return created.error === 'username_taken'
+        ? res.status(409).json({ error: 'A password has already been set' })
+        : res.status(400).json({ error: usernameError });
+    }
+    clearSetupCode();
+    startSession(req, res, created.user);
+    res.status(204).send();
+  } finally {
+    setupInFlight = false;
   }
-  clearSetupCode();
-  startSession(req, res, created.user);
-  res.status(204).send();
 });
 
 authRouter.post('/login', authRateLimit, async (req, res) => {

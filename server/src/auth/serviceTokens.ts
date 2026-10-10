@@ -58,7 +58,15 @@ export function listTokens(): TokenInfo[] {
     .from(serviceTokens)
     .orderBy(desc(serviceTokens.createdAt), serviceTokens.name)
     .all()
-    .map((row) => ({ ...row, scopes: parseScopes(row.scopes) }));
+    .map((row) => ({
+      ...row,
+      // SQLite's datetime('now') is UTC without the ISO "T" and "Z" (same as listSessions
+      // in auth/sessions.ts): without this the client parses it as local time
+      createdAt: /^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/.test(row.createdAt)
+        ? `${row.createdAt.replace(' ', 'T')}Z`
+        : row.createdAt,
+      scopes: parseScopes(row.scopes),
+    }));
 }
 
 /** The token behind an exactly-`Authorization: Bearer ozb_…` header, or null when unknown or revoked. */
