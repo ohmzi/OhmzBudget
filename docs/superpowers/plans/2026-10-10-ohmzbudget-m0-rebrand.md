@@ -541,10 +541,10 @@ cd .. && git add deploy && git commit -m "build: add deploy compose skeleton wit
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
-grep -rIn 'FlyBudget\|flybudget\|FLYBUDGET' --exclude-dir={.git,node_modules,dist,build,.docusaurus,static,coverage,superpowers} . | grep -vE 'cla\.yml|CLA\.md|LICENSE|NOTICE|welcome-to-flybudget|flybudget-app-v1|/tmp/' || echo CLEAN
+grep -rIn 'FlyBudget\|flybudget\|FLYBUDGET' --exclude-dir={.git,node_modules,dist,build,.docusaurus,static,coverage,superpowers} . | grep -vE 'flybudget\.org|cla\.yml|CLA\.md|LICENSE|NOTICE|welcome-to-flybudget|flybudget-app-v1|/tmp/' || echo CLEAN
 ```
 
-Expected leftovers: only `CLA.md` + `.github/workflows/cla.yml` (legal review pending — untouched by design), `website/blog/…welcome-to-flybudget.mdx` (slug kept), and `client/public/sw.js`'s `LEGACY_CACHE = 'flybudget-app-v1'` literal (the mandated stale-client purge needs the old cache name). Excluded, as they legitimately document the rename: `docs/superpowers/`, and generated dirs (`website/build`, `website/.docusaurus`, `website/static/demo`, `client/dist`, `server/dist`). Anything else — fix in a `fix:` commit and re-run.
+Expected leftovers: only `CLA.md` + `.github/workflows/cla.yml` (legal review pending — untouched by design), `website/blog/…welcome-to-flybudget.mdx` (slug kept), `client/public/sw.js`'s `LEGACY_CACHE = 'flybudget-app-v1'` literal (the mandated stale-client purge needs the old cache name), and any line carrying the protected `flybudget.org` domain link (README/SECURITY/website keep upstream-site links by design). Excluded, as they legitimately document the rename: `docs/superpowers/`, and generated dirs (`website/build`, `website/.docusaurus`, `website/static/demo`, `client/dist`, `server/dist`). Anything else — fix in a `fix:` commit and re-run.
 
 - [ ] **Step 2: Full local battery**
 
