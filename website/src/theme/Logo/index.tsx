@@ -1,6 +1,6 @@
 /**
  * The navbar logo, copied from Docusaurus's Logo component to draw the name as the app's
- * wordmark: "Fly" in the brand blue, "Budget" in the text color (see BrandName in the client).
+ * wordmark: "Ohmz" in the brand blue, "Budget" in the text color (see BrandName in the client).
  */
 import type { ReactNode } from 'react';
 import Link from '@docusaurus/Link';
@@ -27,7 +27,7 @@ export default function Logo({ imageClassName, titleClassName, ...rest }: Props)
         </div>
       )}
       <span className={`${titleClassName ?? ''} brand-wordmark`}>
-        <span className="brand-wordmark__fly">Fly</span>Budget
+        <span className="brand-wordmark__fly">Ohmz</span>Budget
       </span>
     </Link>
   );

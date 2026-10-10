@@ -5,7 +5,7 @@ sidebar_label: Connecting a bank
 
 # Connecting a bank
 
-FlyBudget can import transactions automatically through two services. Both are optional: CSV
+OhmzBudget can import transactions automatically through two services. Both are optional: CSV
 import works with almost every bank and costs nothing.
 
 |              | Plaid                                                                                  | SimpleFIN Bridge                                                |
@@ -21,7 +21,7 @@ Connect either one from **Settings → Connected Banks**, or from the welcome sc
 Plaid gives you two sets of API keys:
 
 - **Sandbox** keys work as soon as you sign up, but only with Plaid's test banks and made-up
-  transactions. Use them to try FlyBudget's bank sync.
+  transactions. Use them to try OhmzBudget's bank sync.
 - **Production** keys connect your real banks. They aren't available at signup: you request
   Production access in the Plaid dashboard, answering a few questions about how you'll use it,
   and Plaid reviews the request. That can take anywhere from minutes to a few days.
@@ -36,27 +36,27 @@ Plaid's plans and limits for personal use change from time to time; check
    **Sandbox** to try it out first).
 4. Choose **Connect Bank**. Plaid's sign-in opens in your web browser, which is how banks
    that use their own login page (like Chase) are supported.
-5. Choose which FlyBudget account each bank account belongs to.
+5. Choose which OhmzBudget account each bank account belongs to.
 
-Disconnecting a bank revokes its access at Plaid before FlyBudget forgets it.
+Disconnecting a bank revokes its access at Plaid before OhmzBudget forgets it.
 
 ## SimpleFIN
 
 1. Sign up at [SimpleFIN Bridge](https://bridge.simplefin.org) and connect your banks there.
-2. Create a **setup token** and paste it into FlyBudget.
-3. Choose which FlyBudget account each bank account belongs to.
+2. Create a **setup token** and paste it into OhmzBudget.
+3. Choose which OhmzBudget account each bank account belongs to.
 
-FlyBudget exchanges the one-time token for a private access link, stored encrypted. To stop
-syncing completely, disconnect in FlyBudget _and_ remove the app in SimpleFIN Bridge.
+OhmzBudget exchanges the one-time token for a private access link, stored encrypted. To stop
+syncing completely, disconnect in OhmzBudget _and_ remove the app in SimpleFIN Bridge.
 
 ## How syncing works
 
-- New transactions are imported when FlyBudget starts and whenever you choose **Sync Now**.
+- New transactions are imported when OhmzBudget starts and whenever you choose **Sync Now**.
 - Your [rules](./rules) run on every imported transaction.
 - Reconciled transactions are never changed by a sync.
 - Account balances are adjusted to match what your bank reports.
 
 ## Your credentials
 
-Bank tokens never leave the FlyBudget server, and they are encrypted at rest. They are never
+Bank tokens never leave the OhmzBudget server, and they are encrypted at rest. They are never
 included in [backups](./backups). See the [security overview](/community/security) for details.

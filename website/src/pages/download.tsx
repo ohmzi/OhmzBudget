@@ -5,7 +5,7 @@ import Heading from '@theme/Heading';
 
 import styles from './download.module.css';
 
-const REPO = 'https://github.com/dtymoszenko/FlyBudget';
+const REPO = 'https://github.com/ohmzi/OhmzBudget';
 const RELEASES_URL = `${REPO}/releases/latest`;
 /** The latest release's file with this name (release.yml gives files names without versions) */
 const file = (name: string) => `${REPO}/releases/latest/download/${name}`;
@@ -26,7 +26,7 @@ const DOWNLOADS: Record<Platform, { name: string; requires: string; files: Downl
       {
         label: 'Installer (.exe)',
         note: 'For most PCs',
-        href: file('FlyBudget-Windows-Setup.exe'),
+        href: file('OhmzBudget-Windows-Setup.exe'),
       },
     ],
   },
@@ -37,12 +37,12 @@ const DOWNLOADS: Record<Platform, { name: string; requires: string; files: Downl
       {
         label: 'Apple silicon (.dmg)',
         note: 'Macs with an M1 chip or newer (2020 and later)',
-        href: file('FlyBudget-macOS-arm64.dmg'),
+        href: file('OhmzBudget-macOS-arm64.dmg'),
       },
       {
         label: 'Intel (.dmg)',
         note: 'Older Macs with an Intel processor',
-        href: file('FlyBudget-macOS-x64.dmg'),
+        href: file('OhmzBudget-macOS-x64.dmg'),
       },
     ],
   },
@@ -53,12 +53,12 @@ const DOWNLOADS: Record<Platform, { name: string; requires: string; files: Downl
       {
         label: 'Ubuntu and Debian (.deb)',
         note: 'Also Linux Mint, Pop!_OS and other Debian-based systems',
-        href: file('FlyBudget-Linux-amd64.deb'),
+        href: file('OhmzBudget-Linux-amd64.deb'),
       },
       {
         label: 'Any distribution (.AppImage)',
         note: 'Fedora, Arch, openSUSE and others',
-        href: file('FlyBudget-Linux-x86_64.AppImage'),
+        href: file('OhmzBudget-Linux-x86_64.AppImage'),
       },
       {
         label: 'ARM (.deb, .AppImage)',
@@ -74,24 +74,24 @@ const FIRST_RUN: Record<Platform, ReactNode> = {
   windows: (
     <>
       Run the installer. If Windows says <em>Windows protected your PC</em>, choose{' '}
-      <strong>More info</strong>, then <strong>Run anyway</strong>: FlyBudget isn't signed with a
+      <strong>More info</strong>, then <strong>Run anyway</strong>: OhmzBudget isn't signed with a
       paid Microsoft certificate yet.
     </>
   ),
   mac: (
     <>
-      Open the .dmg and drag FlyBudget to <strong>Applications</strong>. The first time you open it,
-      macOS says it can't check it for malicious software, because FlyBudget isn't notarized by
+      Open the .dmg and drag OhmzBudget to <strong>Applications</strong>. The first time you open
+      it, macOS says it can't check it for malicious software, because OhmzBudget isn't notarized by
       Apple yet. Open <strong>System Settings → Privacy &amp; Security</strong>, scroll down, and
-      choose <strong>Open Anyway</strong> next to FlyBudget.
+      choose <strong>Open Anyway</strong> next to OhmzBudget.
     </>
   ),
   linux: (
     <>
       <strong>.deb</strong>: open it with your software installer, or run{' '}
-      <code>sudo apt install ./FlyBudget-Linux-amd64.deb</code>. <strong>AppImage</strong>: make it
-      executable (<code>chmod +x FlyBudget-Linux-x86_64.AppImage</code>) and run it. On Ubuntu 24.04
-      and later, use the .deb: AppImages can't start Electron apps there without extra setup.
+      <code>sudo apt install ./OhmzBudget-Linux-amd64.deb</code>. <strong>AppImage</strong>: make it
+      executable (<code>chmod +x OhmzBudget-Linux-x86_64.AppImage</code>) and run it. On Ubuntu
+      24.04 and later, use the .deb: AppImages can't start Electron apps there without extra setup.
     </>
   ),
 };
@@ -140,12 +140,12 @@ export default function DownloadPage(): ReactNode {
   return (
     <Layout
       title="Download"
-      description="Download FlyBudget for Windows, macOS or Linux, or run it on your own server"
+      description="Download OhmzBudget for Windows, macOS or Linux, or run it on your own server"
     >
       <main className={styles.page}>
         <header className={styles.header}>
           <Heading as="h1" className={styles.title}>
-            Download FlyBudget
+            Download OhmzBudget
           </Heading>
           <p className={styles.lead}>
             Free and open source. Your budget stays in a file on your computer: no account, no
@@ -189,12 +189,12 @@ export default function DownloadPage(): ReactNode {
             Your own server
           </Heading>
           <p>
-            Run FlyBudget in Docker on a home server, a NAS or a small cloud machine, and open it
+            Run OhmzBudget in Docker on a home server, a NAS or a small cloud machine, and open it
             from any browser, including your phone. A password you choose protects it.
           </p>
           <pre className={styles.command}>
             <code>
-              openssl rand -base64 32 {'>'} flybudget_data_key.txt{'\n'}docker compose up -d
+              openssl rand -base64 32 {'>'} ohmzbudget_data_key.txt{'\n'}docker compose up -d
             </code>
           </pre>
           <p>
@@ -222,7 +222,7 @@ export default function DownloadPage(): ReactNode {
             </li>
             <li>
               <Link to="/docs/installing#from-source">Build it from source</Link> to try the latest
-              changes or help develop FlyBudget.
+              changes or help develop OhmzBudget.
             </li>
           </ul>
         </section>
