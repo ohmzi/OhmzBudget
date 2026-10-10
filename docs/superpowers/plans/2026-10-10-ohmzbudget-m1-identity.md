@@ -13,7 +13,7 @@ Maintained between tasks; commit shas live on branch `m1-identity`. Owner direct
 | 3 Auth services (users, tokens, per-user sessions)          | ✅ done        | 807a697; 286/286 (+19); scoping + token-hash verified; review clean (0 blocking)             |
 | 4 Auth routes grow a username (and per-user semantics)      | ✅ done        | 0ec327e; 289/289 (+3); contract pinned by exact-equality tests; review clean (0 blocking)    |
 | 5 Admin routes (users + service tokens) and the admin guard | ✅ done        | 837c8d1; 321/321 (+32); guard + token-once + carry-overs verified; review clean (0 blocking) |
-| 6 Service-token middleware and the provable sidecar path    | ⬜ not started | —                                                                                            |
+| 6 Service-token middleware and the provable sidecar path    | ✅ done        | 81331ed; 335/335; **M1 exit check passed by hand**; review clean (0 blocking)                |
 | 7 `internalFetch` for allowlisted private hosts             | ⬜ not started | —                                                                                            |
 | 8 The client (username login, Users, API tokens)            | ⬜ not started | —                                                                                            |
 | 9 End-to-end coverage for the new identity                  | ⬜ not started | —                                                                                            |
@@ -411,10 +411,10 @@ app.use('/api/ingest', serviceAuth('ingest'), ingestRouter);
 - `serviceAuth(requiredScope: Scope): RequestHandler` — skips entirely when `!serverMode`; reads `Authorization: Bearer`; `verifyBearer` → null ⇒ `401 {"error":"Unauthorized"}`; scope missing ⇒ `403 {"error":"Forbidden"}`; on success sets `res.locals.service = { name, scopes }` and touches `last_used_at` (in-memory throttle, mirror `touchSession`).
 - `GET /api/service/whoami` → `{ name, scopes }`. `POST /api/ingest/paperless` → `200 {"ok":true}` (stub; a comment marks it as M2's replacement point).
 
-- [ ] **Step 1: Failing tests** — no header → 401; garbage → 401; `ingest` token on `/api/service/whoami` → 403; `service` token → 200 with `{name}`; revoked mid-test → 401; a **session cookie alone** on `/api/service/whoami` → 401 (service routes do not accept cookies); `/api/accounts` with a Bearer header and no cookie → 401 (the bypass is path-scoped, not global).
-- [ ] **Step 2: Implement; `npx tsc --noEmit && npm test` → green.**
-- [ ] **Step 3: Commit** — `git commit -m "feat: scoped service-token auth for sidecar routes"`
-- [ ] **Step 4: Prove the path by hand (the M1 exit check)** — noting the exact commands in the report:
+- [x] **Step 1: Failing tests** — no header → 401; garbage → 401; `ingest` token on `/api/service/whoami` → 403; `service` token → 200 with `{name}`; revoked mid-test → 401; a **session cookie alone** on `/api/service/whoami` → 401 (service routes do not accept cookies); `/api/accounts` with a Bearer header and no cookie → 401 (the bypass is path-scoped, not global).
+- [x] **Step 2: Implement; `npx tsc --noEmit && npm test` → green.** — 335/335 (30 files)
+- [x] **Step 3: Commit** — `git commit -m "feat: scoped service-token auth for sidecar routes"` (landed as 81331ed)
+- [x] **Step 4: Prove the path by hand (the M1 exit check)** — PASSED on a scratch server-mode instance (whoami+Bearer → 200 `{"name":"sidecar","scopes":["service"]}`; no header → 401; wrong scope → 403; cookie-only → 401; ingest stub → `{"ok":true}`; `/api/accounts`+Bearer → 401). Noting the exact commands in the report:
 
 ```bash
 # against the dev server or the container: mint via the admin API first, then
