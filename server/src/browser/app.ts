@@ -54,8 +54,8 @@ app.use('/plaid', (_req, res) => res.status(403).json({ error: NOT_IN_DEMO }));
 app.use('/simplefin', (_req, res) => res.status(403).json({ error: NOT_IN_DEMO }));
 app.use('/auth', (_req, res) => res.status(403).json({ error: NOT_IN_DEMO }));
 
-declare const __FLYBUDGET_VERSION__: string;
-const DEMO_VERSION = typeof __FLYBUDGET_VERSION__ === 'string' ? __FLYBUDGET_VERSION__ : 'demo';
+declare const __OHMZBUDGET_VERSION__: string;
+const DEMO_VERSION = typeof __OHMZBUDGET_VERSION__ === 'string' ? __OHMZBUDGET_VERSION__ : 'demo';
 
 export interface DemoRequest {
   method: string;

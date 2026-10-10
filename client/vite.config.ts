@@ -23,7 +23,7 @@ function demoServerModules(): Plugin {
     [file('db/secretCrypto.ts')]: file('browser/secretCrypto.ts'),
   };
   return {
-    name: 'flybudget-demo-server-modules',
+    name: 'ohmzbudget-demo-server-modules',
     enforce: 'pre',
     async resolveId(source, importer, options) {
       if (!importer || !normalizePath(importer).startsWith(file(''))) return null;
@@ -63,7 +63,7 @@ const DEMO_CSP = [
 function demoPage(): Plugin {
   let outDir = '';
   return {
-    name: 'flybudget-demo-page',
+    name: 'ohmzbudget-demo-page',
     apply: 'build',
     configResolved(config) {
       outDir = path.resolve(config.root, config.build.outDir);
@@ -95,7 +95,7 @@ function withoutDemoWorker(): Plugin {
   const real = normalizePath(path.resolve(import.meta.dirname, 'src/demo/demoWorker.ts'));
   const stub = normalizePath(path.resolve(import.meta.dirname, 'src/demo/demoWorker.stub.ts'));
   return {
-    name: 'flybudget-without-demo-worker',
+    name: 'ohmzbudget-without-demo-worker',
     enforce: 'pre',
     async resolveId(source, importer, options) {
       if (!source.endsWith('demoWorker')) return null;
