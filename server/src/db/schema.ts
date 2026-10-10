@@ -375,6 +375,8 @@ export const plaidAccountMappings = sqliteTable(
 export const authConfig = sqliteTable('auth_config', {
   id: text('id').primaryKey(),
   passwordHash: text('password_hash').notNull(),
+  /** Random key for the device-cookie HMAC; created once on first startup, never rotated */
+  secret: text('secret'),
   createdAt: text('created_at')
     .notNull()
     .default(sql`(datetime('now'))`),
@@ -386,6 +388,7 @@ export const authConfig = sqliteTable('auth_config', {
 /** Login sessions. `id` is the SHA-256 of the session token, never the token itself. */
 export const sessions = sqliteTable('sessions', {
   id: text('id').primaryKey(),
+  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
   createdAt: text('created_at')
     .notNull()
     .default(sql`(datetime('now'))`),
@@ -394,4 +397,36 @@ export const sessions = sqliteTable('sessions', {
   userAgent: text('user_agent'),
   /** Roughly when the session was last used (updated at most every few minutes) */
   lastUsedAt: text('last_used_at'),
+});
+
+/** Server-mode accounts. The budget data is shared; roles gate administration. */
+export const users = sqliteTable(
+  'users',
+  {
+    id: text('id').primaryKey(),
+    username: text('username').notNull(),
+    passwordHash: text('password_hash').notNull(),
+    role: text('role').notNull().default('member'), // 'admin' | 'member'
+    createdAt: text('created_at')
+      .notNull()
+      .default(sql`(datetime('now'))`),
+    updatedAt: text('updated_at')
+      .notNull()
+      .default(sql`(datetime('now'))`),
+    lastLoginAt: text('last_login_at'),
+  },
+  (table) => [uniqueIndex('users_username_unique').on(sql`${table.username} COLLATE NOCASE`)],
+);
+
+/** Machine callers (paperless webhook, sidecar). Only the SHA-256 of the token is stored. */
+export const serviceTokens = sqliteTable('service_tokens', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  tokenHash: text('token_hash').notNull(),
+  scopes: text('scopes').notNull().default('[]'), // JSON array, e.g. ["ingest"]
+  createdAt: text('created_at')
+    .notNull()
+    .default(sql`(datetime('now'))`),
+  lastUsedAt: text('last_used_at'),
+  revokedAt: text('revoked_at'),
 });

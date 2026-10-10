@@ -113,6 +113,12 @@ export async function startServer(port: number | string): Promise<void> {
       process.env.MIGRATIONS_PATH ?? fileURLToPath(new URL('./db/migrations', import.meta.url));
     migrate(db, { migrationsFolder });
   }
+  // Idempotent auth fix-ups (legacy admin backfill, device-cookie secret). Imported here, never
+  // from browser/app.ts: users.ts pulls in Node's crypto, which the demo worker must not load.
+  {
+    const { ensureAuthReady } = await import('./auth/users.js');
+    ensureAuthReady();
+  }
   // Electron serves the built client from this server so the page is same-origin
   // with the API (a file:// page would send Origin: null, which can't be allowlisted safely).
   if (process.env.CLIENT_DIST) {
