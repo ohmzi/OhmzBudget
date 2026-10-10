@@ -19,7 +19,7 @@ Maintained between tasks; commit shas live on branch `m0-rebrand`. Owner directi
 | 9 Docs, attribution & source links       | ✅ done        | ad24424; NOTICE created; URLs repointed + e2e in lockstep; LICENSE/CLA untouched; review clean (0 blocking)                                 |
 | 10 Website text sweep                    | ✅ done        | 2f62184; 34 files; build SUCCESS; blog slug + assets preserved; review clean (0 blocking)                                                   |
 | 11 Deploy skeleton & host run            | ✅ done        | 86ab466; stack LIVE on 127.0.0.1:7300; health `{"status":"ok"}`; subnet pinned; review clean (0 blocking)                                   |
-| 12 Full verification sweep               | ⬜ not started |                                                                                                                                             |
+| 12 Full verification sweep               | ✅ done        | 36ee00d + 64ba971 fixes; scan CLEAN; 263/263 · 85/85 · **e2e 115/115 zero flakes** · builds ✓ · host re-verified; review clean (0 blocking) |
 | 13 GitHub rename & push (pre-authorized) | ⬜ not started |                                                                                                                                             |
 
 **Goal:** Rebrand the `ohmzi/FlyBudget` fork into `ohmzi/OhmzBudget` — full identity sweep, tests updated, own image, deploy skeleton with pinned subnets — ending with the rebranded app running on the homelab host.
@@ -537,7 +537,7 @@ cd .. && git add deploy && git commit -m "build: add deploy compose skeleton wit
 
 **Files:** none (verification + any leftover strings this catches, each as its own fix-commit)
 
-- [ ] **Step 1: Repo-wide residual scan (expected keeps only)**
+- [x] **Step 1: Repo-wide residual scan (expected keeps only)** — CLEAN after the `.gitignore` fix (36ee00d)
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
@@ -546,19 +546,19 @@ grep -rIn 'FlyBudget\|flybudget\|FLYBUDGET' --exclude-dir={.git,node_modules,dis
 
 Expected leftovers: only `CLA.md` + `.github/workflows/cla.yml` (legal review pending — untouched by design), `website/blog/…welcome-to-flybudget.mdx` (slug kept), `client/public/sw.js`'s `LEGACY_CACHE = 'flybudget-app-v1'` literal (the mandated stale-client purge needs the old cache name), and any line carrying the protected `flybudget.org` domain link (README/SECURITY/website keep upstream-site links by design). Excluded, as they legitimately document the rename: `docs/superpowers/`, and generated dirs (`website/build`, `website/.docusaurus`, `website/static/demo`, `client/dist`, `server/dist`). Anything else — fix in a `fix:` commit and re-run.
 
-- [ ] **Step 2: Full local battery**
+- [x] **Step 2: Full local battery** — server 263/263 · client 85/85 · tsc ×2 ✓ · format ✓ · e2e 115/115 (zero flakes, no isolated re-runs needed)
 
 ```bash
 (cd server && npm test) && (cd client && npm test) && (cd client && npx tsc --noEmit) && (cd server && npx tsc --noEmit) && npm run format:check && (cd e2e && npm test)
 ```
 
-- [ ] **Step 3: Demo + website builds**
+- [x] **Step 3: Demo + website builds** — both ✓ (demo 1.86s; website SUCCESS)
 
 ```bash
 (cd client && npx vite build --mode demo 2>&1 | tail -3) && (cd website && npm run build 2>&1 | tail -3)
 ```
 
-- [ ] **Step 4: Container + health on the host (re-run Task 11 Step 3) and `/api/server/info` version check**
+- [x] **Step 4: Container + health on the host (re-run Task 11 Step 3) and `/api/server/info` version check** — health `{"status":"ok"}` · `/` 200 · `/api/server/info` 401 pre-setup (auth gate working; authenticated version display is the owner's post-setup action; bundle verified to inline 0.1.1)
 
 ```bash
 curl -s http://127.0.0.1:7300/api/server/info | head -c 300   # after login it reports version (Task 11's instance)
