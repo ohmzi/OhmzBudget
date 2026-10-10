@@ -6,19 +6,19 @@
 
 Maintained between tasks; commit shas live on branch `m1-identity`. Owner directive 2026-10-10: autonomous execution, haiku subagents, plan-as-tracker (this table + ticked boxes are the cross-session source of truth).
 
-| Task                                                        | Status         | Evidence / commits                                                                            |
-| ----------------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------- |
-| 1 Branch, baseline & tracker                                | ✅ done        | 23807fc; baseline 263/85 green                                                                |
-| 2 Schema, migration 0021, startup backfill                  | ✅ done        | a9e5603; fix round C1+I2 verified; 267 tests; snapshot proven by re-generate                  |
-| 3 Auth services (users, tokens, per-user sessions)          | ✅ done        | 807a697; 286/286 (+19); scoping + token-hash verified; review clean (0 blocking)              |
-| 4 Auth routes grow a username (and per-user semantics)      | ✅ done        | 0ec327e; 289/289 (+3); contract pinned by exact-equality tests; review clean (0 blocking)     |
-| 5 Admin routes (users + service tokens) and the admin guard | ✅ done        | 837c8d1; 321/321 (+32); guard + token-once + carry-overs verified; review clean (0 blocking)  |
-| 6 Service-token middleware and the provable sidecar path    | ✅ done        | 81331ed; 335/335; **M1 exit check passed by hand**; review clean (0 blocking)                 |
-| 7 `internalFetch` for allowlisted private hosts             | ✅ done        | e9aa653; 344/344 (+9); SSRF bound verified (manual redirects, exact host match); review clean |
-| 8 The client (username login, Users, API tokens)            | ✅ done        | 63a9db7; labels pinned + browser-smoked; fail-closed gating; review clean (0 blocking)        |
-| 9 End-to-end coverage for the new identity                  | ⬜ not started | —                                                                                             |
-| 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                                                                                             |
-| 11 Verification battery and close-out                       | ⬜ not started | —                                                                                             |
+| Task                                                        | Status         | Evidence / commits                                                                                      |
+| ----------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------- |
+| 1 Branch, baseline & tracker                                | ✅ done        | 23807fc; baseline 263/85 green                                                                          |
+| 2 Schema, migration 0021, startup backfill                  | ✅ done        | a9e5603; fix round C1+I2 verified; 267 tests; snapshot proven by re-generate                            |
+| 3 Auth services (users, tokens, per-user sessions)          | ✅ done        | 807a697; 286/286 (+19); scoping + token-hash verified; review clean (0 blocking)                        |
+| 4 Auth routes grow a username (and per-user semantics)      | ✅ done        | 0ec327e; 289/289 (+3); contract pinned by exact-equality tests; review clean (0 blocking)               |
+| 5 Admin routes (users + service tokens) and the admin guard | ✅ done        | 837c8d1; 321/321 (+32); guard + token-once + carry-overs verified; review clean (0 blocking)            |
+| 6 Service-token middleware and the provable sidecar path    | ✅ done        | 81331ed; 335/335; **M1 exit check passed by hand**; review clean (0 blocking)                           |
+| 7 `internalFetch` for allowlisted private hosts             | ✅ done        | e9aa653; 344/344 (+9); SSRF bound verified (manual redirects, exact host match); review clean           |
+| 8 The client (username login, Users, API tokens)            | ✅ done        | 63a9db7; labels pinned + browser-smoked; fail-closed gating; review clean (0 blocking)                  |
+| 9 End-to-end coverage for the new identity                  | ✅ done        | e6770c7; **e2e 119/119 zero flakes**; rate-limit coupling documented + moved; review clean (0 blocking) |
+| 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                                                                                                       |
+| 11 Verification battery and close-out                       | ⬜ not started | —                                                                                                       |
 
 **Goal:** Real multi-user identity (users, roles, per-user sessions, an account-creating setup flow), scoped service tokens for machine callers, and `internalFetch` for allowlisted private hosts — the seams M2's document bridge needs.
 
@@ -503,9 +503,9 @@ it('allows a redirect within the allowlist', async () => {
 
 New coverage (serial with the existing spec's server): admin opens Settings → Server and creates a member `household`; member signs in in a second context and does NOT see `Add user`; admin mints a token named `test-sidecar` with scope `service`; a raw `fetch` from the test (Playwright `request`) to `/api/service/whoami` with `Authorization: Bearer <token>` returns 200 and the name; without the header → 401; after `Revoke` → 401 (poll for the revoke to land); a member's cookie gets 403 from `GET /api/users`.
 
-- [ ] **Step 1: Update + add specs.**
-- [ ] **Step 2: Full run** — `cd e2e && npm test` — all four projects green (desktop/phone/demo/server-mode; the known flake pair: isolated re-run evidence, never mask).
-- [ ] **Step 3: Commit** — `git commit -m "test: e2e coverage for users, roles and service tokens"`
+- [x] **Step 1: Update + add specs.** — plus the accepted deviation: the rate-limit-burn test moved to the end of users.spec (body preserved; pointer comments both files)
+- [x] **Step 2: Full run** — `cd e2e && npm test` — all four projects green (desktop/phone/demo/server-mode; the known flake pair: isolated re-run evidence, never mask). — 119/119, zero flakes
+- [x] **Step 3: Commit** — `git commit -m "test: e2e coverage for users, roles and service tokens"` (landed as e6770c7)
 
 ---
 
