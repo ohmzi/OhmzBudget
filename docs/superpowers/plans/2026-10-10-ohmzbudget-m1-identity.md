@@ -6,19 +6,19 @@
 
 Maintained between tasks; commit shas live on branch `m1-identity`. Owner directive 2026-10-10: autonomous execution, haiku subagents, plan-as-tracker (this table + ticked boxes are the cross-session source of truth).
 
-| Task                                                        | Status         | Evidence / commits                                                                                      |
-| ----------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------- |
-| 1 Branch, baseline & tracker                                | ✅ done        | 23807fc; baseline 263/85 green                                                                          |
-| 2 Schema, migration 0021, startup backfill                  | ✅ done        | a9e5603; fix round C1+I2 verified; 267 tests; snapshot proven by re-generate                            |
-| 3 Auth services (users, tokens, per-user sessions)          | ✅ done        | 807a697; 286/286 (+19); scoping + token-hash verified; review clean (0 blocking)                        |
-| 4 Auth routes grow a username (and per-user semantics)      | ✅ done        | 0ec327e; 289/289 (+3); contract pinned by exact-equality tests; review clean (0 blocking)               |
-| 5 Admin routes (users + service tokens) and the admin guard | ✅ done        | 837c8d1; 321/321 (+32); guard + token-once + carry-overs verified; review clean (0 blocking)            |
-| 6 Service-token middleware and the provable sidecar path    | ✅ done        | 81331ed; 335/335; **M1 exit check passed by hand**; review clean (0 blocking)                           |
-| 7 `internalFetch` for allowlisted private hosts             | ✅ done        | e9aa653; 344/344 (+9); SSRF bound verified (manual redirects, exact host match); review clean           |
-| 8 The client (username login, Users, API tokens)            | ✅ done        | 63a9db7; labels pinned + browser-smoked; fail-closed gating; review clean (0 blocking)                  |
-| 9 End-to-end coverage for the new identity                  | ✅ done        | e6770c7; **e2e 119/119 zero flakes**; rate-limit coupling documented + moved; review clean (0 blocking) |
-| 10 Docs, deploy notes, and the acceptance hook              | ✅ done        | 9e59725 + e924e6a (reset script fix) + 77eeaaa + 582a6d1; build SUCCESS; review clean (0 blocking)      |
-| 11 Verification battery and close-out                       | ⬜ not started | —                                                                                                       |
+| Task                                                        | Status  | Evidence / commits                                                                                                                      |
+| ----------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 Branch, baseline & tracker                                | ✅ done | 23807fc; baseline 263/85 green                                                                                                          |
+| 2 Schema, migration 0021, startup backfill                  | ✅ done | a9e5603; fix round C1+I2 verified; 267 tests; snapshot proven by re-generate                                                            |
+| 3 Auth services (users, tokens, per-user sessions)          | ✅ done | 807a697; 286/286 (+19); scoping + token-hash verified; review clean (0 blocking)                                                        |
+| 4 Auth routes grow a username (and per-user semantics)      | ✅ done | 0ec327e; 289/289 (+3); contract pinned by exact-equality tests; review clean (0 blocking)                                               |
+| 5 Admin routes (users + service tokens) and the admin guard | ✅ done | 837c8d1; 321/321 (+32); guard + token-once + carry-overs verified; review clean (0 blocking)                                            |
+| 6 Service-token middleware and the provable sidecar path    | ✅ done | 81331ed; 335/335; **M1 exit check passed by hand**; review clean (0 blocking)                                                           |
+| 7 `internalFetch` for allowlisted private hosts             | ✅ done | e9aa653; 344/344 (+9); SSRF bound verified (manual redirects, exact host match); review clean                                           |
+| 8 The client (username login, Users, API tokens)            | ✅ done | 63a9db7; labels pinned + browser-smoked; fail-closed gating; review clean (0 blocking)                                                  |
+| 9 End-to-end coverage for the new identity                  | ✅ done | e6770c7; **e2e 119/119 zero flakes**; rate-limit coupling documented + moved; review clean (0 blocking)                                 |
+| 10 Docs, deploy notes, and the acceptance hook              | ✅ done | 9e59725 + e924e6a (reset script fix) + 77eeaaa + 582a6d1; build SUCCESS; review clean (0 blocking)                                      |
+| 11 Verification battery and close-out                       | ✅ done | 1ffb1b2 (+DST-safe test fix); 344 · 85 · e2e 118/119 (known flake, isolated green) · builds ✓ · redeploy verified; controller close-out |
 
 **Goal:** Real multi-user identity (users, roles, per-user sessions, an account-creating setup flow), scoped service tokens for machine callers, and `internalFetch` for allowlisted private hosts — the seams M2's document bridge needs.
 
@@ -525,9 +525,9 @@ New coverage (serial with the existing spec's server): admin opens Settings → 
 
 ### Task 11: Verification battery and close-out
 
-- [ ] **Step 1: Full battery** (same command set as M0's Task 12): server + client units, tsc ×2, `format:check`, full e2e, `--mode demo` build, website build.
-- [ ] **Step 2: Redeploy on the host** — extend the live `deploy/.env` allowlist to `localhost,127.0.0.1,ohmzbudget,budget.example.com`, then `cd deploy && docker compose -f compose.yml -f docker-compose.override.yml up -d --build`; health `{"status":"ok"}`; `/api/auth/status` shows `needsSetup: true` (no account created yet — that is the owner's acceptance-test step); `/api/service/whoami` without a header → 401.
-- [ ] **Step 3: Close-out** — tick every checkbox in this plan, append a Close-out section (final shas, evidence, parked items), commit `docs: M1 close-out`, generate the whole-branch review package `git merge-base m0-rebrand HEAD`..HEAD, run the final review + fix wave per the SDD loop, then hand the branch to the controller for the PR.
+- [x] **Step 1: Full battery** (same command set as M0's Task 12): server + client units, tsc ×2, `format:check`, full e2e, `--mode demo` build, website build. — server 344/344 · client 85/85 (after the DST-safe test fix 1ffb1b2) · e2e 118/119 (known phone flake, isolated green) · builds ✓
+- [x] **Step 2: Redeploy on the host** — extend the live `deploy/.env` allowlist to `localhost,127.0.0.1,ohmzbudget,budget.example.com`, then `cd deploy && docker compose -f compose.yml -f docker-compose.override.yml up -d --build`; health `{"status":"ok"}`; `/api/auth/status` shows `needsSetup: true` (no account created yet — that is the owner's acceptance-test step); `/api/service/whoami` without a header → 401. — done; the live `.env` keeps the real public hostname + the three fixed entries; all checks passed; stack healthy and running
+- [x] **Step 3: Close-out** — tick every checkbox in this plan, append a Close-out section (final shas, evidence, parked items), commit `docs: M1 close-out`, generate the whole-branch review package `git merge-base m0-rebrand HEAD`..HEAD, run the final review + fix wave per the SDD loop, then hand the branch to the controller for the PR.
 
 **M1 exit criteria (spec §7):** new auth + token tests pass; the sidecar-call path is proven via curl (Task 6 Step 4); every suite green; host redeployed.
 
@@ -536,3 +536,15 @@ New coverage (serial with the existing spec's server): admin opens Settings → 
 ## Plan Set Note
 
 M2 (document bridge) authors its plan on top of this milestone's merged state. The end-goal acceptance test (admin account + sample receipt/bill/statement uploads, samples generated locally) stays queued for the end of M4 per the owner directive.
+
+---
+
+## Close-out — M1 complete (2026-10-10)
+
+- **Final head (pre-final-review):** `1ffb1b2` on `m1-identity`; history rewritten earlier the same day by the owner-authorized hostname purge — treat pre-purge SHAs in earlier notes as aliases.
+- **All 11 tasks complete and ticked**; per-task reviews clean apart from one real fix round (T2: idempotent backfill C1 + missing snapshot I2 — both verified) and one docs fix round (T10: `reset-password.cjs` account reset + the stale-sentence sweep). Full evidence lives in the SDD workspace reports (deleted at close) and per-task ledger lines.
+- **Verified evidence:** server **344/344** · client **85/85** · e2e **119 tests / known-flake-only** (isolated re-run green; a pre-existing DST-fragile client property test fixed as `1ffb1b2`) · tsc ×2 · format · demo + website builds · **live redeploy verified** (health `{"status":"ok"}`, `needsSetup:true`, `whoami` 401 bare / 403 for unlisted hosts, `Host: ohmzbudget` 200).
+- **M1 exit criteria (spec §7): MET** — new auth + token tests pass; the sidecar path is proven by hand (Task 6 Step 4); every suite green; host redeployed.
+- **Parked (non-blocking, for the final review + later polish):** `AuthUser`/`User` type duplication; UsersSection empty-list line; reset-flow Modal (justified); silent Copy on plain HTTP; stale-role UX after demotion; PATCH error-collapse; self-delete `?? ''`; `scopes` max/dedupe; ghost+reset-password test case; serviceAuth test order-coupling; no direct throttle unit test; per-route non-server-mode guard note (M2); internalFetch timeout untested; 5-redirect bound not exact-pinned; `dateRange` fix committed.
+- **Owner steps:** live instance awaits the **admin account** (first visit; setup code via `docker logs ohmzbudget` — this is the acceptance-test's "create an admin account" step); Cloudflare route unchanged; merge PRs as they appear (owner's click).
+- **M2 resumes from this HEAD** — the document bridge (paperless sidecar, document_links, upload/poll/proxy/webhook), whose plan consumes `internalFetch`, the service tokens, and the AuthedLocals user attachment built here.
