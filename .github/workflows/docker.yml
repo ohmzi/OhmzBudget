@@ -75,10 +75,10 @@ jobs:
           }
           J=(-H 'Origin: http://localhost:3001' -H 'Content-Type: application/json')
           URL=http://localhost:3001
-          PASSWORD='{"password":"correct horse battery"}'
+          PASSWORD='{"username":"owner","password":"correct horse battery"}'
           # The setup code the server prints to its log
           setup_code() { docker compose logs | grep -oE '[A-Z2-9]{4}(-[A-Z2-9]{4}){3}' | tail -1; }
-          setup_body() { printf '{"password":"correct horse battery","setupCode":"%s"}' "$(setup_code)"; }
+          setup_body() { printf '{"username":"owner","password":"correct horse battery","setupCode":"%s"}' "$(setup_code)"; }
 
           test "$(docker exec ohmzbudget id -u)" = 1000
           # No package managers in the runtime image (only node is needed)
@@ -93,7 +93,7 @@ jobs:
           # Without the setup code from the log, nobody can claim the server
           expect 403 "${J[@]}" -d "$PASSWORD" $URL/api/auth/setup
           expect 204 -c cookies "${J[@]}" -d "$(setup_body)" $URL/api/auth/setup
-          expect 409 "${J[@]}" -d '{"password":"another password"}' $URL/api/auth/setup
+          expect 409 "${J[@]}" -d '{"username":"owner","password":"another password"}' $URL/api/auth/setup
           expect 201 -b cookies "${J[@]}" \
             -d '{"name":"Checking","type":"checking","startingBalance":12345}' $URL/api/accounts
           # Server details need a login; the version is built into the bundle
