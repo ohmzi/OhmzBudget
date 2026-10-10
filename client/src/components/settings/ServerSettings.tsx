@@ -31,6 +31,8 @@ import { SELF_HOSTING_URL } from '../../utils/project';
 import { Button } from '../ui/Button';
 import { MIN_PASSWORD_LENGTH } from '../auth/passwordRules';
 import { IS_DEMO } from '../../demo/demoApi';
+import { ApiTokensSection } from './ApiTokensSection';
+import { UsersSection } from './UsersSection';
 
 const inputClass =
   'w-full px-3 py-2 text-sm border border-border rounded-md bg-surface text-text focus:outline-none focus:ring-1 focus:ring-brand-600 focus:border-brand-600';
@@ -389,6 +391,8 @@ function SelfHostedSettings() {
     <div className="max-w-xl space-y-8">
       <SecurityChecks />
       <SignedInDevices />
+      <UsersSection />
+      <ApiTokensSection />
       <OfflineCopySettings />
 
       <section className="pt-6 border-t border-border-light max-w-md">

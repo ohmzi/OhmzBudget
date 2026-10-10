@@ -86,6 +86,9 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     // never reach it (the sign-in screen stayed up until a reload).
     qc.removeQueries({ predicate: (q) => q.queryKey[0] !== 'auth-status' });
     qc.setQueryData(['auth-status'], { ...status, needsSetup: false, authenticated: true });
+    // Ask again so the app learns which account this session belongs to: the status fetched
+    // before signing in carries no user, and the admin-only settings read its role from here.
+    void qc.invalidateQueries({ queryKey: ['auth-status'] });
   };
   return status.needsSetup ? (
     <PasswordForm mode="setup" onDone={onSignedIn} />
@@ -95,6 +98,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 }
 
 function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () => void }) {
+  const [username, setUsername] = useState('');
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -111,7 +115,9 @@ function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () =>
     if (isSetup && password !== confirm) return setError("The passwords don't match.");
     setBusy(true);
     try {
-      await (isSetup ? authApi.setupPassword(password, code) : authApi.login(password));
+      await (isSetup
+        ? authApi.setup(username.trim(), password, code)
+        : authApi.login(username.trim(), password));
       onDone();
     } catch (err) {
       setError((err as Error).message);
@@ -179,6 +185,25 @@ function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () =>
           </div>
         )}
         <div>
+          <label htmlFor="username" className="block text-sm font-medium text-text-secondary mb-1">
+            Username
+          </label>
+          <input
+            id="username"
+            autoComplete="username"
+            spellCheck={false}
+            autoFocus={!isSetup}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className={inputClass}
+          />
+          {isSetup && (
+            <p className="text-xs text-text-tertiary mt-1">
+              Letters, digits, dots, dashes and underscores.
+            </p>
+          )}
+        </div>
+        <div>
           <label htmlFor="password" className="block text-sm font-medium text-text-secondary mb-1">
             {isSetup ? 'New password' : 'Password'}
           </label>
@@ -186,7 +211,6 @@ function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () =>
             id="password"
             type="password"
             autoComplete={isSetup ? 'new-password' : 'current-password'}
-            autoFocus={!isSetup}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className={inputClass}
@@ -208,7 +232,11 @@ function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () =>
           </div>
         )}
         {error && <p className="text-xs text-negative">{error}</p>}
-        <Button type="submit" className="w-full" disabled={busy || !password || (isSetup && !code)}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={busy || !username.trim() || !password || (isSetup && !code)}
+        >
           {busy ? <Loader2 size={14} className="animate-spin" /> : <Lock size={14} />}
           {isSetup ? 'Create password' : 'Sign in'}
         </Button>
