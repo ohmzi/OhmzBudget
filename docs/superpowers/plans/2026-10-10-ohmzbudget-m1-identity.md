@@ -241,7 +241,10 @@ export function countUsers(): number {
  */
 export function ensureAuthReady(): void {
   const legacy = db.select().from(authConfig).get();
-  if (countUsers() === 0 && legacy) {
+  // Only a row with a REAL hash is legacy input. The empty-hash carrier row created on fresh
+  // installs (below) must never be backfilled — otherwise a second startup would mint a
+  // phantom empty-hash `admin` and no account could ever be set up (see review finding T2-C1).
+  if (countUsers() === 0 && legacy?.passwordHash) {
     db.insert(users)
       .values({ id: nanoid(), username: 'admin', role: 'admin', passwordHash: legacy.passwordHash })
       .run();
@@ -281,7 +284,7 @@ git commit -m "feat: users and service-token schema with startup backfill"
 
 - Consumes: Task 2's tables + `ensureAuthReady`.
 - Produces (exact signatures later tasks rely on):
-  - `users.ts`: `interface SessionUser { id: string; username: string; role: 'admin' | 'member' }`; `listUsers(): SessionUser[]`; `createUser(username, password, role): Promise<{ ok: true; user: SessionUser } | { ok: false; error: 'username_taken' | 'invalid_username' }>`; `verifyLogin(username, password): Promise<SessionUser | null>`; `setUserRole(id, role): { ok: boolean; error?: 'last_admin' }`; `resetUserPassword(id, password): Promise<boolean>`; `deleteUser(id, actorId): { ok: boolean; error?: 'self' | 'last_admin' }`; `changeOwnPassword(id, currentPassword, newPassword, keepSessionToken): Promise<{ ok: boolean; error?: 'wrong_password' }>`; `sessionUser(token): SessionUser | null`; `isSetupNeeded(): boolean`.
+  - `users.ts`: `interface SessionUser { id: string; username: string; role: 'admin' | 'member' }`; `listUsers(): SessionUser[]`; `createUser(username, password, role): Promise<{ ok: true; user: SessionUser } | { ok: false; error: 'username_taken' | 'invalid_username' }>`; `verifyLogin(username, password): Promise<SessionUser | null>`; `setUserRole(id, role): { ok: boolean; error?: 'last_admin' }`; `resetUserPassword(id, password): Promise<boolean>`; `deleteUser(id, actorId): { ok: boolean; error?: 'self' | 'last_admin' }`; `changeOwnPassword(id, currentPassword, newPassword, keepSessionToken): Promise<{ ok: boolean; error?: 'wrong_password' }>`; `sessionUser(token): SessionUser | null`; `isSetupNeeded(): boolean` — **true when NO user with a real (non-empty) `passwordHash` exists** (tolerates empty-hash rows from the interim window; review finding T2-C1).
   - `serviceTokens.ts`: `type Scope = 'service' | 'ingest'`; `mintToken(name: string, scopes: Scope[]): { token: string; id: string }`; `verifyBearer(header: string | undefined): { id: string; name: string; scopes: Scope[] } | null`; `listTokens(): { id, name, scopes, createdAt, lastUsedAt, revokedAt }[]`; `revokeToken(id: string): boolean`.
   - `sessions.ts`: `createSession(userId, userAgent?): { token; expiresAt }`; `listSessions(userId, currentToken)`; `deleteOtherSessions(userId, currentToken): number`; `deleteSessionsForUser(userId): number`; `isValidSession` unchanged in name (now also requires a live user).
 
@@ -360,7 +363,7 @@ it('signing out others never touches another user’s sessions', async () => {
 });
 ```
 
-- [ ] **Step 2: Implement** — `/setup` validates `username` (`z.string().min(1).max(64).regex(/^[a-zA-Z0-9._-]+$/)`), replaces the password check with `isSetupNeeded()`, calls `createUser(..., 'admin')`; `/login` keys on `verifyLogin`, error text unchanged (`Incorrect password`) to avoid enumeration; `/status` includes `user` via `sessionUser(token)`; `requireSession` attaches `res.locals.user = sessionUser(token)` (declare `interface AuthedLocals { user?: SessionUser; service?: { name: string; scopes: string[] } }` exported from a shared `server/src/types.ts` and use `Response<unknown, AuthedLocals>` where needed); `signedIn()` helpers return `{ token, user }`.
+- [ ] **Step 2: Implement** — `/setup` validates `username` (`z.string().min(1).max(64).regex(/^[a-zA-Z0-9._-]+$/)`), replaces the password check with `isSetupNeeded()`, calls `createUser(..., 'admin')`; **when a user row already exists with that username AND an empty `passwordHash` (the interim-window phantom from review finding T2-C1), upgrade that row in place instead of 409ing**; `/login` keys on `verifyLogin`, error text unchanged (`Incorrect password`) to avoid enumeration; `/status` includes `user` via `sessionUser(token)`; `requireSession` attaches `res.locals.user = sessionUser(token)` (declare `interface AuthedLocals { user?: SessionUser; service?: { name: string; scopes: string[] } }` exported from a shared `server/src/types.ts` and use `Response<unknown, AuthedLocals>` where needed); `signedIn()` helpers return `{ token, user }`.
 
 - [ ] **Step 3: `cd server && npx tsc --noEmit && npm test` → green.**
 
