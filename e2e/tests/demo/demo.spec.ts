@@ -3,7 +3,7 @@ import fs from 'fs';
 
 // The website's "Try the demo" (client built with `--mode demo`, served under /demo/): the
 // real app, with the server's routes running in a Web Worker on a sample budget. Nothing
-// here talks to a FlyBudget server.
+// here talks to an OhmzBudget server.
 
 // Like the other suites: a test fails if the page throws or logs a console error
 const test = base.extend<{ consoleGuard: void }>({
@@ -110,7 +110,7 @@ test("bank connections can't be set up in the demo", async ({ page }) => {
   await page.getByRole('button', { name: 'Add account' }).click();
   await page.getByRole('button', { name: 'Connect via SimpleFIN' }).click();
   const dialog = page.getByRole('dialog', { name: 'Connect a bank' });
-  await expect(dialog).toContainText('need the FlyBudget app');
+  await expect(dialog).toContainText('need the OhmzBudget app');
   await expect(dialog.getByRole('textbox')).toHaveCount(0);
 
   // The demo's API refuses them too
@@ -186,7 +186,7 @@ test('nothing leaves the browser: imports, backups and restores stay in the tab'
   await page.getByRole('button', { name: 'Download Backup' }).click();
   const backupFile = await (await download).path();
   const backup = JSON.parse(fs.readFileSync(backupFile, 'utf8'));
-  expect(backup).toMatchObject({ format: 'flybudget-backup' });
+  expect(backup).toMatchObject({ format: 'ohmzbudget-backup' });
   expect(Object.keys(backup)).not.toContain('plaidItems');
 
   // Restoring it works in the tab too

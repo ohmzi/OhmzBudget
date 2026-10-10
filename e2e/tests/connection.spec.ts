@@ -1,7 +1,7 @@
 import { test, expect, open, isoDay, thisMonth } from './fixtures';
 import { startDesktopServer, stopDesktopServer } from './serverControl';
 
-// Losing the connection to FlyBudget's server never locks you out: on startup the app
+// Losing the connection to OhmzBudget's server never locks you out: on startup the app
 // shows a reconnect screen that keeps retrying (or opens with the offline copy, see
 // server-mode/auth.spec.ts), and mid-session it keeps what's on screen, pauses saving
 // except for new transactions (they wait on the device), and picks up again by itself.
@@ -15,7 +15,9 @@ test('the reconnect screen retries on its own and the app loads without a reload
   await page.route('**/api/**', (route) => route.abort('connectionrefused'));
   await open(page, '/dashboard');
 
-  await expect(page.getByRole('heading', { name: 'FlyBudget is starting up again' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'OhmzBudget is starting up again' }),
+  ).toBeVisible();
   await expect(page.getByText(/Trying again in \d+s|Checking…/)).toBeVisible();
   await expect(page.getByRole('progressbar', { name: 'Time until the next try' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Try now' })).toBeVisible();
@@ -26,7 +28,7 @@ test('the reconnect screen retries on its own and the app loads without a reload
   await expect(page.getByRole('link', { name: 'All accounts $1,500' })).toBeVisible({
     timeout: 15_000,
   });
-  await expect(page.getByRole('heading', { name: 'FlyBudget is starting up again' })).toBeHidden();
+  await expect(page.getByRole('heading', { name: 'OhmzBudget is starting up again' })).toBeHidden();
 });
 
 test('"Try now" reconnects straight away', async ({ page, api }) => {
@@ -65,7 +67,7 @@ test('mid-session the app keeps what it loaded, keeps new transactions, and reco
     const nav = page.getByRole('complementary');
     await nav.getByRole('link', { name: 'Transactions', exact: true }).click();
     const banner = page.getByRole('status', { name: 'Connection' });
-    await expect(banner).toContainText("Can't reach FlyBudget. Showing your data as of");
+    await expect(banner).toContainText("Can't reach OhmzBudget. Showing your data as of");
     await expect(banner).toContainText(
       'New transactions are saved on this device; other changes wait until it reconnects.',
     );

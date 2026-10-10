@@ -19,7 +19,7 @@ const PAGES: { link: string; route: string; heading?: string }[] = [
 
 test('a new budget starts on the welcome screen', async ({ page }) => {
   await open(page, '/dashboard');
-  await expect(page.getByRole('heading', { name: 'Welcome to FlyBudget' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome to OhmzBudget' })).toBeVisible();
   await expect(page).toHaveURL(/#\/welcome$/);
 });
 
