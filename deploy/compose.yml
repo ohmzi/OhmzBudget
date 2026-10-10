@@ -1,0 +1,38 @@
+name: ohmzbudget
+services:
+  ohmzbudget:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: ohmzbudget:local
+    container_name: ohmzbudget
+    restart: unless-stopped
+    environment:
+      OHMZBUDGET_SERVER_MODE: "true"
+      OHMZBUDGET_HOST: "0.0.0.0"
+      OHMZBUDGET_DATA_KEY_FILE: "/run/secrets/ohmzbudget_data_key"
+      OHMZBUDGET_ALLOWED_HOSTS: "${OHMZBUDGET_ALLOWED_HOSTS:-localhost,127.0.0.1}"
+      OHMZBUDGET_TRUST_PROXY: "true"
+    ports:
+      - "127.0.0.1:7300:3001"
+    volumes:
+      - ohmzbudget-data:/data
+    secrets:
+      - ohmzbudget_data_key
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    read_only: true
+    tmpfs: ["/tmp"]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+volumes:
+  ohmzbudget-data:
+networks:
+  default:
+    name: ohmzbudget_default
+secrets:
+  ohmzbudget_data_key:
+    file: ./secrets/ohmzbudget_data_key
