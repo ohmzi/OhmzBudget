@@ -42,4 +42,4 @@ budget-backup-*.json
 transactions*.csv
 
 # Self-hosting encryption key (docker-compose.yml)
-flybudget_data_key.txt
+ohmzbudget_data_key.txt
