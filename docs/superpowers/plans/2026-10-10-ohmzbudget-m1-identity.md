@@ -6,19 +6,19 @@
 
 Maintained between tasks; commit shas live on branch `m1-identity`. Owner directive 2026-10-10: autonomous execution, haiku subagents, plan-as-tracker (this table + ticked boxes are the cross-session source of truth).
 
-| Task                                                        | Status         | Evidence / commits             |
-| ----------------------------------------------------------- | -------------- | ------------------------------ |
-| 1 Branch, baseline & tracker                                | ✅ done        | 23807fc; baseline 263/85 green |
-| 2 Schema, migration 0021, startup backfill                  | ⬜ not started | —                              |
-| 3 Auth services (users, tokens, per-user sessions)          | ⬜ not started | —                              |
-| 4 Auth routes grow a username (and per-user semantics)      | ⬜ not started | —                              |
-| 5 Admin routes (users + service tokens) and the admin guard | ⬜ not started | —                              |
-| 6 Service-token middleware and the provable sidecar path    | ⬜ not started | —                              |
-| 7 `internalFetch` for allowlisted private hosts             | ⬜ not started | —                              |
-| 8 The client (username login, Users, API tokens)            | ⬜ not started | —                              |
-| 9 End-to-end coverage for the new identity                  | ⬜ not started | —                              |
-| 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                              |
-| 11 Verification battery and close-out                       | ⬜ not started | —                              |
+| Task                                                        | Status         | Evidence / commits                                                           |
+| ----------------------------------------------------------- | -------------- | ---------------------------------------------------------------------------- |
+| 1 Branch, baseline & tracker                                | ✅ done        | 23807fc; baseline 263/85 green                                               |
+| 2 Schema, migration 0021, startup backfill                  | ✅ done        | a9e5603; fix round C1+I2 verified; 267 tests; snapshot proven by re-generate |
+| 3 Auth services (users, tokens, per-user sessions)          | ⬜ not started | —                                                                            |
+| 4 Auth routes grow a username (and per-user semantics)      | ⬜ not started | —                                                                            |
+| 5 Admin routes (users + service tokens) and the admin guard | ⬜ not started | —                                                                            |
+| 6 Service-token middleware and the provable sidecar path    | ⬜ not started | —                                                                            |
+| 7 `internalFetch` for allowlisted private hosts             | ⬜ not started | —                                                                            |
+| 8 The client (username login, Users, API tokens)            | ⬜ not started | —                                                                            |
+| 9 End-to-end coverage for the new identity                  | ⬜ not started | —                                                                            |
+| 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                                                                            |
+| 11 Verification battery and close-out                       | ⬜ not started | —                                                                            |
 
 **Goal:** Real multi-user identity (users, roles, per-user sessions, an account-creating setup flow), scoped service tokens for machine callers, and `internalFetch` for allowlisted private hosts — the seams M2's document bridge needs.
 
@@ -100,7 +100,7 @@ git commit -m "docs: start M1 identity plan (tracker + baseline)"
 
 - Produces: `users` / `service_tokens` tables (column names below), `authConfig.secret`, `countUsers(): number`, `ensureAuthReady(): void` (idempotent).
 
-- [ ] **Step 1: Write the failing tests** (`server/src/auth/users.test.ts` — mirror `routes/auth.test.ts`'s migrate-first harness)
+- [x] **Step 1: Write the failing tests** (`server/src/auth/users.test.ts` — mirror `routes/auth.test.ts`'s migrate-first harness; + the fix round's idempotency test)
 
 ```ts
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -144,9 +144,9 @@ describe('ensureAuthReady', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify it fails** — `cd server && npx vitest run src/auth/users.test.ts` → FAIL (`users` export missing).
+- [x] **Step 2: Run to verify it fails** — `cd server && npx vitest run src/auth/users.test.ts` → FAIL (`users` export missing).
 
-- [ ] **Step 3: Schema additions** (`schema.ts`, after the `authConfig`/`sessions` block)
+- [x] **Step 3: Schema additions** (`schema.ts`, after the `authConfig`/`sessions` block)
 
 ```ts
 /** Server-mode accounts. The budget data is shared; roles gate administration. */
@@ -188,7 +188,7 @@ export const serviceTokens = sqliteTable('service_tokens', {
 
 `authConfig` gains `secret: text('secret')`; `sessions` gains `userId: text('user_id').references(() => users.id, { onDelete: 'cascade' })`.
 
-- [ ] **Step 4: Migration `0021_users_service_tokens.sql`**
+- [x] **Step 4: Migration `0021_users_service_tokens.sql`** (+ `meta/0021_snapshot.json`, generated in the fix round with a temporary legacy-table reconstruction and proven by a re-generate reporting "No schema changes")
 
 ```sql
 CREATE TABLE `users` (
@@ -222,7 +222,7 @@ ALTER TABLE `auth_config` ADD `secret` text;
 
 Append to `meta/_journal.json` (copy 0020's entry): `{"idx": 21, "version": "6", "when": 1790900000000, "tag": "0021_users_service_tokens", "breakpoints": true}`.
 
-- [ ] **Step 5: `ensureAuthReady()`** (in `users.ts`)
+- [x] **Step 5: `ensureAuthReady()`** (in `users.ts`) — fix round C1: the backfill requires `legacy?.passwordHash` so fresh installs stay idempotent
 
 ```ts
 import { randomBytes } from 'crypto';
@@ -260,9 +260,9 @@ const randomKey = () => randomBytes(32).toString('base64url');
 
 Wire in `startServer()` right after the migration block: `const { ensureAuthReady } = await import('./auth/users.js'); ensureAuthReady();` — keep it OUT of `browser/app.ts`.
 
-- [ ] **Step 6: Run the tests → PASS; then `cd server && npx tsc --noEmit && npm test`** (263 must not drop).
+- [x] **Step 6: Run the tests → PASS; then `cd server && npx tsc --noEmit && npm test`** (263 must not drop). — landed at 267 (263+4), tsc clean
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit** (landed as d388e22 pre-rewrite / 8dcc694 post-rewrite, plus 615fbda C1 and a9e5603 snapshot)
 
 ```bash
 git add server/src/db server/src/auth/users.ts server/src/auth/users.test.ts server/src/index.ts
