@@ -387,7 +387,7 @@ it('signing out others never touches another user’s sessions', async () => {
 
 - [x] **Step 1: Failing tests** — non-admin → 403 on every route; admin CRUD happy paths; last-admin demote → `409 last_admin`; self-delete → `409 self`; token create response contains the token exactly once and list never does. **Also from the T4 review, same commit:** (a) serialize `/setup` (an in-flight flag in `routes/auth.ts` around the gate + create — two concurrent valid-code setups ⇒ exactly one admin, the loser gets 409; closes the bounded TOCTOU race); (b) `listUsers()` excludes users with an empty `passwordHash` (ghost rows can never sign in). Test both. — landed with `countAdmins()` ghost-filtering too (closes the phantom-admin lockout)
 - [x] **Step 2: Implement** with zod validation mirroring existing routers' style.
-- [ ] **Step 3: `npx tsc --noEmit && npm test` → green.**
+- [x] **Step 3: `npx tsc --noEmit && npm test` → green.** — 321/321 (+32)
 - [x] **Step 4: Commit** — `git commit -m "feat: admin APIs for users and service tokens"` (landed as 837c8d1)
 
 ---
