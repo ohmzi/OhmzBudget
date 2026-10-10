@@ -39,8 +39,8 @@ The first visit at http://localhost:7300 asks to set a password and needs the
 one-time setup code printed in the logs: `docker logs ohmzbudget`.
 
 After the first run, use `docker compose -f compose.yml -f docker-compose.override.yml up -d --build`
-again to rebuild after a code change (there is no published image for this
-skeleton; it always builds locally).
+again to rebuild after a code change (this skeleton always builds the image
+locally; it does not pull the published `ghcr.io/ohmzi/ohmzbudget` image).
 
 ## Remote access (owner)
 

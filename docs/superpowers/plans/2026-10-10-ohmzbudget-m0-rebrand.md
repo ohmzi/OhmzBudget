@@ -18,7 +18,7 @@ Maintained between tasks; commit shas live on branch `m0-rebrand`. Owner directi
 | 8 Electron identity                      | ✅ done        | 5941860; cookie pair + artifact names match; tsc ✓; review clean (0 blocking)                                                               |
 | 9 Docs, attribution & source links       | ✅ done        | ad24424; NOTICE created; URLs repointed + e2e in lockstep; LICENSE/CLA untouched; review clean (0 blocking)                                 |
 | 10 Website text sweep                    | ✅ done        | 2f62184; 34 files; build SUCCESS; blog slug + assets preserved; review clean (0 blocking)                                                   |
-| 11 Deploy skeleton & host run            | ⬜ not started |                                                                                                                                             |
+| 11 Deploy skeleton & host run            | ✅ done        | 86ab466; stack LIVE on 127.0.0.1:7300; health `{"status":"ok"}`; subnet pinned; review clean (0 blocking)                                   |
 | 12 Full verification sweep               | ⬜ not started |                                                                                                                                             |
 | 13 GitHub rename & push (pre-authorized) | ⬜ not started |                                                                                                                                             |
 
@@ -452,7 +452,7 @@ cd .. && git add website && git commit -m "docs: sweep website text for ohmzbudg
 - Create: `deploy/compose.yml`, `deploy/docker-compose.override.yml`, `deploy/.env.example`, `deploy/README.md`, `deploy/.gitignore` (contents: `secrets/`)
 - Compose secrets pattern (host): `deploy/secrets/ohmzbudget_data_key` (chmod 400)
 
-- [ ] **Step 1: Write `deploy/compose.yml`** (service skeleton — paperless stack lands in M2 with the same conventions):
+- [x] **Step 1: Write `deploy/compose.yml`** (service skeleton — paperless stack lands in M2 with the same conventions):
 
 ```yaml
 name: ohmzbudget
@@ -501,7 +501,7 @@ secrets:
     file: ./secrets/ohmzbudget_data_key
 ```
 
-- [ ] **Step 2: Write `deploy/docker-compose.override.yml`** (pinned subnet — Docker address pools on this host are exhausted; untracked-style pattern like VoiceStudio):
+- [x] **Step 2: Write `deploy/docker-compose.override.yml`** (pinned subnet — Docker address pools on this host are exhausted; untracked-style pattern like VoiceStudio):
 
 ```yaml
 # Pinned because this host's Docker default address pools are exhausted.
@@ -512,7 +512,7 @@ networks:
         - subnet: 10.88.0.0/24
 ```
 
-- [ ] **Step 3: Deploy and verify on the host**
+- [x] **Step 3: Deploy and verify on the host** — stack left RUNNING; health `{"status":"ok"}`; `/` → 200; container healthy; network `10.88.0.0/24`
 
 ```bash
 cd deploy && mkdir -p secrets
@@ -523,13 +523,13 @@ for i in $(seq 1 20); do curl -sf http://127.0.0.1:7300/api/health && break; sle
 curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:7300/   # expect 200 (login screen)
 ```
 
-- [ ] **Step 4: Commit** (the generated secret stays untracked via `deploy/.gitignore` containing `secrets/`)
+- [x] **Step 4: Commit** (landed as 86ab466; the generated secret stays untracked via `deploy/.gitignore` containing `secrets/`)
 
 ```bash
 cd .. && git add deploy && git commit -m "build: add deploy compose skeleton with pinned subnet"
 ```
 
-- [ ] **Step 5: Owner step (report, don't block)** — the cloudflared route `budget.example.com → http://localhost:7300` is a Cloudflare dashboard action; note it for the owner in the task result.
+- [x] **Step 5: Owner step (report, don't block)** — the cloudflared route `budget.example.com → http://localhost:7300` is a Cloudflare dashboard action; note it for the owner in the task result. Host side ready: `deploy/.env` allowlists the hostname.
 
 ---
 
