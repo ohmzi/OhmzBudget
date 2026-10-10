@@ -14,7 +14,7 @@ Maintained between tasks; commit shas live on branch `m0-rebrand`. Owner directi
 | 4 Client shell & storage identifiers     | ✅ done        | d7960fd; 5 files; dist scan CLEAN; review clean (0 blocking)                                                                                |
 | 5 Server runtime identity                | ✅ done        | e4fa6e5; 19 files; 263/263 held; review clean (0 blocking)                                                                                  |
 | 6 End-to-end tests                       | ✅ done        | 0655012; 12 files; full run 114/115 (sole fail = baseline flake, isolated green); review clean (0 blocking)                                 |
-| 7 Docker & CI identity                   | ⬜ not started |                                                                                                                                             |
+| 7 Docker & CI identity                   | ✅ done        | b9a71d6; build 31s + health `{"status":"ok"}`; cla.yml untouched; review clean (0 blocking)                                                 |
 | 8 Electron identity                      | ⬜ not started |                                                                                                                                             |
 | 9 Docs, attribution & source links       | ⬜ not started |                                                                                                                                             |
 | 10 Website text sweep                    | ⬜ not started |                                                                                                                                             |
@@ -291,7 +291,7 @@ git add e2e && git commit -m "test: update e2e suite for ohmzbudget identifiers"
 - Modify: `Dockerfile` (comments, `ENV OHMZBUDGET_*`, esbuild `--define:OHMZBUDGET_VERSION`), `docker-compose.yml` (service/container `ohmzbudget`, image `ghcr.io/ohmzi/ohmzbudget`, volume `ohmzbudget-data`, secret `ohmzbudget_data_key` + file `ohmzbudget_data_key.txt`, env, header comments), `docker/backup.cjs`, `docker/reset-password.cjs` (messages: `docker exec ohmzbudget …`), `.github/workflows/docker.yml` (`IMAGE=ghcr.io/ohmzi/ohmzbudget`, `org.opencontainers.image.title=OhmzBudget` + description, smoke-test `docker exec ohmzbudget` commands), `.github/workflows/release.yml` (artifact paths/names `OhmzBudget-*.exe/.dmg/.deb/.AppImage`, release title, kill commands in comments)
 - Do **not** modify: `.github/workflows/cla.yml`
 
-- [ ] **Step 1: Sweep + hand-check**
+- [x] **Step 1: Sweep + hand-check**
 
 ```bash
 grep -rl 'FlyBudget' Dockerfile docker-compose.yml docker .github | xargs sed -i 's/FlyBudget/OhmzBudget/g'
@@ -300,7 +300,7 @@ grep -rl 'FLYBUDGET' Dockerfile docker-compose.yml docker .github | xargs sed -i
 grep -rn 'FlyBudget\|flybudget\|FLYBUDGET' Dockerfile docker-compose.yml docker .github | grep -v cla.yml || echo CLEAN
 ```
 
-- [ ] **Step 2: Build and smoke-test the container**
+- [x] **Step 2: Build and smoke-test the container**
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
@@ -316,7 +316,7 @@ docker rm -f ohmzbudget-smoke
 
 Expected: `{"status":"ok"}` exactly.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit** (landed as b9a71d6)
 
 ```bash
 git add Dockerfile docker-compose.yml docker .github
@@ -540,10 +540,10 @@ cd .. && git add deploy && git commit -m "build: add deploy compose skeleton wit
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
-grep -rIn 'FlyBudget\|flybudget\|FLYBUDGET' --exclude-dir={.git,node_modules,dist,build,.docusaurus,static,coverage} . | grep -vE 'cla\.yml|CLA\.md|LICENSE|NOTICE|welcome-to-flybudget|flybudget-app-v1|/tmp/' || echo CLEAN
+grep -rIn 'FlyBudget\|flybudget\|FLYBUDGET' --exclude-dir={.git,node_modules,dist,build,.docusaurus,static,coverage,superpowers} . | grep -vE 'cla\.yml|CLA\.md|LICENSE|NOTICE|welcome-to-flybudget|flybudget-app-v1|/tmp/' || echo CLEAN
 ```
 
-Expected leftovers: only `CLA.md` + `.github/workflows/cla.yml` (legal review pending — untouched by design), `website/blog/…welcome-to-flybudget.mdx` (slug kept), and `client/public/sw.js`'s `LEGACY_CACHE = 'flybudget-app-v1'` literal (the mandated stale-client purge needs the old cache name). Generated dirs (`website/build`, `website/.docusaurus`, `website/static/demo`, `client/dist`, `server/dist`) are excluded. Anything else — fix in a `fix:` commit and re-run.
+Expected leftovers: only `CLA.md` + `.github/workflows/cla.yml` (legal review pending — untouched by design), `website/blog/…welcome-to-flybudget.mdx` (slug kept), and `client/public/sw.js`'s `LEGACY_CACHE = 'flybudget-app-v1'` literal (the mandated stale-client purge needs the old cache name). Excluded, as they legitimately document the rename: `docs/superpowers/`, and generated dirs (`website/build`, `website/.docusaurus`, `website/static/demo`, `client/dist`, `server/dist`). Anything else — fix in a `fix:` commit and re-run.
 
 - [ ] **Step 2: Full local battery**
 
