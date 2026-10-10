@@ -6,19 +6,19 @@
 
 Maintained between tasks; commit shas live on branch `m1-identity`. Owner directive 2026-10-10: autonomous execution, haiku subagents, plan-as-tracker (this table + ticked boxes are the cross-session source of truth).
 
-| Task                                                        | Status         | Evidence / commits                                                                           |
-| ----------------------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------- |
-| 1 Branch, baseline & tracker                                | ✅ done        | 23807fc; baseline 263/85 green                                                               |
-| 2 Schema, migration 0021, startup backfill                  | ✅ done        | a9e5603; fix round C1+I2 verified; 267 tests; snapshot proven by re-generate                 |
-| 3 Auth services (users, tokens, per-user sessions)          | ✅ done        | 807a697; 286/286 (+19); scoping + token-hash verified; review clean (0 blocking)             |
-| 4 Auth routes grow a username (and per-user semantics)      | ✅ done        | 0ec327e; 289/289 (+3); contract pinned by exact-equality tests; review clean (0 blocking)    |
-| 5 Admin routes (users + service tokens) and the admin guard | ✅ done        | 837c8d1; 321/321 (+32); guard + token-once + carry-overs verified; review clean (0 blocking) |
-| 6 Service-token middleware and the provable sidecar path    | ✅ done        | 81331ed; 335/335; **M1 exit check passed by hand**; review clean (0 blocking)                |
-| 7 `internalFetch` for allowlisted private hosts             | ⬜ not started | —                                                                                            |
-| 8 The client (username login, Users, API tokens)            | ⬜ not started | —                                                                                            |
-| 9 End-to-end coverage for the new identity                  | ⬜ not started | —                                                                                            |
-| 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                                                                                            |
-| 11 Verification battery and close-out                       | ⬜ not started | —                                                                                            |
+| Task                                                        | Status         | Evidence / commits                                                                            |
+| ----------------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------- |
+| 1 Branch, baseline & tracker                                | ✅ done        | 23807fc; baseline 263/85 green                                                                |
+| 2 Schema, migration 0021, startup backfill                  | ✅ done        | a9e5603; fix round C1+I2 verified; 267 tests; snapshot proven by re-generate                  |
+| 3 Auth services (users, tokens, per-user sessions)          | ✅ done        | 807a697; 286/286 (+19); scoping + token-hash verified; review clean (0 blocking)              |
+| 4 Auth routes grow a username (and per-user semantics)      | ✅ done        | 0ec327e; 289/289 (+3); contract pinned by exact-equality tests; review clean (0 blocking)     |
+| 5 Admin routes (users + service tokens) and the admin guard | ✅ done        | 837c8d1; 321/321 (+32); guard + token-once + carry-overs verified; review clean (0 blocking)  |
+| 6 Service-token middleware and the provable sidecar path    | ✅ done        | 81331ed; 335/335; **M1 exit check passed by hand**; review clean (0 blocking)                 |
+| 7 `internalFetch` for allowlisted private hosts             | ✅ done        | e9aa653; 344/344 (+9); SSRF bound verified (manual redirects, exact host match); review clean |
+| 8 The client (username login, Users, API tokens)            | ⬜ not started | —                                                                                             |
+| 9 End-to-end coverage for the new identity                  | ⬜ not started | —                                                                                             |
+| 10 Docs, deploy notes, and the acceptance hook              | ⬜ not started | —                                                                                             |
+| 11 Verification battery and close-out                       | ⬜ not started | —                                                                                             |
 
 **Goal:** Real multi-user identity (users, roles, per-user sessions, an account-creating setup flow), scoped service tokens for machine callers, and `internalFetch` for allowlisted private hosts — the seams M2's document bridge needs.
 
@@ -448,7 +448,7 @@ export const internalFetchAllow = (process.env.OHMZBUDGET_INTERNAL_FETCH_ALLOW ?
 
 - `internalFetch(url: string, init?: RequestInit): Promise<Response>` — http/https only; the URL's `host[:port]` must match an allowlist entry exactly; redirects followed manually (max 5), **every hop re-validated**; `AbortSignal.timeout(30_000)` merged with `init.signal`; response size NOT capped here (callers check) but a comment says so; throws `InternalFetchError extends Error` with `code: 'not_allowed' | 'http_error' | 'too_many_redirects' | 'timeout'`.
 
-- [ ] **Step 1: Failing tests** (spin a `http.createServer` on `127.0.0.1:0` inside the test; set `process.env.OHMZBUDGET_INTERNAL_FETCH_ALLOW` before importing the module — the module reads config at import):
+- [x] **Step 1: Failing tests** (spin a `http.createServer` on `127.0.0.1:0` inside the test; set `process.env.OHMZBUDGET_INTERNAL_FETCH_ALLOW` before importing the module — the module reads config at import):
 
 ```ts
 it('reaches an allowlisted host:port', async () => {
@@ -467,9 +467,9 @@ it('allows a redirect within the allowlist', async () => {
 });
 ```
 
-- [ ] **Step 2: Implement** — consciously mirror `safeFetch`'s structure (read `server/src/services/safeFetch.ts` for the redirect loop + error style) but with the opposite admission rule (allowlist of private names instead of public-IP-only).
-- [ ] **Step 3: `npx tsc --noEmit && npm test` → green.**
-- [ ] **Step 4: Commit** — `git commit -m "feat: internalFetch for allowlisted private hosts"`
+- [x] **Step 2: Implement** — consciously mirror `safeFetch`'s structure (read `server/src/services/safeFetch.ts` for the redirect loop + error style) but with the opposite admission rule (allowlist of private names instead of public-IP-only).
+- [x] **Step 3: `npx tsc --noEmit && npm test` → green.** — 344/344 (+9, 31 files)
+- [x] **Step 4: Commit** — `git commit -m "feat: internalFetch for allowlisted private hosts"` (landed as e9aa653)
 
 ---
 
