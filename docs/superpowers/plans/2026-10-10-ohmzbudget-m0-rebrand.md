@@ -16,7 +16,7 @@ Maintained between tasks; commit shas live on branch `m0-rebrand`. Owner directi
 | 6 End-to-end tests                       | ✅ done        | 0655012; 12 files; full run 114/115 (sole fail = baseline flake, isolated green); review clean (0 blocking)                                 |
 | 7 Docker & CI identity                   | ✅ done        | b9a71d6; build 31s + health `{"status":"ok"}`; cla.yml untouched; review clean (0 blocking)                                                 |
 | 8 Electron identity                      | ✅ done        | 5941860; cookie pair + artifact names match; tsc ✓; review clean (0 blocking)                                                               |
-| 9 Docs, attribution & source links       | ⬜ not started |                                                                                                                                             |
+| 9 Docs, attribution & source links       | ✅ done        | ad24424; NOTICE created; URLs repointed + e2e in lockstep; LICENSE/CLA untouched; review clean (0 blocking)                                 |
 | 10 Website text sweep                    | ⬜ not started |                                                                                                                                             |
 | 11 Deploy skeleton & host run            | ⬜ not started |                                                                                                                                             |
 | 12 Full verification sweep               | ⬜ not started |                                                                                                                                             |
@@ -366,7 +366,7 @@ git add electron electron-builder.json && git commit -m "refactor: rename electr
 - Create: `NOTICE`
 - Do **not** modify: `LICENSE`, `CLA.md`, `website/blog/…-welcome-to-flybudget.mdx`
 
-- [ ] **Step 1: Doc sweeps (README/SECURITY/CONTRIBUTING/PLANNING/AGENTS+CLAUDE, case-sensitive order)**
+- [x] **Step 1: Doc sweeps (README/SECURITY/CONTRIBUTING/PLANNING/AGENTS+CLAUDE, case-sensitive order)**
 
 ```bash
 grep -rl 'FlyBudget' README.md SECURITY.md CONTRIBUTING.md PLANNING.md AGENTS.md CLAUDE.md | xargs sed -i 's/FlyBudget/OhmzBudget/g'
@@ -377,7 +377,7 @@ grep -rl 'dtymoszenko/FlyBudget\|dtymoszenko/flybudget' README.md SECURITY.md CO
 
 (SECURITY-related comparison content and upstream credit lines stay in NOTICE and in prose; badge/issue links repoint.)
 
-- [ ] **Step 2: Fix `project.ts` targets precisely** — edit the constants so `SOURCE_CODE_URL` and `ISSUES_URL` are `https://github.com/ohmzi/OhmzBudget` and `…/issues`; `WEBSITE_URL`, `DOCS_URL`, `SELF_HOSTING_URL` point at the fork repo (the Docusaurus site is tier-2); `LICENSE_URL` stays as-is.
+- [x] **Step 2: Fix `project.ts` targets precisely** — edit the constants so `SOURCE_CODE_URL` and `ISSUES_URL` are `https://github.com/ohmzi/OhmzBudget` and `…/issues`; `WEBSITE_URL`, `DOCS_URL`, `SELF_HOSTING_URL` point at the fork repo (the Docusaurus site is tier-2); `LICENSE_URL` stays as-is.
 
 ```bash
 grep -n 'URL =' client/src/utils/project.ts
@@ -385,7 +385,7 @@ grep -n 'URL =' client/src/utils/project.ts
 
 Then update `security.ts:186`'s hint URL and the two e2e specs' expected URLs to match, in the same commit.
 
-- [ ] **Step 3: Write `NOTICE`**
+- [x] **Step 3: Write `NOTICE`**
 
 ```markdown
 # NOTICE
@@ -399,7 +399,7 @@ OhmzBudget runs paperless-ngx (https://github.com/paperless-ngx/paperless-ngx, G
 as a separate, unmodified service.
 ```
 
-- [ ] **Step 4: Verify + commit**
+- [x] **Step 4: Verify + commit** (landed as ad24424)
 
 ```bash
 grep -n 'flybudget.org' client/src/utils/project.ts && echo 'FAIL: project.ts still points at flybudget.org' || echo OK
