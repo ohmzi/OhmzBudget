@@ -60,8 +60,37 @@ desktop app) rather than in your budget, so each device can have its own.
   [self-hosting guide](/community/self-hosting) if you'd like to use OhmzBudget on other devices.
 - **Self-hosted server**: a **Security check** of your setup (HTTPS, proxy, allowed hosts,
   encryption key, password) with a hint for anything to fix, your **Signed-in devices** (sign out
-  any of them, or all the others), **Change password**, **Sign out**, and
-  **Keep a copy of my budget on this device** (see [Working offline](./offline)).
+  any of them, or all the others), and, for admins, **Users** and **API tokens** (below). Every
+  account also has **Change password**, **Sign out**, and **Keep a copy of my budget on this
+  device** (see [Working offline](./offline)).
+
+### Users
+
+Everyone on the server shares the same budget; your **role** decides what you can do:
+
+| Role       | Description                                                                   |
+| ---------- | ----------------------------------------------------------------------------- |
+| **Member** | Uses the budget: transactions, accounts, reports, settings, bank connections. |
+| **Admin**  | Everything a member can do, plus **Users** and **API tokens**.                |
+
+**Add user** creates an account with a username, a password and a role (member by default).
+From a row's menu, an admin can **Reset password** (that signs the account out everywhere),
+make someone an admin or a member, or **Remove user**. Your own account is marked **You**, and
+the last admin can't be removed or demoted, so a server always has one. Everyone signs in with
+their own username and password, sees their own signed-in devices, and can change their own
+password.
+
+### API tokens
+
+Credentials for programs instead of people: a script, a sidecar or a webhook sends one as an
+`Authorization: Bearer …` header. Each token has a name and one or both **scopes**:
+
+- **service** — what a companion app or sidecar uses to call the server.
+- **ingest** — reserved for document import (planned later).
+
+**Create token** shows the token **once**: copy it there and then, because it can't be shown
+again. If a token leaks, **Revoke** it (row menu → **Revoke**): it stops working immediately and
+stays in the list marked **Revoked**.
 
 ## Undo
 

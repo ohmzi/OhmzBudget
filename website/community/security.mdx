@@ -50,8 +50,8 @@ The only time OhmzBudget talks to the internet is when bank sync connects to **P
 
 You can also [run OhmzBudget on your own server with Docker](./self-hosting.mdx) and open it in a browser. Then your data lives on _your_ server instead of your computer, and a few extra protections apply:
 
-- **A password protects everything.** You create it on the first visit, using a one-time setup code that only appears in the server's log, so nobody else can claim your server before you do. It's stored as a scrypt hash, never in plain text, and after 10 wrong attempts logins are blocked for 15 minutes.
-- **Login sessions are hard to steal.** Each one is a random 256-bit token kept in a cookie that scripts can't read and other websites can't send, stored on the server only as a hash, and expiring after 30 days. Changing your password signs out every other device.
+- **Accounts protect everything.** The first visit creates the **admin account** (a username and a password), using a one-time setup code that only appears in the server's log, so nobody else can claim your server before you do. Passwords are stored as scrypt hashes, never in plain text, and after 10 wrong attempts logins are blocked for 15 minutes. The admin adds an account for each person (with a **member** or **admin** role); only admins can manage accounts and API tokens.
+- **Login sessions are hard to steal.** Each one is a random 256-bit token kept in a cookie that scripts can't read and other websites can't send, stored on the server only as a hash, and expiring after 30 days. Changing your password signs out your other devices.
 - **Bank credentials are always encrypted.** The server refuses to start without an encryption key, which you keep outside the database as a Docker secret.
 - **The container is locked down.** It runs as an unprivileged user, and the example setup makes its filesystem read-only and drops all Linux privileges.
 - **Images are verifiable.** They're built by GitHub from the public source, with a signed build attestation (just like the desktop installer) and a software bill of materials, and they're scanned for known vulnerabilities every week.

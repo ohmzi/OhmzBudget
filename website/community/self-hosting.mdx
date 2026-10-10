@@ -5,11 +5,11 @@ sidebar_label: Self-hosting (Docker)
 
 # Self-hosting with Docker
 
-Besides the desktop app, you can run OhmzBudget on your own server (a home server, a NAS, or a small cloud machine) and open it from any browser, like Actual Budget or Firefly III. It runs in a single Docker container, and a password protects it.
+Besides the desktop app, you can run OhmzBudget on your own server (a home server, a NAS, or a small cloud machine) and open it from any browser, like Actual Budget or Firefly III. It runs in a single Docker container, and you sign in with your own account.
 
 :::info
 
-The desktop app doesn't need any of this. Self-hosting is for when you want to reach your budget from several devices, or share it with someone in your household.
+The desktop app doesn't need any of this. Self-hosting is for when you want to reach your budget from several devices, or share it with someone in your household — each person gets their own account.
 
 :::
 
@@ -34,13 +34,13 @@ You need [Docker](https://docs.docker.com/get-docker/) with Docker Compose.
    docker compose up -d
    ```
 
-4. Open `http://<your-server>:3001` in a browser and **create your password**. OhmzBudget also asks for a **setup code**, which only appears in the server's log:
+4. Open `http://<your-server>:3001` in a browser and **create your admin account**: pick a username and a password, then enter the **setup code**, which only appears in the server's log:
 
    ```bash
    docker logs ohmzbudget
    ```
 
-   The code makes sure only someone with access to the server can set the password, not whoever happens to open the page first.
+   The code makes sure only someone with access to the server can create the first account, not whoever happens to open the page first. That account is the **admin**: it can add accounts for other people in **Settings → Server → Users**.
 
 That's it. Your budget is stored in a Docker volume.
 
@@ -102,25 +102,31 @@ environment:
 
 ## Settings
 
-| Variable                   | What it does                                                                                                                                |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OHMZBUDGET_DATA_KEY_FILE` | Path to the file holding the encryption key (a Docker secret). **Required** (or `OHMZBUDGET_DATA_KEY`).                                     |
-| `OHMZBUDGET_DATA_KEY`      | The key itself, instead of a file. Less private: anyone who can run `docker inspect` can see it.                                            |
-| `OHMZBUDGET_ALLOWED_HOSTS` | Comma-separated addresses OhmzBudget answers to, e.g. `budget.example.com,192.168.1.20`. Recommended; by default it answers to any address. |
-| `OHMZBUDGET_TRUST_PROXY`   | Set to the number of reverse proxies in front of OhmzBudget (usually `1`) when using one.                                                   |
-| `PORT`                     | Port inside the container (default `3001`). You'll usually change the port mapping in `docker-compose.yml` instead.                         |
+| Variable                          | What it does                                                                                                                                                                                                                                                                                                          |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OHMZBUDGET_DATA_KEY_FILE`        | Path to the file holding the encryption key (a Docker secret). **Required** (or `OHMZBUDGET_DATA_KEY`).                                                                                                                                                                                                               |
+| `OHMZBUDGET_DATA_KEY`             | The key itself, instead of a file. Less private: anyone who can run `docker inspect` can see it.                                                                                                                                                                                                                      |
+| `OHMZBUDGET_ALLOWED_HOSTS`        | Comma-separated addresses OhmzBudget answers to, e.g. `budget.example.com,192.168.1.20`. Recommended; by default it answers to any address.                                                                                                                                                                           |
+| `OHMZBUDGET_TRUST_PROXY`          | Set to the number of reverse proxies in front of OhmzBudget (usually `1`) when using one.                                                                                                                                                                                                                             |
+| `OHMZBUDGET_INTERNAL_FETCH_ALLOW` | Private hosts OhmzBudget may call (e.g. `paperless:8000`), comma-separated. Entries match the address's host exactly, so a host that listens on a non-default port must be written with it (`paperless:8000` matches; `paperless` alone doesn't). Not used yet: the document-import features that need it come later. |
+| `PORT`                            | Port inside the container (default `3001`). You'll usually change the port mapping in `docker-compose.yml` instead.                                                                                                                                                                                                   |
 
-## Your password
+## Your account
 
-- Change it in **Settings → Server**. Changing it signs out every other device.
-- After 10 wrong attempts, logins are blocked for up to 15 minutes.
-- Forgot it? Remove the saved password (this also signs everyone out):
+The first visit creates the **admin account**: a username, a password, and the one-time setup code from the server log. The password is stored as a scrypt hash, never in plain text.
+
+Upgrading from the single-password version? The old password signs in as the username `admin`.
+
+- **Settings → Server → Users** lists the accounts. An admin adds more with **Add user**, each with a **member** or **admin** role; everyone shares the same budget and signs in with their own username and password.
+- Change your own password in **Settings → Server**. That signs out your other devices, not anyone else's.
+- An admin resetting someone's password signs that account out everywhere; after 10 wrong attempts, logins are blocked for up to 15 minutes.
+- Forgot the admin password? Remove every account (this also signs everyone out):
 
   ```bash
   docker exec ohmzbudget node reset-password.cjs
   ```
 
-  Then open OhmzBudget and create a new password, using the new setup code from `docker logs ohmzbudget`.
+  Then open OhmzBudget and create the admin account again, using the new setup code from `docker logs ohmzbudget`.
 
 ## Backups
 
@@ -157,8 +163,9 @@ Database updates are applied automatically when the new version starts. Back up 
 
 - It runs as an unprivileged user, never as root.
 - The example Compose file makes the container's filesystem read-only, drops all Linux capabilities, and blocks privilege escalation.
-- Setting the first password needs a one-time setup code from the server log, so nobody else can claim a freshly started server.
+- Creating the first account (an admin) needs a one-time setup code from the server log, so nobody else can claim a freshly started server.
 - Passwords are stored as scrypt hashes, never in plain text. Login sessions are random 256-bit tokens, stored only as hashes, in a cookie scripts can't read, and they expire after 30 days.
+- Accounts have roles: only admins can manage accounts and API tokens. Machine callers (a sidecar, a webhook) use revocable API tokens instead of an account.
 - Behind HTTPS, OhmzBudget tells browsers to always use HTTPS for your address (HSTS).
 - Bank credentials (Plaid and SimpleFIN) are encrypted with your key, which is kept outside the database.
 - Every image is built by GitHub Actions from the public source code, for both `amd64` and `arm64`, with a software bill of materials (SBOM) and a signed build attestation, and is scanned for known vulnerabilities every week. You can check an image really came from this repository:

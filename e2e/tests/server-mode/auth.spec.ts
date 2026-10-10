@@ -9,6 +9,8 @@ test.describe.configure({ mode: 'serial' });
 
 const PASSWORD = 'correct horse battery';
 const NEW_PASSWORD = 'even better passphrase';
+/** The account the setup creates; every later sign-in goes through it */
+const OWNER = 'owner';
 
 /** The browser that sets up the server; it stays signed in across tests */
 let owner: Page;
@@ -19,6 +21,7 @@ test.beforeAll(async ({ browser }) => {
 test.afterAll(async () => owner.context().close());
 
 async function signIn(page: Page, password: string) {
+  await page.getByLabel('Username', { exact: true }).fill(OWNER);
   await page.getByLabel('Password', { exact: true }).fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
 }
@@ -34,6 +37,7 @@ test('a new server asks for a password and the setup code', async ({ baseURL }) 
   expect(api.status()).toBe(401);
 
   await owner.getByLabel('Setup code').fill('AAAA-BBBB-CCCC-DDDD');
+  await owner.getByLabel('Username').fill(OWNER);
   await owner.getByLabel('New password').fill(PASSWORD);
   await owner.getByLabel('Confirm password').fill(PASSWORD);
   await owner.getByRole('button', { name: 'Create password' }).click();
@@ -306,23 +310,7 @@ test('warns before sending the password over plain HTTP to another machine', asy
   }
 });
 
-test("someone guessing passwords can't lock the owner out", async ({ playwright, baseURL }) => {
-  // An attacker from the same address (e.g. behind the same reverse proxy) burns
-  // through the failed-login limit…
-  const attacker = await playwright.request.newContext({ baseURL });
-  let status = 0;
-  for (let i = 0; i < 12 && status !== 429; i++) {
-    status = (
-      await attacker.post('/api/auth/login', { data: { password: `guess ${i}` } })
-    ).status();
-  }
-  expect(status).toBe(429);
-  await attacker.dispose();
-
-  // …but a browser that signed in before has its own limit and still gets in
-  await owner.goto(`${baseURL}/settings?tab=server`);
-  await owner.getByRole('button', { name: 'Sign out', exact: true }).click();
-  await expect(owner.getByText('Sign in to OhmzBudget')).toBeVisible();
-  await signIn(owner, NEW_PASSWORD);
-  await expect(owner.getByRole('complementary')).toBeVisible();
-});
+// The password-guessing check ("someone guessing passwords can't lock the owner out") lives
+// at the end of users.spec.ts. It deliberately burns the per-IP failed-login limit (10
+// failures, 15 minutes), which would refuse every fresh sign-in in whatever spec runs next:
+// it has to be the last sign-in of the whole server-mode project.

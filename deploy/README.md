@@ -35,8 +35,9 @@ curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:7300/   # 200 (login s
 docker compose -f compose.yml -f docker-compose.override.yml ps
 ```
 
-The first visit at http://localhost:7300 asks to set a password and needs the
-one-time setup code printed in the logs: `docker logs ohmzbudget`.
+The first visit at http://localhost:7300 creates the admin account (a username
+and a password) and needs the one-time setup code printed in the logs:
+`docker logs ohmzbudget`.
 
 After the first run, use `docker compose -f compose.yml -f docker-compose.override.yml up -d --build`
 again to rebuild after a code change (this skeleton always builds the image

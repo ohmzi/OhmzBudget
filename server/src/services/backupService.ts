@@ -23,11 +23,11 @@ import {
 
 // Full JSON backup of the user's data, and restoring one.
 //
-// Bank credentials (Plaid/SimpleFIN), the server password and login sessions are
-// never included: a backup file is easy to leave lying around, and credentials are
-// encrypted with a key that only this installation has anyway. After a restore,
-// connected banks keep syncing into the same accounts when the backup came from
-// this installation.
+// Bank credentials (Plaid/SimpleFIN), server accounts, service tokens and login
+// sessions are never included: a backup file is easy to leave lying around, and
+// credentials are encrypted with a key that only this installation has anyway.
+// After a restore, connected banks keep syncing into the same accounts when the
+// backup came from this installation.
 
 export const BACKUP_FORMAT = 'ohmzbudget-backup';
 export const BACKUP_VERSION = 2;

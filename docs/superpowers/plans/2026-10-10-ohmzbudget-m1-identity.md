@@ -2,6 +2,24 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## Execution Tracker
+
+Maintained between tasks; commit shas live on branch `m1-identity`. Owner directive 2026-10-10: autonomous execution, haiku subagents, plan-as-tracker (this table + ticked boxes are the cross-session source of truth).
+
+| Task                                                        | Status  | Evidence / commits                                                                                                                      |
+| ----------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 Branch, baseline & tracker                                | ✅ done | 23807fc; baseline 263/85 green                                                                                                          |
+| 2 Schema, migration 0021, startup backfill                  | ✅ done | a9e5603; fix round C1+I2 verified; 267 tests; snapshot proven by re-generate                                                            |
+| 3 Auth services (users, tokens, per-user sessions)          | ✅ done | 807a697; 286/286 (+19); scoping + token-hash verified; review clean (0 blocking)                                                        |
+| 4 Auth routes grow a username (and per-user semantics)      | ✅ done | 0ec327e; 289/289 (+3); contract pinned by exact-equality tests; review clean (0 blocking)                                               |
+| 5 Admin routes (users + service tokens) and the admin guard | ✅ done | 837c8d1; 321/321 (+32); guard + token-once + carry-overs verified; review clean (0 blocking)                                            |
+| 6 Service-token middleware and the provable sidecar path    | ✅ done | 81331ed; 335/335; **M1 exit check passed by hand**; review clean (0 blocking)                                                           |
+| 7 `internalFetch` for allowlisted private hosts             | ✅ done | e9aa653; 344/344 (+9); SSRF bound verified (manual redirects, exact host match); review clean                                           |
+| 8 The client (username login, Users, API tokens)            | ✅ done | 63a9db7; labels pinned + browser-smoked; fail-closed gating; review clean (0 blocking)                                                  |
+| 9 End-to-end coverage for the new identity                  | ✅ done | e6770c7; **e2e 119/119 zero flakes**; rate-limit coupling documented + moved; review clean (0 blocking)                                 |
+| 10 Docs, deploy notes, and the acceptance hook              | ✅ done | 9e59725 + e924e6a (reset script fix) + 77eeaaa + 582a6d1; build SUCCESS; review clean (0 blocking)                                      |
+| 11 Verification battery and close-out                       | ✅ done | 1ffb1b2 (+DST-safe test fix); 344 · 85 · e2e 118/119 (known flake, isolated green) · builds ✓ · redeploy verified; controller close-out |
+
 **Goal:** Real multi-user identity (users, roles, per-user sessions, an account-creating setup flow), scoped service tokens for machine callers, and `internalFetch` for allowlisted private hosts — the seams M2's document bridge needs.
 
 **Architecture:** Additive only. A `users` table owned by a new `auth` service layer; sessions gain `user_id`; the old single-password `auth_config` row becomes migration input (one backfill creates the `admin` user) plus the install secret that keeps the device-cookie lockout defense working. Service tokens are hashed at rest, scoped, revoked by timestamp, and accepted only under `/api/service/*` and `/api/ingest/*` via an `Authorization: Bearer ozb_…` header that bypasses session auth but never the host/origin guards. The budget itself stays shared — every user sees the same data (spec D3).
@@ -38,7 +56,7 @@
 
 **Files:** none in the repo except the plan file's tracker.
 
-- [ ] **Step 1: Branch from the M0 tip**
+- [x] **Step 1: Branch from the M0 tip**
 
 ```bash
 cd ~/StudioProjects/OhmzBudget
@@ -46,7 +64,7 @@ git checkout main && git merge --ff-only origin/main 2>/dev/null; git checkout m
 git checkout -b m1-identity
 ```
 
-- [ ] **Step 2: Baseline (fast suites)**
+- [x] **Step 2: Baseline (fast suites)** — server 263/263 (24 files), client 85/85 (12 files), tsc ×2, format ✓
 
 ```bash
 (cd server && npm test) && (cd client && npm test) && (cd client && npx tsc --noEmit) && (cd server && npx tsc --noEmit) && npm run format:check
@@ -54,11 +72,11 @@ git checkout -b m1-identity
 
 Expected: all green (server 263, client 85). If not, stop and report — the baseline is broken.
 
-- [ ] **Step 3: Seed the plan tracker**
+- [x] **Step 3: Seed the plan tracker**
 
 Add an `## Execution Tracker` table under the header (same shape as the M0 plan's) with Tasks 1–11 as `⬜ not started`.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit** (landed as 23807fc)
 
 ```bash
 git add docs/superpowers/plans/2026-10-10-ohmzbudget-m1-identity.md
@@ -82,7 +100,7 @@ git commit -m "docs: start M1 identity plan (tracker + baseline)"
 
 - Produces: `users` / `service_tokens` tables (column names below), `authConfig.secret`, `countUsers(): number`, `ensureAuthReady(): void` (idempotent).
 
-- [ ] **Step 1: Write the failing tests** (`server/src/auth/users.test.ts` — mirror `routes/auth.test.ts`'s migrate-first harness)
+- [x] **Step 1: Write the failing tests** (`server/src/auth/users.test.ts` — mirror `routes/auth.test.ts`'s migrate-first harness; + the fix round's idempotency test)
 
 ```ts
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -126,9 +144,9 @@ describe('ensureAuthReady', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify it fails** — `cd server && npx vitest run src/auth/users.test.ts` → FAIL (`users` export missing).
+- [x] **Step 2: Run to verify it fails** — `cd server && npx vitest run src/auth/users.test.ts` → FAIL (`users` export missing).
 
-- [ ] **Step 3: Schema additions** (`schema.ts`, after the `authConfig`/`sessions` block)
+- [x] **Step 3: Schema additions** (`schema.ts`, after the `authConfig`/`sessions` block)
 
 ```ts
 /** Server-mode accounts. The budget data is shared; roles gate administration. */
@@ -170,7 +188,7 @@ export const serviceTokens = sqliteTable('service_tokens', {
 
 `authConfig` gains `secret: text('secret')`; `sessions` gains `userId: text('user_id').references(() => users.id, { onDelete: 'cascade' })`.
 
-- [ ] **Step 4: Migration `0021_users_service_tokens.sql`**
+- [x] **Step 4: Migration `0021_users_service_tokens.sql`** (+ `meta/0021_snapshot.json`, generated in the fix round with a temporary legacy-table reconstruction and proven by a re-generate reporting "No schema changes")
 
 ```sql
 CREATE TABLE `users` (
@@ -204,7 +222,7 @@ ALTER TABLE `auth_config` ADD `secret` text;
 
 Append to `meta/_journal.json` (copy 0020's entry): `{"idx": 21, "version": "6", "when": 1790900000000, "tag": "0021_users_service_tokens", "breakpoints": true}`.
 
-- [ ] **Step 5: `ensureAuthReady()`** (in `users.ts`)
+- [x] **Step 5: `ensureAuthReady()`** (in `users.ts`) — fix round C1: the backfill requires `legacy?.passwordHash` so fresh installs stay idempotent
 
 ```ts
 import { randomBytes } from 'crypto';
@@ -223,7 +241,10 @@ export function countUsers(): number {
  */
 export function ensureAuthReady(): void {
   const legacy = db.select().from(authConfig).get();
-  if (countUsers() === 0 && legacy) {
+  // Only a row with a REAL hash is legacy input. The empty-hash carrier row created on fresh
+  // installs (below) must never be backfilled — otherwise a second startup would mint a
+  // phantom empty-hash `admin` and no account could ever be set up (see review finding T2-C1).
+  if (countUsers() === 0 && legacy?.passwordHash) {
     db.insert(users)
       .values({ id: nanoid(), username: 'admin', role: 'admin', passwordHash: legacy.passwordHash })
       .run();
@@ -239,9 +260,9 @@ const randomKey = () => randomBytes(32).toString('base64url');
 
 Wire in `startServer()` right after the migration block: `const { ensureAuthReady } = await import('./auth/users.js'); ensureAuthReady();` — keep it OUT of `browser/app.ts`.
 
-- [ ] **Step 6: Run the tests → PASS; then `cd server && npx tsc --noEmit && npm test`** (263 must not drop).
+- [x] **Step 6: Run the tests → PASS; then `cd server && npx tsc --noEmit && npm test`** (263 must not drop). — landed at 267 (263+4), tsc clean
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit** (landed as d388e22 pre-rewrite / 8dcc694 post-rewrite, plus 615fbda C1 and a9e5603 snapshot)
 
 ```bash
 git add server/src/db server/src/auth/users.ts server/src/auth/users.test.ts server/src/index.ts
@@ -263,11 +284,11 @@ git commit -m "feat: users and service-token schema with startup backfill"
 
 - Consumes: Task 2's tables + `ensureAuthReady`.
 - Produces (exact signatures later tasks rely on):
-  - `users.ts`: `interface SessionUser { id: string; username: string; role: 'admin' | 'member' }`; `listUsers(): SessionUser[]`; `createUser(username, password, role): Promise<{ ok: true; user: SessionUser } | { ok: false; error: 'username_taken' | 'invalid_username' }>`; `verifyLogin(username, password): Promise<SessionUser | null>`; `setUserRole(id, role): { ok: boolean; error?: 'last_admin' }`; `resetUserPassword(id, password): Promise<boolean>`; `deleteUser(id, actorId): { ok: boolean; error?: 'self' | 'last_admin' }`; `changeOwnPassword(id, currentPassword, newPassword, keepSessionToken): Promise<{ ok: boolean; error?: 'wrong_password' }>`; `sessionUser(token): SessionUser | null`; `isSetupNeeded(): boolean`.
+  - `users.ts`: `interface SessionUser { id: string; username: string; role: 'admin' | 'member' }`; `listUsers(): SessionUser[]`; `createUser(username, password, role): Promise<{ ok: true; user: SessionUser } | { ok: false; error: 'username_taken' | 'invalid_username' }>`; `verifyLogin(username, password): Promise<SessionUser | null>`; `setUserRole(id, role): { ok: boolean; error?: 'last_admin' }`; `resetUserPassword(id, password): Promise<boolean>`; `deleteUser(id, actorId): { ok: boolean; error?: 'self' | 'last_admin' }`; `changeOwnPassword(id, currentPassword, newPassword, keepSessionToken): Promise<{ ok: boolean; error?: 'wrong_password' }>`; `sessionUser(token): SessionUser | null`; `isSetupNeeded(): boolean` — **true when NO user with a real (non-empty) `passwordHash` exists** (tolerates empty-hash rows from the interim window; review finding T2-C1).
   - `serviceTokens.ts`: `type Scope = 'service' | 'ingest'`; `mintToken(name: string, scopes: Scope[]): { token: string; id: string }`; `verifyBearer(header: string | undefined): { id: string; name: string; scopes: Scope[] } | null`; `listTokens(): { id, name, scopes, createdAt, lastUsedAt, revokedAt }[]`; `revokeToken(id: string): boolean`.
   - `sessions.ts`: `createSession(userId, userAgent?): { token; expiresAt }`; `listSessions(userId, currentToken)`; `deleteOtherSessions(userId, currentToken): number`; `deleteSessionsForUser(userId): number`; `isValidSession` unchanged in name (now also requires a live user).
 
-- [ ] **Step 1: Failing tests — users API** (extend `users.test.ts`):
+- [x] **Step 1: Failing tests — users API** (extend `users.test.ts`):
 
 ```ts
 it('creates, verifies and lists users; username is case-insensitively unique', async () => {
@@ -290,7 +311,7 @@ it('deleting a user removes their sessions', async () => {
 });
 ```
 
-- [ ] **Step 2: Failing tests — tokens** (`serviceTokens.test.ts`):
+- [x] **Step 2: Failing tests — tokens** (`serviceTokens.test.ts`):
 
 ```ts
 it('mints a prefixed token, stores only its hash, verifies and lists without the hash', () => {
@@ -308,11 +329,11 @@ it('rejects unknown, malformed and revoked tokens', () => {
 });
 ```
 
-- [ ] **Step 3: Implement** — mirror `password.ts`/`sessions.ts` style. `verifyLogin` hashes a dummy password when the user is missing (copy `checkPassword`'s timing note). Password changes/resets call `deleteSessionsForUser` except the caller's kept token. `verifyBearer` = `createHash('sha256')` lookup + `revokedAt === null`; parse scopes JSON defensively. Sessions: `createSession` writes `userId`; `isValidSession` joins `users` (`users.id = sessions.userId`); device HMAC switches from `authConfig.passwordHash` to `authConfig.secret` (read the fresh row each call).
+- [x] **Step 3: Implement** — mirror `password.ts`/`sessions.ts` style. `verifyLogin` hashes a dummy password when the user is missing (copy `checkPassword`'s timing note). Password changes/resets call `deleteSessionsForUser` except the caller's kept token. `verifyBearer` = `createHash('sha256')` lookup + `revokedAt === null`; parse scopes JSON defensively. Sessions: `createSession` writes `userId`; `isValidSession` joins `users` (`users.id = sessions.userId`); device HMAC switches from `authConfig.passwordHash` to `authConfig.secret` (read the fresh row each call).
 
-- [ ] **Step 4: Full server suite + tsc → green** (update the existing `sessions`-asserting tests where signatures changed).
+- [x] **Step 4: Full server suite + tsc → green** (update the existing `sessions`-asserting tests where signatures changed). — 286/286, tsc clean
 
-- [ ] **Step 5: Commit** — `git commit -m "feat: user accounts, scoped service tokens and per-user sessions"`
+- [x] **Step 5: Commit** — `git commit -m "feat: user accounts, scoped service tokens and per-user sessions"` (landed as 807a697)
 
 ---
 
@@ -327,7 +348,7 @@ it('rejects unknown, malformed and revoked tokens', () => {
 
 - Consumes: Task 3 APIs. Produces (wire contract): `GET /api/auth/status` → `{ enabled, needsSetup, authenticated, user: { id, username, role } | null }`; `POST /api/auth/setup { username, password, setupCode }`; `POST /api/auth/login { username, password }`; `POST /api/auth/change-password { currentPassword, newPassword }` (caller's own); session routes unchanged in shape, now scoped to the caller.
 
-- [ ] **Step 1: Update the existing tests first** — every `setup`/`login` body gains `username: 'owner'`; sign-in assertions read `status.user.username === 'owner'`. Add:
+- [x] **Step 1: Update the existing tests first** — every `setup`/`login` body gains `username: 'owner'`; sign-in assertions read `status.user.username === 'owner'`. Add:
 
 ```ts
 it('the setup username must be valid and unique', async () => {
@@ -342,11 +363,11 @@ it('signing out others never touches another user’s sessions', async () => {
 });
 ```
 
-- [ ] **Step 2: Implement** — `/setup` validates `username` (`z.string().min(1).max(64).regex(/^[a-zA-Z0-9._-]+$/)`), replaces the password check with `isSetupNeeded()`, calls `createUser(..., 'admin')`; `/login` keys on `verifyLogin`, error text unchanged (`Incorrect password`) to avoid enumeration; `/status` includes `user` via `sessionUser(token)`; `requireSession` attaches `res.locals.user = sessionUser(token)` (declare `interface AuthedLocals { user?: SessionUser; service?: { name: string; scopes: string[] } }` exported from a shared `server/src/types.ts` and use `Response<unknown, AuthedLocals>` where needed); `signedIn()` helpers return `{ token, user }`.
+- [x] **Step 2: Implement** — `/setup` validates `username` (`z.string().min(1).max(64).regex(/^[a-zA-Z0-9._-]+$/)`), replaces the password check with `isSetupNeeded()`, calls `createUser(..., 'admin')`; **when a user row already exists with that username AND an empty `passwordHash` (the interim-window phantom from review finding T2-C1), upgrade that row in place instead of 409ing**; `/login` keys on `verifyLogin`, error text unchanged (`Incorrect password`) to avoid enumeration; `/status` includes `user` via `sessionUser(token)`; `requireSession` attaches `res.locals.user = sessionUser(token)` (declare `interface AuthedLocals { user?: SessionUser; service?: { name: string; scopes: string[] } }` exported from a shared `server/src/types.ts` and use `Response<unknown, AuthedLocals>` where needed); `signedIn()` helpers return `{ token, user }`.
 
-- [ ] **Step 3: `cd server && npx tsc --noEmit && npm test` → green.**
+- [x] **Step 3: `cd server && npx tsc --noEmit && npm test` → green.** — 289/289
 
-- [ ] **Step 4: Commit** — `git commit -m "feat: username-based setup and login, per-user sessions"`
+- [x] **Step 4: Commit** — `git commit -m "feat: username-based setup and login, per-user sessions"` (landed as 0ec327e)
 
 ---
 
@@ -364,10 +385,10 @@ it('signing out others never touches another user’s sessions', async () => {
 - `GET /api/users` → `SessionUser[]`; `POST /api/users { username, password, role }` → `201 { user }` | `409 username_taken`; `PATCH /api/users/:id { role }`; `POST /api/users/:id/reset-password { password }`; `DELETE /api/users/:id`.
 - `GET /api/service-tokens` → list (no hashes); `POST /api/service-tokens { name, scopes }` → `201 { id, name, scopes, token }` (**only time the token appears**); `DELETE /api/service-tokens/:id` (revoke).
 
-- [ ] **Step 1: Failing tests** — non-admin → 403 on every route; admin CRUD happy paths; last-admin demote → `409 last_admin`; self-delete → `409 self`; token create response contains the token exactly once and list never does.
-- [ ] **Step 2: Implement** with zod validation mirroring existing routers' style.
-- [ ] **Step 3: `npx tsc --noEmit && npm test` → green.**
-- [ ] **Step 4: Commit** — `git commit -m "feat: admin APIs for users and service tokens"`
+- [x] **Step 1: Failing tests** — non-admin → 403 on every route; admin CRUD happy paths; last-admin demote → `409 last_admin`; self-delete → `409 self`; token create response contains the token exactly once and list never does. **Also from the T4 review, same commit:** (a) serialize `/setup` (an in-flight flag in `routes/auth.ts` around the gate + create — two concurrent valid-code setups ⇒ exactly one admin, the loser gets 409; closes the bounded TOCTOU race); (b) `listUsers()` excludes users with an empty `passwordHash` (ghost rows can never sign in). Test both. — landed with `countAdmins()` ghost-filtering too (closes the phantom-admin lockout)
+- [x] **Step 2: Implement** with zod validation mirroring existing routers' style.
+- [x] **Step 3: `npx tsc --noEmit && npm test` → green.** — 321/321 (+32)
+- [x] **Step 4: Commit** — `git commit -m "feat: admin APIs for users and service tokens"` (landed as 837c8d1)
 
 ---
 
@@ -390,10 +411,10 @@ app.use('/api/ingest', serviceAuth('ingest'), ingestRouter);
 - `serviceAuth(requiredScope: Scope): RequestHandler` — skips entirely when `!serverMode`; reads `Authorization: Bearer`; `verifyBearer` → null ⇒ `401 {"error":"Unauthorized"}`; scope missing ⇒ `403 {"error":"Forbidden"}`; on success sets `res.locals.service = { name, scopes }` and touches `last_used_at` (in-memory throttle, mirror `touchSession`).
 - `GET /api/service/whoami` → `{ name, scopes }`. `POST /api/ingest/paperless` → `200 {"ok":true}` (stub; a comment marks it as M2's replacement point).
 
-- [ ] **Step 1: Failing tests** — no header → 401; garbage → 401; `ingest` token on `/api/service/whoami` → 403; `service` token → 200 with `{name}`; revoked mid-test → 401; a **session cookie alone** on `/api/service/whoami` → 401 (service routes do not accept cookies); `/api/accounts` with a Bearer header and no cookie → 401 (the bypass is path-scoped, not global).
-- [ ] **Step 2: Implement; `npx tsc --noEmit && npm test` → green.**
-- [ ] **Step 3: Commit** — `git commit -m "feat: scoped service-token auth for sidecar routes"`
-- [ ] **Step 4: Prove the path by hand (the M1 exit check)** — noting the exact commands in the report:
+- [x] **Step 1: Failing tests** — no header → 401; garbage → 401; `ingest` token on `/api/service/whoami` → 403; `service` token → 200 with `{name}`; revoked mid-test → 401; a **session cookie alone** on `/api/service/whoami` → 401 (service routes do not accept cookies); `/api/accounts` with a Bearer header and no cookie → 401 (the bypass is path-scoped, not global).
+- [x] **Step 2: Implement; `npx tsc --noEmit && npm test` → green.** — 335/335 (30 files)
+- [x] **Step 3: Commit** — `git commit -m "feat: scoped service-token auth for sidecar routes"` (landed as 81331ed)
+- [x] **Step 4: Prove the path by hand (the M1 exit check)** — PASSED on a scratch server-mode instance (whoami+Bearer → 200 `{"name":"sidecar","scopes":["service"]}`; no header → 401; wrong scope → 403; cookie-only → 401; ingest stub → `{"ok":true}`; `/api/accounts`+Bearer → 401). Noting the exact commands in the report:
 
 ```bash
 # against the dev server or the container: mint via the admin API first, then
@@ -427,7 +448,7 @@ export const internalFetchAllow = (process.env.OHMZBUDGET_INTERNAL_FETCH_ALLOW ?
 
 - `internalFetch(url: string, init?: RequestInit): Promise<Response>` — http/https only; the URL's `host[:port]` must match an allowlist entry exactly; redirects followed manually (max 5), **every hop re-validated**; `AbortSignal.timeout(30_000)` merged with `init.signal`; response size NOT capped here (callers check) but a comment says so; throws `InternalFetchError extends Error` with `code: 'not_allowed' | 'http_error' | 'too_many_redirects' | 'timeout'`.
 
-- [ ] **Step 1: Failing tests** (spin a `http.createServer` on `127.0.0.1:0` inside the test; set `process.env.OHMZBUDGET_INTERNAL_FETCH_ALLOW` before importing the module — the module reads config at import):
+- [x] **Step 1: Failing tests** (spin a `http.createServer` on `127.0.0.1:0` inside the test; set `process.env.OHMZBUDGET_INTERNAL_FETCH_ALLOW` before importing the module — the module reads config at import):
 
 ```ts
 it('reaches an allowlisted host:port', async () => {
@@ -446,9 +467,9 @@ it('allows a redirect within the allowlist', async () => {
 });
 ```
 
-- [ ] **Step 2: Implement** — consciously mirror `safeFetch`'s structure (read `server/src/services/safeFetch.ts` for the redirect loop + error style) but with the opposite admission rule (allowlist of private names instead of public-IP-only).
-- [ ] **Step 3: `npx tsc --noEmit && npm test` → green.**
-- [ ] **Step 4: Commit** — `git commit -m "feat: internalFetch for allowlisted private hosts"`
+- [x] **Step 2: Implement** — consciously mirror `safeFetch`'s structure (read `server/src/services/safeFetch.ts` for the redirect loop + error style) but with the opposite admission rule (allowlist of private names instead of public-IP-only).
+- [x] **Step 3: `npx tsc --noEmit && npm test` → green.** — 344/344 (+9, 31 files)
+- [x] **Step 4: Commit** — `git commit -m "feat: internalFetch for allowlisted private hosts"` (landed as e9aa653)
 
 ---
 
@@ -464,11 +485,11 @@ it('allows a redirect within the allowlist', async () => {
 
 **Interfaces:** consumes Task 5's routes; labels the e2e task relies on: buttons `Add user`, `Create token`; fields `Username`, `Password`, `Name`, `Scopes` (two checkboxes labelled `service` and `ingest`); the created token appears in a `role="status"` block with a `Copy` button and the warning `Copy this token now — it will not be shown again.`; row menus `Reset password`, `Make admin` / `Make member`, `Remove user`, `Revoke`.
 
-- [ ] **Step 1: Implement the API wrappers + AuthGate fields** (above).
-- [ ] **Step 2: `UsersSection`** — TanStack Query `['users']`; table (Username, Role `Badge`, Created, Last login) using the existing table-row idiom; `Add user` opens the shared `Modal` with username/password/role select; row `RowMenu` per the labels above; destructive ones through `ConfirmModal`. Errors surface via the existing error string convention.
-- [ ] **Step 3: `ApiTokensSection`** — query `['service-tokens']`; table (Name, Scopes badges, Created, Last used); create dialog per labels; after create, show the one-time token block; `Revoke` via `ConfirmModal`.
-- [ ] **Step 4: Verify** — `cd client && npx tsc --noEmit && npm test && npm run build && npx vite build --mode demo 2>&1 | tail -3` (demo must pass; the sections simply won't render in demo/serve mode).
-- [ ] **Step 5: Commit** — `git commit -m "feat: multi-user login, user management and API tokens in the client"`
+- [x] **Step 1: Implement the API wrappers + AuthGate fields** (above).
+- [x] **Step 2: `UsersSection`** — TanStack Query `['users']`; table (Username, Role `Badge`, actions — Created/Last-login dropped per the T5 `SessionUser[]` ruling); `Add user` opens the shared `Modal` with username/password/role select; row `RowMenu` per the labels above; destructive ones through `ConfirmModal`. Errors surface via the existing error string convention.
+- [x] **Step 3: `ApiTokensSection`** — query `['service-tokens']`; table (Name, Scopes badges, Created, Last used); create dialog per labels; after create, show the one-time token block; `Revoke` via `ConfirmModal`.
+- [x] **Step 4: Verify** — `cd client && npx tsc --noEmit && npm test && npm run build && npx vite build --mode demo 2>&1 | tail -3` (demo must pass; the sections simply won't render in demo/serve mode). — all green + a browser smoke against a real server instance
+- [x] **Step 5: Commit** — `git commit -m "feat: multi-user login, user management and API tokens in the client"` (landed as 63a9db7)
 
 ---
 
@@ -482,9 +503,9 @@ it('allows a redirect within the allowlist', async () => {
 
 New coverage (serial with the existing spec's server): admin opens Settings → Server and creates a member `household`; member signs in in a second context and does NOT see `Add user`; admin mints a token named `test-sidecar` with scope `service`; a raw `fetch` from the test (Playwright `request`) to `/api/service/whoami` with `Authorization: Bearer <token>` returns 200 and the name; without the header → 401; after `Revoke` → 401 (poll for the revoke to land); a member's cookie gets 403 from `GET /api/users`.
 
-- [ ] **Step 1: Update + add specs.**
-- [ ] **Step 2: Full run** — `cd e2e && npm test` — all four projects green (desktop/phone/demo/server-mode; the known flake pair: isolated re-run evidence, never mask).
-- [ ] **Step 3: Commit** — `git commit -m "test: e2e coverage for users, roles and service tokens"`
+- [x] **Step 1: Update + add specs.** — plus the accepted deviation: the rate-limit-burn test moved to the end of users.spec (body preserved; pointer comments both files)
+- [x] **Step 2: Full run** — `cd e2e && npm test` — all four projects green (desktop/phone/demo/server-mode; the known flake pair: isolated re-run evidence, never mask). — 119/119, zero flakes
+- [x] **Step 3: Commit** — `git commit -m "test: e2e coverage for users, roles and service tokens"` (landed as e6770c7)
 
 ---
 
@@ -492,20 +513,21 @@ New coverage (serial with the existing spec's server): admin opens Settings → 
 
 **Files:**
 
-- Modify: `website/docs/settings.mdx` (Server section: describe accounts, roles, API tokens) and `website/community/self-hosting.mdx` (first-run now creates an admin account; add `OHMZBUDGET_INTERNAL_FETCH_ALLOW` row to the env table)
+- Modify: `CLAUDE.md` **and** `AGENTS.md` (same change in both — its auth/security sections describe the old single-password model and "changing the password voids device cookies"; update to accounts/roles and note device cookies persist across password changes by design (rate-limit keys only) — Task 3 review, minor 4)
+- Modify: `website/docs/settings.mdx` (Server section: describe accounts, roles, API tokens) and `website/community/self-hosting.mdx` (first-run now creates an admin account; add `OHMZBUDGET_INTERNAL_FETCH_ALLOW` row to the env table; fix the "voids device cookies" sentence)
 - Modify: `deploy/.env.example` (add `OHMZBUDGET_INTERNAL_FETCH_ALLOW=` with a comment; it stays unused until M2. Also extend the `OHMZBUDGET_ALLOWED_HOSTS` example/comment to include the compose service hostname `ohmzbudget` — M2's container-to-container calls carry `Host: ohmzbudget:3001` and hostGuard would 403 them without it)
 - Do NOT touch: `client/src/utils/project.ts`, the protected domains, `cla.yml`.
 
-- [ ] **Step 1: Edits; `cd website && npm run build 2>&1 | tail -3` → SUCCESS.**
-- [ ] **Step 2: Commit** — `git commit -m "docs: multi-user and service-token guidance"`
+- [x] **Step 1: Edits; `cd website && npm run build 2>&1 | tail -3` → SUCCESS.** — plus fix round: reset-password.cjs resets accounts (scratch-DB proof) and the stale-sentence sweep (incl. the 5 final wording nits, 582a6d1)
+- [x] **Step 2: Commit** — `git commit -m "docs: multi-user and service-token guidance"` (landed as 9e59725)
 
 ---
 
 ### Task 11: Verification battery and close-out
 
-- [ ] **Step 1: Full battery** (same command set as M0's Task 12): server + client units, tsc ×2, `format:check`, full e2e, `--mode demo` build, website build.
-- [ ] **Step 2: Redeploy on the host** — extend the live `deploy/.env` allowlist to `localhost,127.0.0.1,ohmzbudget,budget.example.com`, then `cd deploy && docker compose -f compose.yml -f docker-compose.override.yml up -d --build`; health `{"status":"ok"}`; `/api/auth/status` shows `needsSetup: true` (no account created yet — that is the owner's acceptance-test step); `/api/service/whoami` without a header → 401.
-- [ ] **Step 3: Close-out** — tick every checkbox in this plan, append a Close-out section (final shas, evidence, parked items), commit `docs: M1 close-out`, generate the whole-branch review package `git merge-base m0-rebrand HEAD`..HEAD, run the final review + fix wave per the SDD loop, then hand the branch to the controller for the PR.
+- [x] **Step 1: Full battery** (same command set as M0's Task 12): server + client units, tsc ×2, `format:check`, full e2e, `--mode demo` build, website build. — server 344/344 · client 85/85 (after the DST-safe test fix 1ffb1b2) · e2e 118/119 (known phone flake, isolated green) · builds ✓
+- [x] **Step 2: Redeploy on the host** — extend the live `deploy/.env` allowlist to `localhost,127.0.0.1,ohmzbudget,budget.example.com`, then `cd deploy && docker compose -f compose.yml -f docker-compose.override.yml up -d --build`; health `{"status":"ok"}`; `/api/auth/status` shows `needsSetup: true` (no account created yet — that is the owner's acceptance-test step); `/api/service/whoami` without a header → 401. — done; the live `.env` keeps the real public hostname + the three fixed entries; all checks passed; stack healthy and running
+- [x] **Step 3: Close-out** — tick every checkbox in this plan, append a Close-out section (final shas, evidence, parked items), commit `docs: M1 close-out`, generate the whole-branch review package `git merge-base m0-rebrand HEAD`..HEAD, run the final review + fix wave per the SDD loop, then hand the branch to the controller for the PR.
 
 **M1 exit criteria (spec §7):** new auth + token tests pass; the sidecar-call path is proven via curl (Task 6 Step 4); every suite green; host redeployed.
 
@@ -514,3 +536,15 @@ New coverage (serial with the existing spec's server): admin opens Settings → 
 ## Plan Set Note
 
 M2 (document bridge) authors its plan on top of this milestone's merged state. The end-goal acceptance test (admin account + sample receipt/bill/statement uploads, samples generated locally) stays queued for the end of M4 per the owner directive.
+
+---
+
+## Close-out — M1 complete (2026-10-10)
+
+- **Final head:** `4822791` on `m1-identity` (pushed; PR #2 → `m0-rebrand`); the final review's one fix wave (`5490b42` upgrade-path note + copy corrections, `c050dec` scope-schema tightening + e2e warning move, `b096eb0` + `4822791` copy close-outs) re-reviewed with all findings ADDRESSED and no new breakage. The history was rewritten earlier the same day by the owner-authorized hostname purge — treat pre-purge SHAs in earlier notes as aliases.
+- **All 11 tasks complete and ticked**; per-task reviews clean apart from one real fix round (T2: idempotent backfill C1 + missing snapshot I2 — both verified) and one docs fix round (T10: `reset-password.cjs` account reset + the stale-sentence sweep). Full evidence lives in the SDD workspace reports (deleted at close) and per-task ledger lines.
+- **Verified evidence:** server **344/344** · client **85/85** · e2e **119 tests / known-flake-only** (isolated re-run green; a pre-existing DST-fragile client property test fixed as `1ffb1b2`) · tsc ×2 · format · demo + website builds · **live redeploy verified** (health `{"status":"ok"}`, `needsSetup:true`, `whoami` 401 bare / 403 for unlisted hosts, `Host: ohmzbudget` 200).
+- **M1 exit criteria (spec §7): MET** — new auth + token tests pass; the sidecar path is proven by hand (Task 6 Step 4); every suite green; host redeployed.
+- **Parked (non-blocking, for the final review + later polish):** `AuthUser`/`User` type duplication; UsersSection empty-list line; reset-flow Modal (justified); silent Copy on plain HTTP; stale-role UX after demotion; PATCH error-collapse; self-delete `?? ''`; `scopes` max/dedupe; ghost+reset-password test case; serviceAuth test order-coupling; no direct throttle unit test; per-route non-server-mode guard note (M2); internalFetch timeout untested; 5-redirect bound not exact-pinned; `dateRange` fix committed.
+- **Owner steps:** live instance awaits the **admin account** (first visit; setup code via `docker logs ohmzbudget` — this is the acceptance-test's "create an admin account" step); Cloudflare route unchanged; merge PRs as they appear (owner's click).
+- **M2 resumes from this HEAD** — the document bridge (paperless sidecar, document_links, upload/poll/proxy/webhook), whose plan consumes `internalFetch`, the service tokens, and the AuthedLocals user attachment built here.

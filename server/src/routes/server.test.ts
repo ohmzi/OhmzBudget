@@ -13,6 +13,7 @@ const { authRouter, requireSession } = await import('./auth.js');
 const { serverRouter, securityChecks } = await import('./server.js');
 const { setupCode } = await import('../auth/setupCode.js');
 const { cleanUserAgent } = await import('../auth/sessions.js');
+const { ensureAuthReady } = await import('../auth/users.js');
 const { resolveVersion } = await import('../utils/version.js');
 
 let server: Server;
@@ -20,6 +21,7 @@ let base: string;
 
 beforeAll(async () => {
   migrate(db, { migrationsFolder: 'src/db/migrations' });
+  ensureAuthReady(); // fills auth_config.secret, like server startup
   const app = express();
   app.use(express.json());
   app.use('/api/auth', authRouter);
@@ -50,7 +52,7 @@ async function login(userAgent: string) {
   const res = await fetch(base + '/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'User-Agent': userAgent },
-    body: JSON.stringify({ password: PASSWORD }),
+    body: JSON.stringify({ username: 'owner', password: PASSWORD }),
   });
   expect(res.status).toBe(204);
   return sessionCookie(res)!;
@@ -67,7 +69,7 @@ describe('GET /api/server/info (server mode)', () => {
     const res = await fetch(base + '/auth/setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: PASSWORD, setupCode: setupCode() }),
+      body: JSON.stringify({ username: 'owner', password: PASSWORD, setupCode: setupCode() }),
     });
     expect(res.status).toBe(204);
     cookie = sessionCookie(res)!;
@@ -113,8 +115,9 @@ describe('GET /api/server/info (server mode)', () => {
         .prepare('select id from sessions')
         .all()
         .map((r) => (r as { id: string }).id),
+      // Since Task 4 the signable hash lives on the account, not in the legacy auth_config row
       (
-        db.$client.prepare('select password_hash from auth_config').get() as {
+        db.$client.prepare('select password_hash from users').get() as {
           password_hash: string;
         }
       ).password_hash,

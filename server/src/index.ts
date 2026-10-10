@@ -4,9 +4,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { listenHost, serverMode, trustProxy } from './config.js';
 import { secretCipher } from './db/secretCrypto.js';
-import { deleteExpiredSessions, isPasswordSet } from './auth/sessions.js';
+import { deleteExpiredSessions } from './auth/sessions.js';
+import { isSetupNeeded } from './auth/users.js';
 import { setupCode } from './auth/setupCode.js';
 import { authRouter, requireSession } from './routes/auth.js';
+import { serviceAuth } from './middleware/serviceAuth.js';
+import { serviceRouter } from './routes/service.js';
+import { ingestRouter } from './routes/ingest.js';
 import {
   DEV_CLIENT_ORIGINS,
   apiNotFound,
@@ -19,7 +23,10 @@ import {
   securityHeaders,
   hstsWhenSecure,
 } from './middleware/security.js';
+import { requireAdmin } from './middleware/adminGuard.js';
 import { accountsRouter } from './routes/accounts.js';
+import { usersRouter } from './routes/users.js';
+import { serviceTokensRouter } from './routes/serviceTokens.js';
 import { categoriesRouter } from './routes/categories.js';
 import { transactionsRouter } from './routes/transactions.js';
 import { budgetRouter } from './routes/budget.js';
@@ -76,11 +83,21 @@ app.use((req, res, next) => (req.path === RESTORE_PATH ? next() : jsonBody(req, 
 
 // Server mode: login routes, then a valid session is required for the rest of the API
 app.use('/api/auth', authRouter);
+// Machine callers (paperless webhook, sidecar) use a scoped bearer token instead of a
+// cookie. Mounted before requireSession, so these two paths — and only these — skip the
+// session gate; each route still requires the token to carry its scope.
+app.use('/api/service', serviceAuth('service'), serviceRouter);
+app.use('/api/ingest', serviceAuth('ingest'), ingestRouter);
 app.use('/api', requireSession);
 
 // Kept minimal: anyone who can reach the server may call it (health checks, reconnecting)
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/server', serverRouter);
+// Server mode's administration, behind requireSession above and the admin guard: user
+// accounts (multi-user identity) and machine callers' tokens. Never mounted in
+// browser/app.ts — the demo has no accounts.
+app.use('/api/users', requireAdmin, usersRouter);
+app.use('/api/service-tokens', requireAdmin, serviceTokensRouter);
 app.use('/api/accounts', accountsRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/transactions', transactionsRouter);
@@ -113,6 +130,12 @@ export async function startServer(port: number | string): Promise<void> {
       process.env.MIGRATIONS_PATH ?? fileURLToPath(new URL('./db/migrations', import.meta.url));
     migrate(db, { migrationsFolder });
   }
+  // Idempotent auth fix-ups (legacy admin backfill, device-cookie secret). Imported here, never
+  // from browser/app.ts: users.ts pulls in Node's crypto, which the demo worker must not load.
+  {
+    const { ensureAuthReady } = await import('./auth/users.js');
+    ensureAuthReady();
+  }
   // Electron serves the built client from this server so the page is same-origin
   // with the API (a file:// page would send Origin: null, which can't be allowlisted safely).
   if (process.env.CLIENT_DIST) {
@@ -137,7 +160,9 @@ export async function startServer(port: number | string): Promise<void> {
       );
       if (serverMode) {
         console.log('Server mode: login required.');
-        if (!isPasswordSet()) setupCode();
+        // A fresh install prints its one-time setup code now (`docker logs ohmzbudget`);
+        // a phantom empty-hash row from the setup interim window doesn't count as set up
+        if (isSetupNeeded()) setupCode();
         deleteExpiredSessions();
         setInterval(
           () => runStartupTask('Session cleanup', deleteExpiredSessions),
