@@ -1,0 +1,9 @@
+# NOTICE
+
+OhmzBudget is a rebranded fork of FlyBudget (https://github.com/dtymoszenko/FlyBudget),
+Copyright David Tymoszenko and contributors, licensed AGPL-3.0-only. The LICENSE file is
+kept unchanged and the original project is credited here. OhmzBudget's own source is
+published at https://github.com/ohmzi/OhmzBudget, satisfying AGPL section 13 for network users.
+
+OhmzBudget runs paperless-ngx (https://github.com/paperless-ngx/paperless-ngx, GPL-3.0-only)
+as a separate, unmodified service.

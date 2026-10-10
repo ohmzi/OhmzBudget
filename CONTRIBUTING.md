@@ -1,6 +1,6 @@
-# Contributing to FlyBudget
+# Contributing to OhmzBudget
 
-Thanks for helping make FlyBudget better. Bug reports, ideas and pull requests
+Thanks for helping make OhmzBudget better. Bug reports, ideas and pull requests
 are all welcome.
 
 ## Before you start
@@ -12,16 +12,16 @@ are all welcome.
 
 ## Contributor License Agreement
 
-FlyBudget is licensed under the [GNU AGPL v3](LICENSE). Before we can merge your
+OhmzBudget is licensed under the [GNU AGPL v3](LICENSE). Before we can merge your
 first pull request, you need to accept the
 [Contributor License Agreement](CLA.md) by commenting this on the pull request:
 
-> I have read the FlyBudget CLA (v1) and I agree to it.
+> I have read the OhmzBudget CLA (v1) and I agree to it.
 
 You only do this once. A check named **CLA** on your pull request shows whether
 it's done.
 
-**Why a CLA?** It lets FlyBudget be offered in places the AGPL alone doesn't
+**Why a CLA?** It lets OhmzBudget be offered in places the AGPL alone doesn't
 allow, like Apple's App Store, and lets the project change licenses later if it
 ever needs to. In return, the CLA promises that every version including your work
 is also released as open source. You keep the copyright to your work.

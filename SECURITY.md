@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-FlyBudget is a single-user, local-first app under active development. Security
+OhmzBudget is a single-user, local-first app under active development. Security
 fixes land on `main` and ship in the next release; older releases are not patched.
 
 | Version                 | Supported          |
@@ -15,7 +15,7 @@ fixes land on `main` and ship in the next release; older releases are not patche
 **Please do not open a public issue for security problems.**
 
 Report privately through GitHub: go to the
-[Security tab](https://github.com/dtymoszenko/FlyBudget/security) →
+[Security tab](https://github.com/ohmzi/OhmzBudget/security) →
 **Report a vulnerability**. Please include:
 
 - what the issue is and where (file, endpoint, or screen)
@@ -36,13 +36,13 @@ times are best-effort.
 
 ## Scope
 
-FlyBudget runs entirely on your own machine. See [How FlyBudget protects your
-data](#how-flybudget-protects-your-data) below for the full model.
+OhmzBudget runs entirely on your own machine. See [How OhmzBudget protects your
+data](#how-ohmzbudget-protects-your-data) below for the full model.
 
 Especially in scope:
 
 - anything that lets a website, another user, or another process read or change
-  FlyBudget data or bank-sync credentials
+  OhmzBudget data or bank-sync credentials
 - ways to make the local API reachable from outside the machine
 - vulnerabilities in the Electron desktop app
 - in the self-hosted Docker server: getting past the password login, stealing
@@ -54,16 +54,16 @@ Out of scope:
   or machine
 - vulnerabilities in third-party services (Plaid, SimpleFIN) themselves, which
   should be reported to them
-- outdated dependencies with no demonstrated impact on FlyBudget (Dependabot
+- outdated dependencies with no demonstrated impact on OhmzBudget (Dependabot
   already tracks these)
 
-## How FlyBudget protects your data
+## How OhmzBudget protects your data
 
-FlyBudget is local-first: there is no FlyBudget server, account, telemetry, or
+OhmzBudget is local-first: there is no OhmzBudget server, account, telemetry, or
 crash reporting. Your data never leaves your computer except when bank sync
 talks to Plaid or SimpleFIN on your behalf.
 
-You can also host FlyBudget yourself with Docker ("server mode", see
+You can also host OhmzBudget yourself with Docker ("server mode", see
 [Self-hosting](https://flybudget.org/community/self-hosting)). Then the data
 lives on your server, and:
 
@@ -71,7 +71,7 @@ lives on your server, and:
   minutes, then blocked). Setting the first password also needs a one-time setup
   code printed only in the server log, so whoever reaches a fresh server first
   (or a website using DNS rebinding) can't claim it
-- behind HTTPS (`FLYBUDGET_TRUST_PROXY`), responses carry HSTS
+- behind HTTPS (`OHMZBUDGET_TRUST_PROXY`), responses carry HSTS
 - sessions are random 256-bit tokens, stored server-side only as SHA-256
   hashes, sent in an HttpOnly, SameSite=Strict cookie (Secure over HTTPS),
   expiring after 30 days; changing the password ends every other session.
@@ -82,7 +82,7 @@ lives on your server, and:
   need a session. The security check names the setting that fixes each
   warning, never a secret value
 - the server refuses to start without a credential encryption key, supplied as
-  a Docker secret (`FLYBUDGET_DATA_KEY_FILE`) rather than stored with the
+  a Docker secret (`OHMZBUDGET_DATA_KEY_FILE`) rather than stored with the
   database
 - the container runs as an unprivileged user; the example Compose file adds a
   read-only filesystem, drops all capabilities and sets `no-new-privileges`
@@ -90,7 +90,7 @@ lives on your server, and:
   cache, base images are pinned by digest, npm registry signatures are verified
   during the build, each image has an SBOM and signed SLSA build provenance, and
   images are scanned for known vulnerabilities (Grype) weekly
-  (`gh attestation verify oci://ghcr.io/dtymoszenko/flybudget:<version> -R dtymoszenko/FlyBudget`)
+  (`gh attestation verify oci://ghcr.io/ohmzi/ohmzbudget:<version> -R ohmzi/OhmzBudget`)
 
 Run it behind an HTTPS reverse proxy before exposing it to the internet.
 
@@ -98,7 +98,7 @@ Run it behind an HTTPS reverse proxy before exposing it to the internet.
 
 | Data                               | Location (desktop app)                     | Protection                                                                                        |
 | ---------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| Budget, accounts, transactions     | `budget.db` in the app's data folder       | Your OS user account (not encrypted by FlyBudget; see below)                                      |
+| Budget, accounts, transactions     | `budget.db` in the app's data folder       | Your OS user account (not encrypted by OhmzBudget; see below)                                     |
 | Plaid secret and access tokens     | `budget.db`                                | AES-256-GCM, with a key protected by the OS (Windows DPAPI, macOS Keychain, Linux secret service) |
 | SimpleFIN access URL (credentials) | `budget.db`                                | Same as above                                                                                     |
 | Encryption key for the above       | `credentials.key` in the app's data folder | Encrypted by the OS; only usable by your user account on that machine                             |
@@ -127,11 +127,11 @@ Access tokens are never sent to the app's own UI, logs, or backup exports.
 
 - **Plaid:** you use your own Plaid API keys. You log in to your bank on
   Plaid's own page in your web browser (Plaid Hosted Link), never inside
-  FlyBudget, which is how banks that use OAuth (Chase, Wells Fargo, and others)
+  OhmzBudget, which is how banks that use OAuth (Chase, Wells Fargo, and others)
   work in the desktop app. Disconnecting a bank revokes its
   access token at Plaid (`/item/remove`); if Plaid can't be reached, the
   connection is kept so you can retry.
-- **SimpleFIN:** SimpleFIN has no revoke API. Disconnecting deletes FlyBudget's
+- **SimpleFIN:** SimpleFIN has no revoke API. Disconnecting deletes OhmzBudget's
   copy of the access URL; to revoke access completely, also remove the app in
   your [SimpleFIN Bridge](https://bridge.simplefin.org) account.
 - Data from banks is treated as untrusted: it is validated, amounts are converted
@@ -147,7 +147,7 @@ Access tokens are never sent to the app's own UI, logs, or backup exports.
   and the app refuses to start if its files have been modified (asar integrity).
 - Releases are built by GitHub Actions and signed with Sigstore, with SLSA build
   provenance. Verify a download with:
-  `gh attestation verify FlyBudget-Windows-Setup.exe -R dtymoszenko/FlyBudget` (the same
+  `gh attestation verify OhmzBudget-Windows-Setup.exe -R ohmzi/OhmzBudget` (the same
   for the macOS and Linux files; each release also has `SHA256SUMS.txt`)
 
 ### Development and supply chain
@@ -161,14 +161,14 @@ Access tokens are never sent to the app's own UI, logs, or backup exports.
 
 ### What you should do
 
-FlyBudget can't protect against someone who controls your user account. To keep
+OhmzBudget can't protect against someone who controls your user account. To keep
 your financial data safe:
 
 - Use a strong OS login and turn on full-disk encryption (BitLocker on Windows,
   FileVault on macOS), since `budget.db` itself is not encrypted.
 - Treat backup exports (`budget-backup-*.json`) and CSV exports as sensitive:
   they contain your full financial history (but no bank credentials).
-- Only download FlyBudget from this repository's Releases page, and verify it
+- Only download OhmzBudget from this repository's Releases page, and verify it
   with the command above.
 - Keep your Plaid API keys private, and disconnect banks you no longer use.
 - `npm run dev` is for development: it has no per-launch secret, and bank

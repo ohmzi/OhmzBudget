@@ -183,7 +183,7 @@ export const proxyConfigWarning: RequestHandler = (req, _res, next) => {
     console.warn(
       'OhmzBudget is behind a reverse proxy, but OHMZBUDGET_TRUST_PROXY is not set. Set it to ' +
         'the number of proxies in front of OhmzBudget (usually 1) so HTTPS and client ' +
-        'addresses are detected: https://flybudget.org/community/self-hosting',
+        'addresses are detected: https://github.com/ohmzi/OhmzBudget',
     );
   }
   next();
