@@ -15,7 +15,7 @@ Maintained between tasks; commit shas live on branch `m0-rebrand`. Owner directi
 | 5 Server runtime identity                | ✅ done        | e4fa6e5; 19 files; 263/263 held; review clean (0 blocking)                                                                                  |
 | 6 End-to-end tests                       | ✅ done        | 0655012; 12 files; full run 114/115 (sole fail = baseline flake, isolated green); review clean (0 blocking)                                 |
 | 7 Docker & CI identity                   | ✅ done        | b9a71d6; build 31s + health `{"status":"ok"}`; cla.yml untouched; review clean (0 blocking)                                                 |
-| 8 Electron identity                      | ⬜ not started |                                                                                                                                             |
+| 8 Electron identity                      | ✅ done        | 5941860; cookie pair + artifact names match; tsc ✓; review clean (0 blocking)                                                               |
 | 9 Docs, attribution & source links       | ⬜ not started |                                                                                                                                             |
 | 10 Website text sweep                    | ⬜ not started |                                                                                                                                             |
 | 11 Deploy skeleton & host run            | ⬜ not started |                                                                                                                                             |
@@ -331,7 +331,7 @@ git commit -m "build: rename docker and CI identity to ohmzbudget"
 
 - Modify: `electron-builder.json` (`appId: "com.ohmzi.ohmzbudget"`, `productName: "OhmzBudget"`, artifactName patterns `OhmzBudget-*`, `executableName: "ohmzbudget"`, vendor/maintainer/linux synopsis/description), `electron/main.ts` (messages, cookie `ohmzbudget_token` — **must match** `server/src/middleware/security.ts`; `OHMZBUDGET_*` env), `electron/package.json` (name via Task 2), any `FlyBudget` strings
 
-- [ ] **Step 1: Sweep + hand-check the cookie name pair**
+- [x] **Step 1: Sweep + hand-check the cookie name pair**
 
 ```bash
 grep -rl 'FlyBudget' electron | xargs sed -i 's/FlyBudget/OhmzBudget/g'
@@ -341,17 +341,17 @@ grep -rl 'flybudget' electron | xargs sed -i 's#flybudget\.org#@@KD@@#g; s/flybu
 grep -rn 'ohmzbudget_token' electron/main.ts server/src/middleware/security.ts   # both files must show it
 ```
 
-- [ ] **Step 2: Verify**
+- [x] **Step 2: Verify**
 
 ```bash
 grep -rn 'FlyBudget\|flybudget\|FLYBUDGET' electron || echo CLEAN
 cd electron && npx tsc --noEmit
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit** (landed as 5941860 — staged `electron` + root `electron-builder.json`, which the original `git add electron` could not reach)
 
 ```bash
-git add electron && git commit -m "refactor: rename electron app identity (installers deferred)"
+git add electron electron-builder.json && git commit -m "refactor: rename electron app identity (installers deferred)"
 ```
 
 ---
@@ -405,7 +405,8 @@ as a separate, unmodified service.
 grep -n 'flybudget.org' client/src/utils/project.ts && echo 'FAIL: project.ts still points at flybudget.org' || echo OK
 grep -c 'flybudget.org' README.md   # may stay >0: README keeps upstream-site links; NOTICE covers attribution
 diff AGENTS.md CLAUDE.md    # no output — they must stay identical
-git add README.md SECURITY.md CONTRIBUTING.md PLANNING.md AGENTS.md CLAUDE.md client/src/utils/project.ts NOTICE website/sidebarsCommunity.ts
+cd e2e && npx tsc --noEmit && cd ..
+git add README.md SECURITY.md CONTRIBUTING.md PLANNING.md AGENTS.md CLAUDE.md client/src/utils/project.ts NOTICE website/sidebarsCommunity.ts server/src/middleware/security.ts e2e/tests/settings.spec.ts e2e/tests/connection.spec.ts
 git commit -m "docs: rebrand documentation, attribution and source links"
 ```
 
