@@ -7,7 +7,7 @@ import { useCreateTransaction, useCreateTransfer } from './useTransactions';
 
 /**
  * Whether a new transaction can be added right now, and whether it would wait on this
- * device (FlyBudget can't reach its server, but this browser can store it).
+ * device (OhmzBudget can't reach its server, but this browser can store it).
  */
 export function useCanAddTransaction() {
   const canSave = useCanSave();
@@ -22,7 +22,7 @@ export type NewTransaction =
 /**
  * Adds a new transaction or transfer. Connected: saves it on the server. Not connected, or
  * the connection drops mid-save: keeps it on this device with the same id, and it's sent
- * when FlyBudget reconnects (the id stops a save that did arrive from being made twice).
+ * when OhmzBudget reconnects (the id stops a save that did arrive from being made twice).
  */
 export function useAddTransaction() {
   const { allowed, onDevice } = useCanAddTransaction();

@@ -14,7 +14,7 @@ export const useServerInfo = () =>
 export type AppMode = 'desktop' | 'server' | 'dev';
 
 /**
- * How FlyBudget runs, as far as this page can tell: the desktop app (its preload sets
+ * How OhmzBudget runs, as far as this page can tell: the desktop app (its preload sets
  * __API_BASE__), a self-hosted server (login enabled), or a local dev server. Before the
  * server has answered, a production web build is assumed to be a self-hosted server.
  */

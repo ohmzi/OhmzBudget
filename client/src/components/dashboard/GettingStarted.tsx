@@ -87,7 +87,7 @@ export default function GettingStarted({ currentMonth }: { currentMonth: string 
     <Card padding="none" className="overflow-hidden">
       <div className="flex items-start justify-between gap-3 px-5 pt-4">
         <div>
-          <h2 className="text-base font-semibold text-text">Get started with FlyBudget</h2>
+          <h2 className="text-base font-semibold text-text">Get started with OhmzBudget</h2>
           <p className="text-sm text-text-tertiary mt-0.5">
             {doneCount} of {steps.length} done. Each step brings more of your dashboard to life.
           </p>

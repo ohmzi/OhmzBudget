@@ -114,7 +114,7 @@ export default defineConfig(({ mode }) => ({
   // The desktop app loads files from disk and the demo lives under /demo/ on the website,
   // so both use relative paths
   base: mode === 'electron' || mode === 'demo' ? './' : '/',
-  define: { __FLYBUDGET_VERSION__: JSON.stringify(version) },
+  define: { __OHMZBUDGET_VERSION__: JSON.stringify(version) },
   worker: {
     format: 'es',
     plugins: () => (mode === 'demo' ? [demoServerModules()] : []),

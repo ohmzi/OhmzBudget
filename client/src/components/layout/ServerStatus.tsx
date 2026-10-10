@@ -16,7 +16,7 @@ const SECURITY_LABEL = {
 } as const;
 
 /**
- * Sidebar footer: where FlyBudget's server is and whether it's reachable, like Actual
+ * Sidebar footer: where OhmzBudget's server is and whether it's reachable, like Actual
  * Budget's "Server online". Opens a small menu with details, Server settings and (server
  * mode) Sign out.
  */

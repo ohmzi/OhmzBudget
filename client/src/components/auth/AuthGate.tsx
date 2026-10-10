@@ -14,7 +14,7 @@ import { AuthScreen } from './AuthScreen';
 import { MIN_PASSWORD_LENGTH } from './passwordRules';
 
 /**
- * Shows the login (or first-run setup) screen when FlyBudget runs as a server and
+ * Shows the login (or first-run setup) screen when OhmzBudget runs as a server and
  * this browser isn't signed in. In the desktop app and dev mode login is disabled,
  * so this renders the app straight away. If the server can't be reached on startup it
  * opens with this device's offline copy (read-only, see offline/snapshot.ts) or, without
@@ -126,7 +126,7 @@ function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () =>
 
   return (
     <AuthScreen
-      title={isSetup ? 'Set up your FlyBudget server' : 'Sign in to FlyBudget'}
+      title={isSetup ? 'Set up your OhmzBudget server' : 'Sign in to OhmzBudget'}
       subtitle={
         <>
           <span className="block font-mono text-xs break-all" aria-label="Server address">
@@ -174,7 +174,7 @@ function PasswordForm({ mode, onDone }: { mode: 'setup' | 'login'; onDone: () =>
             />
             <p className="text-xs text-text-tertiary mt-1">
               Printed in the server log. With Docker, run{' '}
-              <code className="font-mono">docker logs flybudget</code>.
+              <code className="font-mono">docker logs ohmzbudget</code>.
             </p>
           </div>
         )}

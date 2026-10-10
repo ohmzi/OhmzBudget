@@ -11,7 +11,7 @@ import { retryLabel } from './RetryStatus';
 const RECONNECTED_MS = 4_000;
 
 /**
- * Top-of-page notice while FlyBudget can't reach its server. Everything already loaded
+ * Top-of-page notice while OhmzBudget can't reach its server. Everything already loaded
  * (or this device's offline copy) stays on screen; save buttons are disabled (useCanSave),
  * except for new transactions, which wait on the device. When the server is back, AuthGate
  * refreshes the data, OutboxSender sends what waited, and this says so briefly.
@@ -49,7 +49,7 @@ export function ConnectionBanner() {
       >
         <CloudOff size={16} className="text-caution shrink-0" aria-hidden />
         <span className="font-medium">
-          Can't reach FlyBudget.{' '}
+          Can't reach OhmzBudget.{' '}
           {dataAsOf !== null
             ? `Showing your data as of ${formatDistanceToNow(dataAsOf, { addSuffix: true })}.`
             : 'You can still look around.'}{' '}

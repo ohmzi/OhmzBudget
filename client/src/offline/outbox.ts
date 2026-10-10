@@ -5,7 +5,7 @@ import * as txApi from '../api/transactions';
 import { sendable, type OutboxItem } from '../utils/offline';
 import { deleteValue, readValue, storageWorks, updateValue } from './storage';
 
-// New transactions saved while FlyBudget can't reach its server wait here, on this device,
+// New transactions saved while OhmzBudget can't reach its server wait here, on this device,
 // and are sent in order once it's back. Each carries the id it will have on the server, so
 // sending one twice (the answer got lost, or two tabs sent it) never creates a duplicate.
 //
@@ -28,9 +28,9 @@ export const useOutbox = create<OutboxState>(() => ({
   sending: false,
 }));
 
-// Other tabs of FlyBudget share the list: reload it when one of them changes it
+// Other tabs of OhmzBudget share the list: reload it when one of them changes it
 const channel =
-  typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('flybudget-outbox') : null;
+  typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('ohmzbudget-outbox') : null;
 if (channel) channel.onmessage = () => void loadOutbox();
 
 const asList = (v: unknown): OutboxItem[] => (Array.isArray(v) ? v : []);
@@ -128,7 +128,7 @@ export function sendWaiting(qc: QueryClient): Promise<void> {
       do {
         again = false;
         if (typeof navigator !== 'undefined' && navigator.locks) {
-          await navigator.locks.request('flybudget-outbox', () => sendAll(qc));
+          await navigator.locks.request('ohmzbudget-outbox', () => sendAll(qc));
         } else {
           await sendAll(qc);
         }

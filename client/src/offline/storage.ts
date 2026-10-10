@@ -2,7 +2,7 @@
 // IndexedDB can be missing or refuse to open (private windows, blocked site data), so
 // every call swallows errors: the app then works as before, just without an offline copy.
 
-const DB_NAME = 'flybudget-offline';
+const DB_NAME = 'ohmzbudget-offline';
 const STORE = 'kv';
 
 let dbPromise: Promise<IDBDatabase | null> | null = null;
@@ -93,5 +93,5 @@ export function updateValue<T>(
   );
 }
 
-/** Whether this browser lets FlyBudget store anything (false in some private windows) */
+/** Whether this browser lets OhmzBudget store anything (false in some private windows) */
 export const storageWorks = () => openDb().then((db) => db !== null);

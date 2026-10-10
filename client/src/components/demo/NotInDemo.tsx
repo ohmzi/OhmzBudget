@@ -4,7 +4,7 @@ import { Button } from '../ui/Button';
 import { DOWNLOAD_URL } from './DemoBanner';
 
 const TEXT =
-  "Bank connections need the FlyBudget app, so the demo can't connect a bank or take bank " +
+  "Bank connections need the OhmzBudget app, so the demo can't connect a bank or take bank " +
   'credentials. In the app, Plaid or SimpleFIN brings in your transactions automatically, and ' +
   'you can also import CSV files from your bank.';
 
@@ -20,7 +20,7 @@ export function NotInDemo() {
           href={DOWNLOAD_URL}
           className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 max-md:min-h-11 text-xs font-medium rounded-md bg-brand-600 text-white hover:bg-brand-700 transition-colors"
         >
-          <Download size={12} aria-hidden /> Download FlyBudget
+          <Download size={12} aria-hidden /> Download OhmzBudget
         </a>
       </div>
     </div>
@@ -40,7 +40,7 @@ export function NotInDemoModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
           href={DOWNLOAD_URL}
           className="inline-flex items-center gap-1.5 px-4 py-2 max-md:min-h-11 text-sm font-medium rounded-md bg-brand-600 text-white hover:bg-brand-700 transition-colors"
         >
-          <Download size={14} aria-hidden /> Download FlyBudget
+          <Download size={14} aria-hidden /> Download OhmzBudget
         </a>
       </div>
     </Modal>

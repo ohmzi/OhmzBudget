@@ -14,7 +14,7 @@ export type HostedLinkState =
 /**
  * Connects (or reconnects) a bank with Plaid Hosted Link: Plaid's page opens in
  * the user's own browser — where OAuth banks like Chase work and credentials are
- * never typed into FlyBudget — and the app polls the local server until the user
+ * never typed into OhmzBudget — and the app polls the local server until the user
  * finishes. In the desktop app, window.open() is routed to the system browser.
  */
 export function usePlaidHostedLink(onSuccess: (result: PlaidExchangeResult | null) => void) {

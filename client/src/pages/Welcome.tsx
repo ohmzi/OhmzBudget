@@ -131,8 +131,8 @@ export default function WelcomePage() {
           <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-text-tertiary">
             <ShieldCheck size={14} className="text-positive shrink-0" aria-hidden />
             {mode === 'server'
-              ? 'Your budget is stored on your own server. No FlyBudget account, no tracking.'
-              : 'Your budget stays on this computer. No FlyBudget account, no tracking.'}{' '}
+              ? 'Your budget is stored on your own server. No OhmzBudget account, no tracking.'
+              : 'Your budget stays on this computer. No OhmzBudget account, no tracking.'}{' '}
             <ExternalLink
               href={docsUrl('bank-sync')}
               className="font-medium text-brand-600 hover:text-brand-700"

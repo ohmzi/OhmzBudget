@@ -24,9 +24,9 @@ export function waitProgress(now: number, startedAt: number, retryAt: number): n
 }
 
 /**
- * Whether a response means the FlyBudget server itself didn't answer: a gateway or
+ * Whether a response means the OhmzBudget server itself didn't answer: a gateway or
  * reverse proxy saying it's down (502-504), or the Vite dev proxy's bare 500 while
- * `tsx watch` restarts the server. FlyBudget's own errors always come back as JSON.
+ * `tsx watch` restarts the server. OhmzBudget's own errors always come back as JSON.
  */
 export function isUnreachableResponse(status: number, contentType: string | null): boolean {
   if (status >= 502 && status <= 504) return true;

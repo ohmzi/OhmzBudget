@@ -51,7 +51,7 @@ export function DemoBanner() {
         <a
           href={HOME_URL}
           aria-label="Back to home"
-          title="Back to the FlyBudget homepage"
+          title="Back to the OhmzBudget homepage"
           className={`${button} max-md:min-w-11 border border-border bg-surface text-text-secondary hover:text-text hover:bg-surface-alt`}
         >
           <House size={14} aria-hidden />
@@ -74,7 +74,7 @@ export function DemoBanner() {
         </button>
         <a href={DOWNLOAD_URL} className={`${button} bg-brand-600 text-white hover:bg-brand-700`}>
           <Download size={14} aria-hidden />
-          Download<span className="max-md:hidden"> FlyBudget</span>
+          Download<span className="max-md:hidden"> OhmzBudget</span>
         </a>
       </div>
     </div>

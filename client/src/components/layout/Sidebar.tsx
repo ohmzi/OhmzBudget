@@ -110,7 +110,7 @@ function SidebarContent({ isExpanded, onClose }: { isExpanded: boolean; onClose?
           className={`text-sm font-semibold tracking-tight transition-opacity duration-200 ${
             isExpanded ? 'opacity-100' : 'opacity-0'
           }`}
-          flyClassName="text-brand-500"
+          ohmzClassName="text-brand-500"
           budgetClassName="text-sidebar-text-hi"
         />
         <div

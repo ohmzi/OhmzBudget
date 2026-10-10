@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { API_BASE } from '../api/base';
 import { retryDelayMs } from '../utils/connection';
 
-// Whether FlyBudget's server is reachable. apiFetch reports every request's outcome:
+// Whether OhmzBudget's server is reachable. apiFetch reports every request's outcome:
 // a network failure (or a gateway saying the server is down) switches to
 // "reconnecting", and any answer from the server switches back. While reconnecting,
 // this pings GET /api/health with backoff (2s, 4s, 8s, 16s, then every 30s), pauses

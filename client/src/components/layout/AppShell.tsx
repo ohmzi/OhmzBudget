@@ -103,7 +103,7 @@ function PhoneShell() {
           <img src={logoUrl} alt="" className="w-6 h-6" />
           <BrandName
             className="text-sm font-semibold tracking-tight"
-            flyClassName="text-brand-500"
+            ohmzClassName="text-brand-500"
             budgetClassName="text-sidebar-text-hi"
           />
         </header>

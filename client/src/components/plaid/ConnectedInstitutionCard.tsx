@@ -149,7 +149,7 @@ export function ConnectedInstitutionCard({ item }: Props) {
         onClose={() => setShowDisconnect(false)}
         onConfirm={handleDisconnect}
         title="Disconnect Institution"
-        message={`Are you sure you want to disconnect ${item.institutionName}? This revokes FlyBudget's access to this bank at Plaid. Your existing accounts and transactions will not be deleted.`}
+        message={`Are you sure you want to disconnect ${item.institutionName}? This revokes OhmzBudget's access to this bank at Plaid. Your existing accounts and transactions will not be deleted.`}
         confirmLabel="Disconnect"
         danger
       />

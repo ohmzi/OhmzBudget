@@ -313,7 +313,7 @@ export default function AllTab({
             <EmptyState
               icon={<Repeat size={26} />}
               title="No recurring items yet"
-              description="Add bills, subscriptions and paychecks to see what’s due and when, or let FlyBudget find them in the transactions you already have."
+              description="Add bills, subscriptions and paychecks to see what’s due and when, or let OhmzBudget find them in the transactions you already have."
               learnMoreHref={docsUrl('recurring')}
               actions={
                 <>
