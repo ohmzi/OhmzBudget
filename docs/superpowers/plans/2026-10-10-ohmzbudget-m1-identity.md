@@ -541,7 +541,7 @@ M2 (document bridge) authors its plan on top of this milestone's merged state. T
 
 ## Close-out — M1 complete (2026-10-10)
 
-- **Final head (pre-final-review):** `1ffb1b2` on `m1-identity`; history rewritten earlier the same day by the owner-authorized hostname purge — treat pre-purge SHAs in earlier notes as aliases.
+- **Final head:** `4822791` on `m1-identity` (pushed; PR #2 → `m0-rebrand`); the final review's one fix wave (`5490b42` upgrade-path note + copy corrections, `c050dec` scope-schema tightening + e2e warning move, `b096eb0` + `4822791` copy close-outs) re-reviewed with all findings ADDRESSED and no new breakage. The history was rewritten earlier the same day by the owner-authorized hostname purge — treat pre-purge SHAs in earlier notes as aliases.
 - **All 11 tasks complete and ticked**; per-task reviews clean apart from one real fix round (T2: idempotent backfill C1 + missing snapshot I2 — both verified) and one docs fix round (T10: `reset-password.cjs` account reset + the stale-sentence sweep). Full evidence lives in the SDD workspace reports (deleted at close) and per-task ledger lines.
 - **Verified evidence:** server **344/344** · client **85/85** · e2e **119 tests / known-flake-only** (isolated re-run green; a pre-existing DST-fragile client property test fixed as `1ffb1b2`) · tsc ×2 · format · demo + website builds · **live redeploy verified** (health `{"status":"ok"}`, `needsSetup:true`, `whoami` 401 bare / 403 for unlisted hosts, `Host: ohmzbudget` 200).
 - **M1 exit criteria (spec §7): MET** — new auth + token tests pass; the sidecar path is proven by hand (Task 6 Step 4); every suite green; host redeployed.
