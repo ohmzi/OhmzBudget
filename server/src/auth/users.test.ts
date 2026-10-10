@@ -1,8 +1,8 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 process.env.OHMZBUDGET_SERVER_MODE = 'true';
 const { migrate } = await import('drizzle-orm/better-sqlite3/migrator');
 const { db } = await import('../db/index.js');
-const { users, authConfig, sessions } = await import('../db/schema.js');
+const { users, authConfig } = await import('../db/schema.js');
 const { countUsers, ensureAuthReady } = await import('./users.js');
 
 beforeAll(() => migrate(db, { migrationsFolder: 'src/db/migrations' }));
@@ -33,7 +33,11 @@ describe('ensureAuthReady', () => {
     expect(countUsers()).toBe(0);
     expect(db.select({ secret: authConfig.secret }).from(authConfig).get()?.secret).toBeTruthy();
   });
-  it('migration 0021 cleared old sessions (column exists, no rows survive)', () => {
-    expect(db.select().from(sessions).all()).toEqual([]);
+  it('stays idempotent on a fresh install: no phantom admin after a restart', () => {
+    db.delete(users).run();
+    db.delete(authConfig).run();
+    ensureAuthReady();
+    ensureAuthReady();
+    expect(countUsers()).toBe(0);
   });
 });

@@ -18,7 +18,10 @@ export function countUsers(): number {
  */
 export function ensureAuthReady(): void {
   const legacy = db.select().from(authConfig).get();
-  if (countUsers() === 0 && legacy) {
+  // Only a row with a REAL hash is legacy input. The empty-hash carrier row created on fresh
+  // installs (below) must never be backfilled — otherwise a second startup would mint a
+  // phantom empty-hash `admin` and no account could ever be set up (see review finding T2-C1).
+  if (countUsers() === 0 && legacy?.passwordHash) {
     db.insert(users)
       .values({ id: nanoid(), username: 'admin', role: 'admin', passwordHash: legacy.passwordHash })
       .run();
