@@ -4,6 +4,11 @@ import { test, expect, type Page } from '@playwright/test';
 // the bearer tokens for machine callers (Settings → Server → API tokens). These run after
 // auth.spec, against the same server: auth.spec sets it up and changes the owner's password,
 // which is what OWNER_PASSWORD below holds. Serial, like a real server being administered.
+//
+// The last test must stay last: it burns the per-IP failed-login limit (10 failures,
+// 15 minutes), which refuses every fresh sign-in until it expires. Every other spec's logins
+// run before it; auth.spec's own tests would break if this lived there (it comes before
+// this file).
 
 test.describe.configure({ mode: 'serial' });
 
@@ -141,10 +146,6 @@ test('revoking a token stops it working', async ({ baseURL, playwright }) => {
   }
 });
 
-// The last sign-in of the server-mode project, and it has to stay last: it burns the
-// per-IP failed-login limit (10 failures, 15 minutes), which refuses every fresh sign-in
-// until it expires. Every other spec's logins run before it; auth.spec's own tests would
-// break if this lived there (it comes before this file).
 test("someone guessing passwords can't lock the owner out", async ({ playwright, baseURL }) => {
   // An attacker from the same address (e.g. behind the same reverse proxy) burns
   // through the failed-login limit…

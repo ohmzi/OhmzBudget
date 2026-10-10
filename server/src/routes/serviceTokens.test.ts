@@ -143,6 +143,8 @@ describe('service tokens', () => {
       [{ name: 'x'.repeat(101), scopes: ['ingest'] }, /name/i],
       [{ name: 'sidecar', scopes: [] }, /scope/i],
       [{ name: 'sidecar', scopes: ['admin'] }, /scope/i],
+      [{ name: 'sidecar', scopes: ['ingest', 'ingest'] }, /scope/i],
+      [{ name: 'sidecar', scopes: ['service', 'ingest', 'service'] }, /scope/i],
       [{ name: 'sidecar' }, /scope/i],
     ];
     for (const [body, message] of cases) {

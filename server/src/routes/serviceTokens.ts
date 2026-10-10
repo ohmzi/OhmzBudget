@@ -9,7 +9,11 @@ import { listTokens, mintToken, revokeToken } from '../auth/serviceTokens.js';
 export const serviceTokensRouter = Router();
 
 const name = z.string().trim().min(1).max(100);
-const scopes = z.array(z.enum(['service', 'ingest'])).min(1);
+const scopes = z
+  .array(z.enum(['service', 'ingest']))
+  .min(1)
+  .max(2)
+  .refine((s) => new Set(s).size === s.length, 'duplicate scope');
 const nameError = 'Name must be 1-100 characters';
 const scopesError = 'Scopes must be service, ingest, or both';
 
