@@ -2,7 +2,7 @@ name: Docker
 
 # Builds the self-hosted server image (Dockerfile) and smoke-tests the running
 # container on every PR and push to main. Pushing a version tag like v1.0.0 also
-# publishes it for amd64 and arm64 to ghcr.io/dtymoszenko/flybudget, with signed
+# publishes it for amd64 and arm64 to ghcr.io/ohmzi/ohmzbudget, with signed
 # SLSA build provenance.
 #
 # Tags: the exact version (0.2.0, 0.2.0-beta.1), major.minor for stable releases,
@@ -12,7 +12,7 @@ name: Docker
 # weekly; results appear under Security → Code scanning.
 #
 # Verify an image with:
-#   gh attestation verify oci://ghcr.io/dtymoszenko/flybudget:<version> -R dtymoszenko/FlyBudget
+#   gh attestation verify oci://ghcr.io/ohmzi/ohmzbudget:<version> -R ohmzi/OhmzBudget
 
 on:
   push:
@@ -29,7 +29,7 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 env:
-  IMAGE: ghcr.io/dtymoszenko/flybudget
+  IMAGE: ghcr.io/ohmzi/ohmzbudget
 
 jobs:
   test:
@@ -60,9 +60,9 @@ jobs:
         run: |
           set -euo pipefail
           # The key setup from the self-hosting guide
-          openssl rand -base64 32 > flybudget_data_key.txt
-          sudo chown 1000:1000 flybudget_data_key.txt
-          sudo chmod 400 flybudget_data_key.txt
+          openssl rand -base64 32 > ohmzbudget_data_key.txt
+          sudo chown 1000:1000 ohmzbudget_data_key.txt
+          sudo chmod 400 ohmzbudget_data_key.txt
           # --wait also requires the image's health check to report healthy
           docker compose up -d --wait --wait-timeout 180
 
@@ -80,9 +80,9 @@ jobs:
           setup_code() { docker compose logs | grep -oE '[A-Z2-9]{4}(-[A-Z2-9]{4}){3}' | tail -1; }
           setup_body() { printf '{"password":"correct horse battery","setupCode":"%s"}' "$(setup_code)"; }
 
-          test "$(docker exec flybudget id -u)" = 1000
+          test "$(docker exec ohmzbudget id -u)" = 1000
           # No package managers in the runtime image (only node is needed)
-          if docker exec flybudget sh -c 'command -v npm || command -v npx || command -v yarn || command -v corepack || ls -d /usr/local/lib/node_modules'; then
+          if docker exec ohmzbudget sh -c 'command -v npm || command -v npx || command -v yarn || command -v corepack || ls -d /usr/local/lib/node_modules'; then
             echo "::error::package manager found in the runtime image"; exit 1
           fi
           curl -sf $URL/api/auth/status | grep -q '"needsSetup":true'
@@ -112,18 +112,18 @@ jobs:
           curl -sf -b cookies $URL/api/accounts | grep -q '"Checking"'
 
           # The backup command from the self-hosting guide
-          docker exec flybudget node backup.cjs
-          docker cp flybudget:/data/backups ./backups
+          docker exec ohmzbudget node backup.cjs
+          docker cp ohmzbudget:/data/backups ./backups
           python3 -c "import glob, sqlite3; db = sqlite3.connect(glob.glob('backups/*.db')[0]); assert db.execute('SELECT name FROM accounts').fetchall() == [('Checking',)]"
 
           # The password reset command from the guide
-          docker exec flybudget node reset-password.cjs
+          docker exec ohmzbudget node reset-password.cjs
           curl -sf $URL/api/auth/status | grep -q '"needsSetup":true'
           expect 401 -b cookies $URL/api/accounts
 
           # The restore steps from the guide bring back the data and the password
           docker compose stop
-          docker run --rm --volumes-from flybudget -v "$PWD/backups":/backups alpine \
+          docker run --rm --volumes-from ohmzbudget -v "$PWD/backups":/backups alpine \
             sh -c 'rm -f /data/budget.db-wal /data/budget.db-shm && cp /backups/*.db /data/budget.db && chown 1000:1000 /data/budget.db'
           docker compose start
           docker compose up -d --wait --wait-timeout 180
@@ -185,8 +185,8 @@ jobs:
             type=semver,pattern={{major}}.{{minor}},enable=${{ !contains(github.ref_name, '-') }}
             type=raw,value=latest,enable=${{ !contains(github.ref_name, '-') || startsWith(github.ref_name, 'v0.') }}
           labels: |
-            org.opencontainers.image.title=FlyBudget
-            org.opencontainers.image.description=Self-hosted FlyBudget server
+            org.opencontainers.image.title=OhmzBudget
+            org.opencontainers.image.description=Self-hosted OhmzBudget server
             org.opencontainers.image.licenses=AGPL-3.0-only
 
       - id: push

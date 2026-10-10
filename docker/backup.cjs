@@ -1,6 +1,6 @@
-// Safe copy of the database while FlyBudget is running (SQLite online backup, so
+// Safe copy of the database while OhmzBudget is running (SQLite online backup, so
 // changes still in the write-ahead log are included).
-//   docker exec flybudget node backup.cjs
+//   docker exec ohmzbudget node backup.cjs
 const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
