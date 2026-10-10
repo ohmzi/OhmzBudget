@@ -17,7 +17,7 @@ Maintained between tasks; commit shas live on branch `m0-rebrand`. Owner directi
 | 7 Docker & CI identity                   | ✅ done        | b9a71d6; build 31s + health `{"status":"ok"}`; cla.yml untouched; review clean (0 blocking)                                                 |
 | 8 Electron identity                      | ✅ done        | 5941860; cookie pair + artifact names match; tsc ✓; review clean (0 blocking)                                                               |
 | 9 Docs, attribution & source links       | ✅ done        | ad24424; NOTICE created; URLs repointed + e2e in lockstep; LICENSE/CLA untouched; review clean (0 blocking)                                 |
-| 10 Website text sweep                    | ⬜ not started |                                                                                                                                             |
+| 10 Website text sweep                    | ✅ done        | 2f62184; 34 files; build SUCCESS; blog slug + assets preserved; review clean (0 blocking)                                                   |
 | 11 Deploy skeleton & host run            | ⬜ not started |                                                                                                                                             |
 | 12 Full verification sweep               | ⬜ not started |                                                                                                                                             |
 | 13 GitHub rename & push (pre-authorized) | ⬜ not started |                                                                                                                                             |
@@ -418,7 +418,7 @@ git commit -m "docs: rebrand documentation, attribution and source links"
 
 **Do not touch:** `website/static/img/screenshots/**`, `website/blog/*.mdx` filename, `website/static/img/logo.png` (assets are tier-2)
 
-- [ ] **Step 1: Sweep + hand-check docusaurus.config.ts editUrl ×4 and footer**
+- [x] **Step 1: Sweep + hand-check docusaurus.config.ts editUrl ×4 and footer**
 
 ```bash
 grep -rl 'FlyBudget' website --include='*.mdx' --include='*.ts' --include='*.tsx' --include='*.css' | xargs sed -i 's/FlyBudget/OhmzBudget/g'
@@ -431,13 +431,13 @@ grep -rn 'dtymoszenko' website --include='*.ts' --include='*.tsx' --include='*.m
 
 The `url:` value in `docusaurus.config.ts` and other `flybudget.org` domains stay untouched in M0 (the site is not deployed; domains are decided at tier-2).
 
-- [ ] **Step 2: Verify the site still builds**
+- [x] **Step 2: Verify the site still builds**
 
 ```bash
 cd website && npm ci && npm run build 2>&1 | tail -5   # build = build:demo (client --mode demo) + docusaurus build
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit** (landed as 2f62184)
 
 ```bash
 cd .. && git add website && git commit -m "docs: sweep website text for ohmzbudget (screenshots deferred)"
