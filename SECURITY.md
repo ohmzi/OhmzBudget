@@ -45,7 +45,7 @@ Especially in scope:
   OhmzBudget data or bank-sync credentials
 - ways to make the local API reachable from outside the machine
 - vulnerabilities in the Electron desktop app
-- in the self-hosted Docker server: getting past the password login, stealing
+- in the self-hosted Docker server: getting past the login, stealing
   or forging sessions, or reading data or credentials without logging in
 
 Out of scope:
@@ -67,14 +67,14 @@ You can also host OhmzBudget yourself with Docker ("server mode", see
 [Self-hosting](https://flybudget.org/community/self-hosting)). Then the data
 lives on your server, and:
 
-- a password protects every API route (scrypt hash; 10 failed attempts per 15
-  minutes, then blocked). Setting the first password also needs a one-time setup
-  code printed only in the server log, so whoever reaches a fresh server first
-  (or a website using DNS rebinding) can't claim it
+- accounts protect every API route (scrypt-hashed passwords; 10 failed attempts
+  per 15 minutes, then blocked). Creating the first account also needs a one-time
+  setup code printed only in the server log, so whoever reaches a fresh server
+  first (or a website using DNS rebinding) can't claim it
 - behind HTTPS (`OHMZBUDGET_TRUST_PROXY`), responses carry HSTS
 - sessions are random 256-bit tokens, stored server-side only as SHA-256
   hashes, sent in an HttpOnly, SameSite=Strict cookie (Secure over HTTPS),
-  expiring after 30 days; changing the password ends every other session.
+  expiring after 30 days; changing your password ends your other sessions.
   Settings → Server lists signed-in devices (by an opaque id that can't be used
   to sign in) so you can sign any of them out
 - visitors who aren't signed in learn nothing about the server: `/api/health`

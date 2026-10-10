@@ -113,9 +113,9 @@ docker compose up -d
 docker logs ohmzbudget                              # prints the one-time setup code
 ```
 
-Open `http://<your-server>:3001`, enter the setup code and choose your password. Images are
-published for amd64 and arm64 as `ghcr.io/ohmzi/ohmzbudget` (no image is published yet — build
-locally with the provided compose). The
+Open `http://<your-server>:3001`, enter the setup code and create the admin account (a username
+and a password). Images are published for amd64 and arm64 as `ghcr.io/ohmzi/ohmzbudget` (no image
+is published yet — build locally with the provided compose). The
 [self-hosting guide](https://flybudget.org/community/self-hosting) covers HTTPS, backups and
 updates.
 

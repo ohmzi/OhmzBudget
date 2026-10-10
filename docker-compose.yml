@@ -5,8 +5,8 @@
 #        openssl rand -base64 32 > ohmzbudget_data_key.txt
 #        sudo chown 1000:1000 ohmzbudget_data_key.txt && sudo chmod 400 ohmzbudget_data_key.txt
 #   2. docker compose up -d
-#   3. Open http://<your-server>:3001 and create your password. It asks for a setup
-#      code, printed by: docker logs ohmzbudget
+#   3. Open http://<your-server>:3001 and create the admin account (a username and
+#      password). It asks for a setup code, printed by: docker logs ohmzbudget
 #
 # Put OhmzBudget behind a reverse proxy with HTTPS (Caddy, Traefik, nginx…) before
 # exposing it to the internet. More options: https://flybudget.org/community/self-hosting
